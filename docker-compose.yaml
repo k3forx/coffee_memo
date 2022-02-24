@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  api-server:
+    container_name: api-server
+    image: golang:1.17.7
+    working_dir: /go/src/app
+    ports:
+      - 8000:8000
+    command: >
+      bash -c "
+        echo ${DOCKER_NETRC} > ~/.netrc
+        go install github.com/cespare/reflex@latest
+        reflex -R '_test\.go$$' -r '(\.go$$|go\.mod|\.html$$)' -s -- sh -c 'go run ./cmd/api_server/main.go'
+      "
+    volumes:
+      - ./go:/go/src/app
+
