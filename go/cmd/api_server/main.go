@@ -1,23 +1,23 @@
 package main
 
 import (
-	"net/http"
-
-	"github.com/labstack/echo/v4"
+	"fmt"
+	"os"
 )
 
 func main() {
-	// Echo instance
-	e := echo.New()
+	os.Exit(run())
+}
 
-	// Routes
-	e.GET("/", hello)
+func run() int {
+	// ctx := context.Background()
+	os.Setenv("TEST", "value")
+	fmt.Printf("value: %s\n", os.Getenv("TEST"))
 
-	// Start server
-	e.Logger.Fatal(e.Start(":8000"))
+	return 0
 }
 
 // Handler
-func hello(c echo.Context) error {
-	return c.String(http.StatusOK, "Hello, World!")
-}
+// func hello(c echo.Context) error {
+// 	return c.String(http.StatusOK, "Hello, World!")
+// }
