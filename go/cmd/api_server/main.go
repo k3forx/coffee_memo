@@ -1,8 +1,11 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"os"
+
+	"github.com/k3forx/coffee_memo/pkg/config"
+	"github.com/k3forx/coffee_memo/pkg/server"
 )
 
 func main() {
@@ -11,8 +14,17 @@ func main() {
 
 func run() int {
 	// ctx := context.Background()
-	os.Setenv("TEST", "value")
-	fmt.Printf("value: %s\n", os.Getenv("TEST"))
+
+	if err := config.LoadConfig(); err != nil {
+		log.Println(err)
+		return 1
+	}
+
+	s := server.NewServer()
+	if err := s.Start(); err != nil {
+		log.Println(err)
+		return 1
+	}
 
 	return 0
 }

@@ -1,22 +1,22 @@
 package config
 
-import "github.com/spf13/viper"
+import (
+	"github.com/kelseyhightower/envconfig"
+)
+
+var cfg Config
 
 type Config struct {
-	Test string `mapstructure:"TEST"`
+	MainAppPortNumber int `envconfig:"MAIN_APP_PORT_NUMBER"`
 }
 
 func LoadConfig() error {
-	var cfg Config
-	viper.AutomaticEnv()
-
-	// if err := viper.ReadInConfig(); err != nil {
-	// 	return err
-	// }
-
-	if err := viper.Unmarshal(&cfg); err != nil {
+	if err := envconfig.Process("", &cfg); err != nil {
 		return err
 	}
-
 	return nil
+}
+
+func GetMainAppPortNumber() int {
+	return cfg.MainAppPortNumber
 }

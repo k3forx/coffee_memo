@@ -15,4 +15,7 @@ services:
       "
     volumes:
       - ./go:/go/src/app
+    environment:
+      - MAIN_APP_PORT_NUMBER=8000
+      - User=test
 
