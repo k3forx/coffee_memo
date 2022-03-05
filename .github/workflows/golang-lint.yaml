@@ -1,0 +1,5 @@
+name: golang-lint
+
+on:
+  push:
+    - eull_request
