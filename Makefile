@@ -26,3 +26,8 @@ mysql: ## Conntect to mysql container
 .PHONY: generate-ent-schema
 generate-ent-schema: ## Generate ent schema
 	cd ./go && go run ariga.io/entimport/cmd/entimport -dsn "mysql://$(DB_USER):$(DB_PASS)@tcp(localhost:$(DB_PORT))/$(DB_NAME)" -schema-path ./pkg/ent/schema && go run -mod=mod entgo.io/ent/cmd/ent generate ./pkg/ent/schema
+
+.PHONY: generate-go-mock
+generate-go-mock: ## Generate go mock
+	go install github.com/golang/mock/mockgen@v1.6.0
+	cd ./go && go generate ./...
