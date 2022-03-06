@@ -13,17 +13,32 @@ services:
         go install github.com/cespare/reflex@latest
         reflex -R '_test\.go$$' -r '(\.go$$|go\.mod|\.html$$)' -s -- sh -c 'go run ./cmd/api_server/main.go'
       "
+    depends_on:
+      - mysql
     volumes:
       - ./go:/go/src/app
     environment:
       - MAIN_APP_PORT_NUMBER=8000
       - User=test
+    networks:
+      - coffee_app_default
 
   mysql:
     container_name: mysql
     image: mysql:5.7
     ports:
       - 3306:3306
+    volumes:
+      - mysql:/var/lib/mysql
     environment:
       MYSQL_DATABASE: coffee_app
       MYSQL_ROOT_PASSWORD: password
+    networks:
+      - coffee_app_default
+
+volumes:
+  mysql:
+
+networks:
+  coffee_app_default:
+    external: true

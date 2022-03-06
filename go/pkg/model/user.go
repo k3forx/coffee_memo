@@ -19,3 +19,7 @@ type User struct {
 	Password       string
 	LastLoggedInAt time.Time
 }
+
+func (u *User) Exists() bool {
+	return u.ID > 0
+}

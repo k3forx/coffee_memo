@@ -31,3 +31,7 @@ generate-ent-schema: ## Generate ent schema
 generate-go-mock: ## Generate go mock
 	go install github.com/golang/mock/mockgen@v1.6.0
 	cd ./go && go generate ./...
+
+.PHONY: go-test
+go-test: ## Run Go tests
+	docker-compose exec -T api-server bash -c "source ./.env.test && go test ./... -count=1 -race ${options}"
