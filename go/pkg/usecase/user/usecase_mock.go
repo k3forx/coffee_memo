@@ -9,6 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	result "github.com/k3forx/coffee_memo/pkg/result"
 )
 
 // MockUsecase is a mock of Usecase interface.
@@ -35,13 +36,16 @@ func (m *MockUsecase) EXPECT() *MockUsecaseMockRecorder {
 }
 
 // GetByID mocks base method.
-func (m *MockUsecase) GetByID(ctx context.Context) {
+func (m *MockUsecase) GetByID(ctx context.Context, in GetByIDInput) (*GetByIDOutput, *result.Result) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "GetByID", ctx)
+	ret := m.ctrl.Call(m, "GetByID", ctx, in)
+	ret0, _ := ret[0].(*GetByIDOutput)
+	ret1, _ := ret[1].(*result.Result)
+	return ret0, ret1
 }
 
 // GetByID indicates an expected call of GetByID.
-func (mr *MockUsecaseMockRecorder) GetByID(ctx interface{}) *gomock.Call {
+func (mr *MockUsecaseMockRecorder) GetByID(ctx, in interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockUsecase)(nil).GetByID), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockUsecase)(nil).GetByID), ctx, in)
 }

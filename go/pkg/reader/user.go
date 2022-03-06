@@ -14,6 +14,7 @@ func NewUserReader(db *ent.Client) *UserReader {
 	}
 }
 
+//go:generate mockgen -source=./user.go -destination=./user_mock.go -package=reader
 type User interface {
 	GetByID(ctx context.Context, userID int) (model.User, error)
 }
