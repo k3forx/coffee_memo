@@ -2,6 +2,7 @@ package user_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -44,6 +45,36 @@ func TestUsecase_GetByID(t *testing.T) {
 				User: returnedUser,
 			},
 			res: result.OK(),
+		},
+		"error_in_getting_user": {
+			setup: func(ctrl *gomock.Controller) inject.Injector {
+				injector := inject.NewMockInjector(ctrl)
+
+				userReader := injector.Reader.User.(*reader.MockUser)
+				userReader.EXPECT().GetByID(gomock.Any(), userID).Return(model.User{}, errors.New("server error"))
+
+				return injector
+			},
+			in: user.GetByIDInput{
+				UserID: userID,
+			},
+			out: nil,
+			res: result.Error(),
+		},
+		"user_is_not_found": {
+			setup: func(ctrl *gomock.Controller) inject.Injector {
+				injector := inject.NewMockInjector(ctrl)
+
+				userReader := injector.Reader.User.(*reader.MockUser)
+				userReader.EXPECT().GetByID(gomock.Any(), userID).Return(model.User{}, nil)
+
+				return injector
+			},
+			in: user.GetByIDInput{
+				UserID: userID,
+			},
+			out: nil,
+			res: result.New(result.CodeNotFound, "user is not found"),
 		},
 	}
 
