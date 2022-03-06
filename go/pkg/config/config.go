@@ -7,7 +7,8 @@ import (
 var cfg Config
 
 type Config struct {
-	MainAppPortNumber int `envconfig:"MAIN_APP_PORT_NUMBER"`
+	GoEnv             string `envconfig:"GO_ENV" default:"dev"`
+	MainAppPortNumber int    `envconfig:"MAIN_APP_PORT_NUMBER"`
 }
 
 func LoadConfig() error {
@@ -15,6 +16,10 @@ func LoadConfig() error {
 		return err
 	}
 	return nil
+}
+
+func IsProduction() bool {
+	return cfg.GoEnv == "prod"
 }
 
 func GetMainAppPortNumber() int {

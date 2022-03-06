@@ -1,28 +1,32 @@
 package user
 
 import (
-	"fmt"
 	"log"
 	"strconv"
 
+	"github.com/k3forx/coffee_memo/pkg/inject"
+	"github.com/k3forx/coffee_memo/pkg/presenter"
 	"github.com/k3forx/coffee_memo/pkg/usecase/user"
 	"github.com/labstack/echo/v4"
 )
 
-func newHandler() *Handler {
-	return &Handler{}
+func newHandler(injector inject.Injector) *Handler {
+	return &Handler{
+		injector: injector,
+	}
 }
 
 type Handler struct {
+	injector inject.Injector
 }
 
-func Route(r *echo.Group) {
-	h := newHandler()
+func Route(r *echo.Group, injector inject.Injector) {
+	h := newHandler(injector)
 	r.GET("/:id", h.Get)
 }
 
 func (h Handler) Get(ctx echo.Context) error {
-	u := user.NewUsecase()
+	u := user.NewUsecase(h.injector)
 	userID, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		log.Fatal(err)
@@ -31,8 +35,10 @@ func (h Handler) Get(ctx echo.Context) error {
 	in := user.GetByIDInput{
 		UserID: userID,
 	}
-	out := u.GetByID(ctx.Request().Context(), in)
-	fmt.Printf("output: %+v\n", out)
+	out, res := u.GetByID(ctx.Request().Context(), in)
+	if !res.IsOK() {
+		return presenter.Error(ctx, res)
+	}
 
-	return nil
+	return presenter.JSON(ctx, out)
 }

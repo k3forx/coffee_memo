@@ -2,54 +2,35 @@ package user
 
 import (
 	"context"
-	"log"
 
-	"github.com/go-sql-driver/mysql"
-	"github.com/k3forx/coffee_memo/pkg/ent"
-	"github.com/k3forx/coffee_memo/pkg/ent/user"
-	"github.com/k3forx/coffee_memo/pkg/model"
+	"github.com/k3forx/coffee_memo/pkg/inject"
+	"github.com/k3forx/coffee_memo/pkg/result"
 )
 
-func NewUsecase() *UserUsecase {
-	return &UserUsecase{}
+func NewUsecase(injector inject.Injector) *UserUsecase {
+	return &UserUsecase{
+		injector: injector,
+	}
 }
 
 //go:generate mockgen -source=./usecase.go -destination=./usecase_mock.go -package=user
 type Usecase interface {
-	GetByID(ctx context.Context, in GetByIDInput) *GetByIDOutput
+	GetByID(ctx context.Context, in GetByIDInput) (*GetByIDOutput, *result.Result)
 }
 
-type UserUsecase struct{}
+type UserUsecase struct {
+	injector inject.Injector
+}
 
 var _ Usecase = (*UserUsecase)(nil)
 
-func (u *UserUsecase) GetByID(ctx context.Context, in GetByIDInput) *GetByIDOutput {
-	entOptions := []ent.Option{}
-	entOptions = append(entOptions, ent.Debug())
-
-	mc := mysql.Config{
-		User:                 "root",
-		Passwd:               "password",
-		Net:                  "tcp",
-		Addr:                 "mysql" + ":" + "3306",
-		DBName:               "coffee_app",
-		AllowNativePasswords: true,
-		ParseTime:            true,
-	}
-	client, err := ent.Open("mysql", mc.FormatDSN(), entOptions...)
+func (u *UserUsecase) GetByID(ctx context.Context, in GetByIDInput) (*GetByIDOutput, *result.Result) {
+	user, err := u.injector.Reader.User.GetByID(ctx, in.UserID)
 	if err != nil {
-		log.Fatalf("open error: %+v\n", err)
-		return nil
+		return nil, result.Error()
 	}
-	defer client.Close()
-
-	user, err := client.User.Query().Where(user.IDEQ(int32(in.UserID))).Only(ctx)
-	if err != nil {
-		log.Fatalf("select err: %+v\n", err)
-		return nil
+	if !user.Exists() {
+		return nil, result.New(result.CodeNotFound, "user is not found")
 	}
-
-	return &GetByIDOutput{
-		User: model.NewUser(user),
-	}
+	return &GetByIDOutput{User: user}, result.OK()
 }

@@ -5,6 +5,8 @@ import (
 	"os"
 
 	"github.com/k3forx/coffee_memo/pkg/config"
+	"github.com/k3forx/coffee_memo/pkg/inject"
+	"github.com/k3forx/coffee_memo/pkg/logger"
 	"github.com/k3forx/coffee_memo/pkg/server"
 )
 
@@ -20,7 +22,20 @@ func run() int {
 		return 1
 	}
 
-	s := server.NewServer()
+	fn, err := logger.Init()
+	if err != nil {
+		log.Fatalf("init logger failed: %+v\n", err)
+	}
+	defer fn()
+
+	injector, fn, err := inject.New()
+	if err != nil {
+		log.Fatalln(err)
+		return 1
+	}
+	defer fn()
+
+	s := server.NewServer(injector)
 	if err := s.Start(); err != nil {
 		log.Println(err)
 		return 1
@@ -28,8 +43,3 @@ func run() int {
 
 	return 0
 }
-
-// Handler
-// func hello(c echo.Context) error {
-// 	return c.String(http.StatusOK, "Hello, World!")
-// }

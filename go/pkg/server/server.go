@@ -5,12 +5,13 @@ import (
 
 	"github.com/k3forx/coffee_memo/pkg/api/v1/user"
 	"github.com/k3forx/coffee_memo/pkg/config"
+	"github.com/k3forx/coffee_memo/pkg/inject"
 	"github.com/labstack/echo/v4"
 )
 
-func NewServer() *Server {
+func NewServer(injector inject.Injector) *Server {
 	e := echo.New()
-	registerRoute(e)
+	registerRoute(e, injector)
 	return &Server{server: e}
 }
 
@@ -27,10 +28,10 @@ func (s *Server) Start() error {
 	return nil
 }
 
-func registerRoute(e *echo.Echo) {
+func registerRoute(e *echo.Echo, injector inject.Injector) {
 	v1API := e.Group("/v1")
 	{
 		v1APIUser := v1API.Group("/users")
-		user.Route(v1APIUser)
+		user.Route(v1APIUser, injector)
 	}
 }
