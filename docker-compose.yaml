@@ -19,3 +19,11 @@ services:
       - MAIN_APP_PORT_NUMBER=8000
       - User=test
 
+  mysql:
+    container_name: mysql
+    image: mysql:5.7
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_DATABASE: coffee_app
+      MYSQL_ROOT_PASSWORD: password
