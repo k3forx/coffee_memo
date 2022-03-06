@@ -11,3 +11,7 @@ comment:
   require_changes: false
   require_base: no
   require_head: yes
+
+ignore:
+  - "**/ent/**/*.go"
+
