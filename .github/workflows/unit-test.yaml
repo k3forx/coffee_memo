@@ -18,7 +18,6 @@ jobs:
         run: |
           curl -fsSL \
             https://raw.githubusercontent.com/pressly/goose/master/install.sh | sh -s v3.5.3
-            which goose
 
       - name: Setup containers
         run: |
@@ -30,4 +29,9 @@ jobs:
 
       - name: Run tests
         run: |
-          make go-test
+          make go-test options="-coverprofile=coverage.out -covermode=atomic -coverpkg=./..."
+
+      - name: Upload coverages
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
