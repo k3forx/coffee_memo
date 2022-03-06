@@ -17,9 +17,8 @@ jobs:
       - name: Setup goose
         run: |
           curl -fsSL \
-            https://raw.githubusercontent.com/pressly/goose/master/install.sh |\
-            GOOSE_INSTALL=$HOME/.goose sh -s v3.5.3
-            ls
+            https://raw.githubusercontent.com/pressly/goose/master/install.sh | sh -s v3.5.3
+            which goose
 
       - name: Setup containers
         run: |
