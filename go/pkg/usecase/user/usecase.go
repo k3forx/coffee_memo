@@ -16,14 +16,14 @@ func NewUsecase() *UserUsecase {
 
 //go:generate mockgen -source=./usecase.go -destination=./usecase_mock.go -package=user
 type Usecase interface {
-	GetByID(ctx context.Context) *GetByIDOutput
+	GetByID(ctx context.Context, in GetByIDInput) *GetByIDOutput
 }
 
 type UserUsecase struct{}
 
 var _ Usecase = (*UserUsecase)(nil)
 
-func (u *UserUsecase) GetByID(ctx context.Context) *GetByIDOutput {
+func (u *UserUsecase) GetByID(ctx context.Context, in GetByIDInput) *GetByIDOutput {
 	entOptions := []ent.Option{}
 	entOptions = append(entOptions, ent.Debug())
 
@@ -43,7 +43,7 @@ func (u *UserUsecase) GetByID(ctx context.Context) *GetByIDOutput {
 	}
 	defer client.Close()
 
-	user, err := client.User.Query().Where(user.IDEQ(int32(1))).Only(ctx)
+	user, err := client.User.Query().Where(user.IDEQ(int32(in.UserID))).Only(ctx)
 	if err != nil {
 		log.Fatalf("select err: %+v\n", err)
 		return nil

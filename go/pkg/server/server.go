@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/k3forx/coffee_memo/pkg/api/v1/user"
 	"github.com/k3forx/coffee_memo/pkg/config"
@@ -29,16 +28,9 @@ func (s *Server) Start() error {
 }
 
 func registerRoute(e *echo.Echo) {
-
 	v1API := e.Group("/v1")
 	{
 		v1APIUser := v1API.Group("/users")
 		user.Route(v1APIUser)
 	}
-
-	e.GET("/",
-		func(c echo.Context) error {
-			return c.String(http.StatusOK, "Hello, World!!!!!")
-		},
-	)
 }
