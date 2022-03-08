@@ -32,5 +32,6 @@ func (u *UserUsecase) GetByID(ctx context.Context, in GetByIDInput) (*GetByIDOut
 	if !user.Exists() {
 		return nil, result.New(result.CodeNotFound, "user is not found")
 	}
+
 	return &GetByIDOutput{User: user}, result.OK()
 }
