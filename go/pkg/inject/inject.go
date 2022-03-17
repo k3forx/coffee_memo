@@ -22,18 +22,18 @@ func New() (Injector, func(), error) {
 		AllowNativePasswords: true,
 		ParseTime:            true,
 	}
-	dbReader, err := ent.Open("mysql", mc.FormatDSN(), opts...)
+	readerClient, err := ent.Open("mysql", mc.FormatDSN(), opts...)
 	if err != nil {
 		return Injector{}, nil, err
 	}
 
 	fn := func() {
-		_ = dbReader.Close()
+		_ = readerClient.Close()
 	}
 
 	injector := Injector{
 		Reader: Reader{
-			User: reader.NewUserReader(dbReader),
+			User: reader.NewUserReader(readerClient),
 		},
 	}
 
