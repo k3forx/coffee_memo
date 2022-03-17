@@ -2,7 +2,6 @@ package reader_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -37,7 +36,6 @@ func TestUser_GetByID(t *testing.T) {
 			t.Parallel()
 
 			actual, err := userReader.GetByID(context.Background(), c.userID)
-			fmt.Printf("actual: %+v\n", actual)
 
 			if err != nil {
 				t.Errorf("err should be nil, but got %v", err)
