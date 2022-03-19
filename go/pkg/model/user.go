@@ -1,12 +1,14 @@
 package model
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/k3forx/coffee_memo/pkg/ent"
 )
 
 func NewUser(e *ent.User) User {
+	fmt.Println("NewUser")
 	return User{
 		ID:             int(e.ID),
 		Username:       e.Username,

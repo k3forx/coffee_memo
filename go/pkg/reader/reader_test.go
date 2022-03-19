@@ -15,7 +15,7 @@ var (
 
 func TestMain(m *testing.M) {
 	var err error
-	testClient, err = ent.Open("mysql", "root:password@tcp(mysql:3306)/coffee_app_test")
+	testClient, err = ent.Open("mysql", "root:password@tcp(mysql:3306)/coffee_app_test?parseTime=true")
 	if err != nil {
 		os.Exit(1)
 	}

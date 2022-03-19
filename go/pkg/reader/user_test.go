@@ -7,21 +7,27 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/k3forx/coffee_memo/pkg/model"
 	"github.com/k3forx/coffee_memo/pkg/reader"
+	db_helper "github.com/k3forx/coffee_memo/test/db"
 )
 
 func TestUser_GetByID(t *testing.T) {
 	t.Parallel()
 
 	userReader := reader.NewUserReader(testClient)
+	user := db_helper.InsertAndDeleteUsers(t, testClient)
 
 	cases := map[string]struct {
 		userID   int
 		expected model.User
 	}{
 		"has_rows": {
-			userID: 1,
+			userID: int(user.ID),
 			expected: model.User{
-				ID: 1,
+				ID:             int(user.ID),
+				Username:       user.Username,
+				Email:          user.Email,
+				Password:       user.Password,
+				LastLoggedInAt: user.LastLoggedInAt,
 			},
 		},
 		"no_rows": {
