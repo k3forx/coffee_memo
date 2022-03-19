@@ -9,7 +9,6 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/k3forx/coffee_memo/pkg/inject"
 	"github.com/k3forx/coffee_memo/pkg/model"
-	reader "github.com/k3forx/coffee_memo/pkg/reader/mock"
 	readerMock "github.com/k3forx/coffee_memo/pkg/reader/mock"
 	"github.com/k3forx/coffee_memo/pkg/result"
 	"github.com/k3forx/coffee_memo/pkg/usecase/user"
@@ -66,7 +65,7 @@ func TestUsecase_GetByID(t *testing.T) {
 			setup: func(ctrl *gomock.Controller) inject.Injector {
 				injector := inject.NewMockInjector(ctrl)
 
-				userReader := injector.Reader.User.(*reader.MockUser)
+				userReader := injector.Reader.User.(*readerMock.MockUser)
 				userReader.EXPECT().GetByID(gomock.Any(), userID).Return(model.User{}, nil)
 
 				return injector

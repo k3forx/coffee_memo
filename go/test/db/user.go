@@ -39,6 +39,7 @@ func deleteUser(ctx context.Context, client *ent.Client, user *ent.User) {
 
 func InsertAndDeleteUsers(tb testing.TB, client *ent.Client, setters ...func(u *ent.User)) *ent.User {
 	tb.Helper()
+
 	user := newUser()
 	for _, set := range setters {
 		set(user)
