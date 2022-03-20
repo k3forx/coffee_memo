@@ -8,6 +8,9 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/k3forx/coffee_memo/pkg/ent/coffeebean"
+	"github.com/k3forx/coffee_memo/pkg/ent/coffeeshop"
+	"github.com/k3forx/coffee_memo/pkg/ent/driprecipe"
 	"github.com/k3forx/coffee_memo/pkg/ent/goosedbversion"
 	"github.com/k3forx/coffee_memo/pkg/ent/user"
 )
@@ -30,6 +33,9 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
+		coffeebean.Table:     coffeebean.ValidColumn,
+		coffeeshop.Table:     coffeeshop.ValidColumn,
+		driprecipe.Table:     driprecipe.ValidColumn,
 		goosedbversion.Table: goosedbversion.ValidColumn,
 		user.Table:           user.ValidColumn,
 	}

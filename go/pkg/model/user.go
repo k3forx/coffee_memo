@@ -6,6 +6,22 @@ import (
 	"github.com/k3forx/coffee_memo/pkg/ent"
 )
 
+type UserFlag int
+
+const (
+	UserFlagEmailActivated UserFlag = 2
+)
+
+type UserFlags []UserFlag
+
+func (uf UserFlags) Int() int {
+	var num int
+	for _, flag := range uf {
+		num = num + int(flag)
+	}
+	return num
+}
+
 func NewUser(e *ent.User) User {
 	return User{
 		ID:             int(e.ID),
@@ -13,6 +29,7 @@ func NewUser(e *ent.User) User {
 		Email:          e.Email,
 		Password:       e.Password,
 		LastLoggedInAt: e.LastLoggedInAt,
+		CreatedAt:      e.CreatedAt,
 	}
 }
 
@@ -21,7 +38,10 @@ type User struct {
 	Username       string
 	Email          string
 	Password       string
+	Flags          UserFlags
 	LastLoggedInAt time.Time
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
 }
 
 func (u *User) Exists() bool {

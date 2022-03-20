@@ -15,6 +15,11 @@ func JSON(ctx echo.Context, body interface{}) error {
 	return ctx.JSON(http.StatusOK, body)
 }
 
+func BadRequest(ctx echo.Context, msg string) error {
+	res := result.New(result.CodeBadRequest, msg)
+	return ctx.JSON(res.Code.ToStatusCode(), newV1ErrResponse(res))
+}
+
 func Error(ctx echo.Context, res *result.Result) error {
 	return ctx.JSON(res.Code.ToStatusCode(), newV1ErrResponse(res))
 }

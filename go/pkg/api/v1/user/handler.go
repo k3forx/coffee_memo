@@ -1,7 +1,6 @@
 package user
 
 import (
-	"log"
 	"strconv"
 
 	"github.com/k3forx/coffee_memo/pkg/inject"
@@ -23,14 +22,14 @@ type Handler struct {
 func Route(r *echo.Group, injector inject.Injector) {
 	h := newHandler(injector)
 	r.GET("/:id", h.Get)
+	r.POST("sign-up", h.SignUp)
 }
 
 func (h Handler) Get(ctx echo.Context) error {
 	u := user.NewUsecase(h.injector)
 	userID, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		log.Fatal(err)
-		return err
+		return presenter.BadRequest(ctx, err.Error())
 	}
 	in := user.GetByIDInput{
 		UserID: userID,
@@ -41,4 +40,13 @@ func (h Handler) Get(ctx echo.Context) error {
 	}
 
 	return presenter.JSON(ctx, out)
+}
+
+func (h Handler) SignUp(ctx echo.Context) error {
+	var req SignUpRequest
+	_ = ctx.Bind(req)
+	if err := req.Validate(); err != nil {
+		return presenter.BadRequest(ctx, err.Error())
+	}
+	return nil
 }

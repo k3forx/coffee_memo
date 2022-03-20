@@ -8,11 +8,15 @@ const (
 	CodeUnspecified Code = iota
 	CodeOK
 	CodeNotFound
+	CodeBadRequest
+	CodeForbidden
 	CodeInternalError
 )
 
 var codeStringMap = map[Code]string{
 	CodeNotFound:      "not found",
+	CodeBadRequest:    "bad request",
+	CodeForbidden:     "forbbiden",
 	CodeInternalError: "error",
 }
 
@@ -27,6 +31,8 @@ func (c Code) String() string {
 var statusCodeMap = map[Code]int{
 	CodeOK:            http.StatusOK,
 	CodeNotFound:      http.StatusNotFound,
+	CodeBadRequest:    http.StatusBadRequest,
+	CodeForbidden:     http.StatusForbidden,
 	CodeInternalError: http.StatusInternalServerError,
 }
 
