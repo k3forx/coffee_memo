@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/k3forx/coffee_memo/pkg/ent"
+	entUser "github.com/k3forx/coffee_memo/pkg/ent/user"
 )
 
 func newUser() *ent.User {
@@ -34,7 +35,7 @@ func insertUser(client *ent.Client, user *ent.User) (*ent.User, error) {
 }
 
 func deleteUser(ctx context.Context, client *ent.Client, user *ent.User) {
-	client.User.DeleteOneID(user.ID)
+	client.User.Delete().Where(entUser.IDEQ(user.ID))
 }
 
 func InsertAndDeleteUsers(tb testing.TB, client *ent.Client, setters ...func(u *ent.User)) *ent.User {
