@@ -84,7 +84,6 @@ var (
 		{Name: "email", Type: field.TypeString, Unique: true},
 		{Name: "password", Type: field.TypeString},
 		{Name: "flags", Type: field.TypeInt},
-		{Name: "last_logged_in_at", Type: field.TypeTime},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},

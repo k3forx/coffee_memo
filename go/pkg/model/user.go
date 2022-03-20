@@ -24,13 +24,12 @@ func (uf UserFlags) Int() int {
 
 func NewUser(e *ent.User) User {
 	return User{
-		ID:             int(e.ID),
-		Username:       e.Username,
-		Email:          e.Email,
-		Password:       e.Password,
-		LastLoggedInAt: e.LastLoggedInAt,
-		CreatedAt:      e.CreatedAt,
-		UpdatedAt:      e.UpdatedAt,
+		ID:        int(e.ID),
+		Username:  e.Username,
+		Email:     e.Email,
+		Password:  e.Password,
+		CreatedAt: e.CreatedAt,
+		UpdatedAt: e.UpdatedAt,
 	}
 }
 

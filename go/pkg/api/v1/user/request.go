@@ -13,8 +13,12 @@ type SignUpRequest struct {
 
 func (r SignUpRequest) Validate() error {
 	return validation.ValidateStruct(&r,
-		validation.Field(&r.Username, validation.Required),
-		validation.Field(&r.Email, validation.Required),
-		validation.Field(&r.Password, validation.Required, validation.Length(8, 20), is.Email),
+		validation.Field(&r.Username, validation.Required.Error("ユーザー名を指定してください")),
+		validation.Field(&r.Email, validation.Required, is.Email),
+		validation.Field(
+			&r.Password,
+			validation.Required.Error("パスワードは必須項目です"),
+			validation.Length(8, 20).Error("パスワードは8-20文字で指定してください"),
+		),
 	)
 }

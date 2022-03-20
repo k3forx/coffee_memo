@@ -5,6 +5,7 @@
 package writer
 
 import (
+	context "context"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -35,15 +36,15 @@ func (m *MockUser) EXPECT() *MockUserMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockUser) Create(user model.User) error {
+func (m *MockUser) Create(ctx context.Context, user model.User) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", user)
+	ret := m.ctrl.Call(m, "Create", ctx, user)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockUserMockRecorder) Create(user interface{}) *gomock.Call {
+func (mr *MockUserMockRecorder) Create(ctx, user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockUser)(nil).Create), user)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockUser)(nil).Create), ctx, user)
 }

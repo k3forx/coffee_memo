@@ -23,13 +23,12 @@ func TestUser_GetByID(t *testing.T) {
 		"has_rows": {
 			userID: int(user.ID),
 			expected: model.User{
-				ID:             int(user.ID),
-				Username:       user.Username,
-				Email:          user.Email,
-				Password:       user.Password,
-				LastLoggedInAt: user.LastLoggedInAt,
-				CreatedAt:      user.CreatedAt,
-				UpdatedAt:      user.UpdatedAt,
+				ID:        int(user.ID),
+				Username:  user.Username,
+				Email:     user.Email,
+				Password:  user.Password,
+				CreatedAt: user.CreatedAt,
+				UpdatedAt: user.UpdatedAt,
 			},
 		},
 		"no_rows": {

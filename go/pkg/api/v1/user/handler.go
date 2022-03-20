@@ -22,7 +22,7 @@ type Handler struct {
 func Route(r *echo.Group, injector inject.Injector) {
 	h := newHandler(injector)
 	r.GET("/:id", h.Get)
-	r.POST("sign-up", h.SignUp)
+	r.POST("/sign-up", h.SignUp)
 }
 
 func (h Handler) Get(ctx echo.Context) error {
@@ -44,9 +44,22 @@ func (h Handler) Get(ctx echo.Context) error {
 
 func (h Handler) SignUp(ctx echo.Context) error {
 	var req SignUpRequest
-	_ = ctx.Bind(req)
+
+	// Ignore error because we can catch errors by Validate method
+	_ = ctx.Bind(&req)
 	if err := req.Validate(); err != nil {
 		return presenter.BadRequest(ctx, err.Error())
 	}
+
+	u := user.NewUsecase(h.injector)
+	in := user.SignUpInput{
+		Username: req.Username,
+		Email:    req.Email,
+		Password: req.Password,
+	}
+	if res := u.SignUp(ctx.Request().Context(), in); !res.IsOK() {
+		return presenter.Error(ctx, res)
+	}
+
 	return nil
 }

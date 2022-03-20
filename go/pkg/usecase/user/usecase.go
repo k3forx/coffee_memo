@@ -2,10 +2,12 @@ package user
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/k3forx/coffee_memo/pkg/inject"
 	"github.com/k3forx/coffee_memo/pkg/model"
 	"github.com/k3forx/coffee_memo/pkg/result"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func NewUsecase(injector inject.Injector) *UserUsecase {
@@ -40,11 +42,11 @@ func (u *UserUsecase) GetByID(ctx context.Context, in GetByIDInput) (*GetByIDOut
 func (u *UserUsecase) SignUp(ctx context.Context, in SignUpInput) *result.Result {
 	user := model.User{
 		Username: in.Username,
-		Password: in.Password,
 		Email:    in.Email,
 	}
 
-	existingUser, err := u.injector.Reader.User.GetByEmail(ctx, user.Email)
+	existingUser, err := u.injector.Reader.User.GetByEmail(ctx, in.Email)
+	fmt.Printf("err: %+v\n", err)
 	if err != nil {
 		return result.Error()
 	}
@@ -52,7 +54,15 @@ func (u *UserUsecase) SignUp(ctx context.Context, in SignUpInput) *result.Result
 		return result.New(result.CodeForbidden, "既に使用されているメールアドレスです")
 	}
 
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
+	fmt.Printf("err: %+v\n", err)
+	if err != nil {
+		return result.Error()
+	}
+	user.Password = string(hashedPassword)
+
 	if err := u.injector.Writer.User.Create(ctx, user); err != nil {
+		fmt.Printf("err: %+v\n", err)
 		return result.Error()
 	}
 

@@ -24,8 +24,6 @@ type User struct {
 	Password string `json:"password,omitempty"`
 	// Flags holds the value of the "flags" field.
 	Flags int `json:"flags,omitempty"`
-	// LastLoggedInAt holds the value of the "last_logged_in_at" field.
-	LastLoggedInAt time.Time `json:"last_logged_in_at,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -43,7 +41,7 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullInt64)
 		case user.FieldUsername, user.FieldEmail, user.FieldPassword:
 			values[i] = new(sql.NullString)
-		case user.FieldLastLoggedInAt, user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldDeletedAt:
+		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
@@ -89,12 +87,6 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field flags", values[i])
 			} else if value.Valid {
 				u.Flags = int(value.Int64)
-			}
-		case user.FieldLastLoggedInAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field last_logged_in_at", values[i])
-			} else if value.Valid {
-				u.LastLoggedInAt = value.Time
 			}
 		case user.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -150,8 +142,6 @@ func (u *User) String() string {
 	builder.WriteString(u.Password)
 	builder.WriteString(", flags=")
 	builder.WriteString(fmt.Sprintf("%v", u.Flags))
-	builder.WriteString(", last_logged_in_at=")
-	builder.WriteString(u.LastLoggedInAt.Format(time.ANSIC))
 	builder.WriteString(", created_at=")
 	builder.WriteString(u.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", updated_at=")

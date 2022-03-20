@@ -120,13 +120,6 @@ func Flags(v int) predicate.User {
 	})
 }
 
-// LastLoggedInAt applies equality check predicate on the "last_logged_in_at" field. It's identical to LastLoggedInAtEQ.
-func LastLoggedInAt(v time.Time) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLastLoggedInAt), v))
-	})
-}
-
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -554,82 +547,6 @@ func FlagsLT(v int) predicate.User {
 func FlagsLTE(v int) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldFlags), v))
-	})
-}
-
-// LastLoggedInAtEQ applies the EQ predicate on the "last_logged_in_at" field.
-func LastLoggedInAtEQ(v time.Time) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLastLoggedInAt), v))
-	})
-}
-
-// LastLoggedInAtNEQ applies the NEQ predicate on the "last_logged_in_at" field.
-func LastLoggedInAtNEQ(v time.Time) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLastLoggedInAt), v))
-	})
-}
-
-// LastLoggedInAtIn applies the In predicate on the "last_logged_in_at" field.
-func LastLoggedInAtIn(vs ...time.Time) predicate.User {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.User(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldLastLoggedInAt), v...))
-	})
-}
-
-// LastLoggedInAtNotIn applies the NotIn predicate on the "last_logged_in_at" field.
-func LastLoggedInAtNotIn(vs ...time.Time) predicate.User {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.User(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldLastLoggedInAt), v...))
-	})
-}
-
-// LastLoggedInAtGT applies the GT predicate on the "last_logged_in_at" field.
-func LastLoggedInAtGT(v time.Time) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldLastLoggedInAt), v))
-	})
-}
-
-// LastLoggedInAtGTE applies the GTE predicate on the "last_logged_in_at" field.
-func LastLoggedInAtGTE(v time.Time) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldLastLoggedInAt), v))
-	})
-}
-
-// LastLoggedInAtLT applies the LT predicate on the "last_logged_in_at" field.
-func LastLoggedInAtLT(v time.Time) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldLastLoggedInAt), v))
-	})
-}
-
-// LastLoggedInAtLTE applies the LTE predicate on the "last_logged_in_at" field.
-func LastLoggedInAtLTE(v time.Time) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldLastLoggedInAt), v))
 	})
 }
 

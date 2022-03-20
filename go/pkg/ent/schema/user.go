@@ -14,10 +14,10 @@ type User struct {
 
 // Fields of the User.
 func (User) Fields() []ent.Field {
-	return []ent.Field{field.Int32("id"), field.String("username"), field.String("email").Unique(), field.String(
+	return []ent.Field{field.Int32("id"), field.String("username"), field.String("email").Unique(), field.String("password"),
 
 		// Edges of the User.
-		"password"), field.Int("flags"), field.Time("last_logged_in_at"), field.Time("created_at"), field.Time("updated_at"), field.Time("deleted_at").Optional()}
+		field.Int("flags"), field.Time("created_at"), field.Time("updated_at"), field.Time("deleted_at").Optional()}
 
 }
 
