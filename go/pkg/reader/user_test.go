@@ -28,6 +28,8 @@ func TestUser_GetByID(t *testing.T) {
 				Email:          user.Email,
 				Password:       user.Password,
 				LastLoggedInAt: user.LastLoggedInAt,
+				CreatedAt:      user.CreatedAt,
+				UpdatedAt:      user.UpdatedAt,
 			},
 		},
 		"no_rows": {

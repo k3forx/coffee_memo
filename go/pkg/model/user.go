@@ -30,6 +30,7 @@ func NewUser(e *ent.User) User {
 		Password:       e.Password,
 		LastLoggedInAt: e.LastLoggedInAt,
 		CreatedAt:      e.CreatedAt,
+		UpdatedAt:      e.UpdatedAt,
 	}
 }
 
