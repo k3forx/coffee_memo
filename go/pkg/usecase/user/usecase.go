@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/k3forx/coffee_memo/pkg/inject"
 	"github.com/k3forx/coffee_memo/pkg/model"
@@ -46,7 +45,6 @@ func (u *UserUsecase) SignUp(ctx context.Context, in SignUpInput) *result.Result
 	}
 
 	existingUser, err := u.injector.Reader.User.GetByEmail(ctx, in.Email)
-	fmt.Printf("err: %+v\n", err)
 	if err != nil {
 		return result.Error()
 	}
@@ -55,14 +53,12 @@ func (u *UserUsecase) SignUp(ctx context.Context, in SignUpInput) *result.Result
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
-	fmt.Printf("err: %+v\n", err)
 	if err != nil {
 		return result.Error()
 	}
 	user.Password = string(hashedPassword)
 
 	if err := u.injector.Writer.User.Create(ctx, user); err != nil {
-		fmt.Printf("err: %+v\n", err)
 		return result.Error()
 	}
 
