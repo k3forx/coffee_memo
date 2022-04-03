@@ -7,9 +7,32 @@ import (
 	echo "github.com/labstack/echo/v4"
 )
 
+type v1SuccessResponse struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+}
+
+func newV1SuccessResponse() *v1SuccessResponse {
+	return &v1SuccessResponse{
+		Status:  "success",
+		Message: "success",
+	}
+}
+
+type v1ErrResponse struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+}
+
+func newV1ErrResponse(res *result.Result) *v1ErrResponse {
+	return &v1ErrResponse{
+		Status:  res.Code.String(),
+		Message: res.Message,
+	}
+}
+
 func Success(ctx echo.Context) error {
-	res := result.OK()
-	return ctx.JSON(http.StatusOK, res)
+	return ctx.JSON(http.StatusOK, newV1SuccessResponse())
 }
 
 func JSON(ctx echo.Context, body interface{}) error {
@@ -23,16 +46,4 @@ func BadRequest(ctx echo.Context, msg string) error {
 
 func Error(ctx echo.Context, res *result.Result) error {
 	return ctx.JSON(res.Code.ToStatusCode(), newV1ErrResponse(res))
-}
-
-func newV1ErrResponse(res *result.Result) *v1ErrResponse {
-	return &v1ErrResponse{
-		Status:  res.Code.String(),
-		Message: res.Message,
-	}
-}
-
-type v1ErrResponse struct {
-	Status  string `json:"status"`
-	Message string `json:"message"`
 }
