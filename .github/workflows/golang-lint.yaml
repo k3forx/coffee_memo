@@ -21,4 +21,3 @@ jobs:
 
           # Optional: working directory, useful for monorepos
           working-directory: ./go
-          only-new-issues: true
