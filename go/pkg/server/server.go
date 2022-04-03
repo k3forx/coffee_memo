@@ -6,7 +6,7 @@ import (
 	"github.com/k3forx/coffee_memo/pkg/api/v1/user"
 	"github.com/k3forx/coffee_memo/pkg/config"
 	"github.com/k3forx/coffee_memo/pkg/inject"
-	"github.com/labstack/echo/v4"
+	echo "github.com/labstack/echo/v4"
 )
 
 func NewServer(injector inject.Injector) *Server {

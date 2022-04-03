@@ -6,7 +6,7 @@ import (
 	"github.com/k3forx/coffee_memo/pkg/inject"
 	"github.com/k3forx/coffee_memo/pkg/presenter"
 	"github.com/k3forx/coffee_memo/pkg/usecase/user"
-	"github.com/labstack/echo/v4"
+	echo "github.com/labstack/echo/v4"
 )
 
 func newHandler(injector inject.Injector) *Handler {

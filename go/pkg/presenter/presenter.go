@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/k3forx/coffee_memo/pkg/result"
-	"github.com/labstack/echo/v4"
+	echo "github.com/labstack/echo/v4"
 )
 
 func Success(w echo.Response) error {
