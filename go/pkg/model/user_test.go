@@ -8,6 +8,31 @@ import (
 	"github.com/k3forx/coffee_memo/pkg/model"
 )
 
+func TestUserFlags_Int(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		flags    model.UserFlags
+		expected int
+	}{
+		"success": {
+			flags:    []model.UserFlag{model.UserFlagEmailActivated},
+			expected: 2,
+		},
+	}
+
+	for name, c := range cases {
+		c := c
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			if diff := cmp.Diff(c.expected, c.flags.Int()); diff != "" {
+				t.Errorf("UserFlags.Int() mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
 func TestNewUser(t *testing.T) {
 	t.Parallel()
 
@@ -38,6 +63,35 @@ func TestNewUser(t *testing.T) {
 
 			if diff := cmp.Diff(c.expected, model.NewUser(c.e)); diff != "" {
 				t.Errorf("NewUser() (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+func TestNewSignUpUser(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		usename  string
+		email    string
+		expected model.User
+	}{
+		"success": {
+			usename: "test username",
+			email:   "test email",
+			expected: model.User{
+				Username: "test username",
+				Email:    "test email",
+			},
+		},
+	}
+
+	for name, c := range cases {
+		c := c
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			if diff := cmp.Diff(c.expected, model.NewSignUpUser(c.usename, c.email)); diff != "" {
+				t.Errorf("NewSignUpUser mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
