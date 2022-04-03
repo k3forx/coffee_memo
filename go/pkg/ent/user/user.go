@@ -15,8 +15,6 @@ const (
 	FieldPassword = "password"
 	// FieldFlags holds the string denoting the flags field in the database.
 	FieldFlags = "flags"
-	// FieldLastLoggedInAt holds the string denoting the last_logged_in_at field in the database.
-	FieldLastLoggedInAt = "last_logged_in_at"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -34,7 +32,6 @@ var Columns = []string{
 	FieldEmail,
 	FieldPassword,
 	FieldFlags,
-	FieldLastLoggedInAt,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDeletedAt,

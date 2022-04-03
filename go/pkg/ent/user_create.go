@@ -44,12 +44,6 @@ func (uc *UserCreate) SetFlags(i int) *UserCreate {
 	return uc
 }
 
-// SetLastLoggedInAt sets the "last_logged_in_at" field.
-func (uc *UserCreate) SetLastLoggedInAt(t time.Time) *UserCreate {
-	uc.mutation.SetLastLoggedInAt(t)
-	return uc
-}
-
 // SetCreatedAt sets the "created_at" field.
 func (uc *UserCreate) SetCreatedAt(t time.Time) *UserCreate {
 	uc.mutation.SetCreatedAt(t)
@@ -164,9 +158,6 @@ func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.Flags(); !ok {
 		return &ValidationError{Name: "flags", err: errors.New(`ent: missing required field "User.flags"`)}
 	}
-	if _, ok := uc.mutation.LastLoggedInAt(); !ok {
-		return &ValidationError{Name: "last_logged_in_at", err: errors.New(`ent: missing required field "User.last_logged_in_at"`)}
-	}
 	if _, ok := uc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "User.created_at"`)}
 	}
@@ -237,14 +228,6 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldFlags,
 		})
 		_node.Flags = value
-	}
-	if value, ok := uc.mutation.LastLoggedInAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: user.FieldLastLoggedInAt,
-		})
-		_node.LastLoggedInAt = value
 	}
 	if value, ok := uc.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

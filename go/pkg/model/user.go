@@ -8,11 +8,10 @@ import (
 
 func NewUser(e *ent.User) User {
 	return User{
-		ID:             int(e.ID),
-		Username:       e.Username,
-		Email:          e.Email,
-		Password:       e.Password,
-		LastLoggedInAt: e.LastLoggedInAt,
+		ID:       int(e.ID),
+		Username: e.Username,
+		Email:    e.Email,
+		Password: e.Password,
 	}
 }
 

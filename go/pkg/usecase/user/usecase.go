@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/k3forx/coffee_memo/pkg/inject"
+	"github.com/k3forx/coffee_memo/pkg/logger"
 	"github.com/k3forx/coffee_memo/pkg/result"
 )
 
@@ -27,6 +28,7 @@ var _ Usecase = (*UserUsecase)(nil)
 func (u *UserUsecase) GetByID(ctx context.Context, in GetByIDInput) (*GetByIDOutput, *result.Result) {
 	user, err := u.injector.Reader.User.GetByID(ctx, in.UserID)
 	if err != nil {
+		logger.Error(ctx, err)
 		return nil, result.Error()
 	}
 	if !user.Exists() {

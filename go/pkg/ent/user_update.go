@@ -59,12 +59,6 @@ func (uu *UserUpdate) AddFlags(i int) *UserUpdate {
 	return uu
 }
 
-// SetLastLoggedInAt sets the "last_logged_in_at" field.
-func (uu *UserUpdate) SetLastLoggedInAt(t time.Time) *UserUpdate {
-	uu.mutation.SetLastLoggedInAt(t)
-	return uu
-}
-
 // SetCreatedAt sets the "created_at" field.
 func (uu *UserUpdate) SetCreatedAt(t time.Time) *UserUpdate {
 	uu.mutation.SetCreatedAt(t)
@@ -209,13 +203,6 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldFlags,
 		})
 	}
-	if value, ok := uu.mutation.LastLoggedInAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: user.FieldLastLoggedInAt,
-		})
-	}
 	if value, ok := uu.mutation.CreatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -290,12 +277,6 @@ func (uuo *UserUpdateOne) SetFlags(i int) *UserUpdateOne {
 // AddFlags adds i to the "flags" field.
 func (uuo *UserUpdateOne) AddFlags(i int) *UserUpdateOne {
 	uuo.mutation.AddFlags(i)
-	return uuo
-}
-
-// SetLastLoggedInAt sets the "last_logged_in_at" field.
-func (uuo *UserUpdateOne) SetLastLoggedInAt(t time.Time) *UserUpdateOne {
-	uuo.mutation.SetLastLoggedInAt(t)
 	return uuo
 }
 
@@ -465,13 +446,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Type:   field.TypeInt,
 			Value:  value,
 			Column: user.FieldFlags,
-		})
-	}
-	if value, ok := uuo.mutation.LastLoggedInAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: user.FieldLastLoggedInAt,
 		})
 	}
 	if value, ok := uuo.mutation.CreatedAt(); ok {

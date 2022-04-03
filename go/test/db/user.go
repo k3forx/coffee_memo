@@ -10,13 +10,12 @@ import (
 
 func newUser() *ent.User {
 	return &ent.User{
-		Username:       "test-user",
-		Email:          "test-email",
-		Password:       "test-password",
-		Flags:          0,
-		CreatedAt:      time.Date(2020, time.January, 1, 0, 0, 0, 0, time.UTC),
-		UpdatedAt:      time.Date(2022, time.March, 20, 0, 0, 0, 0, time.UTC),
-		LastLoggedInAt: time.Date(2022, time.March, 20, 0, 0, 0, 0, time.UTC),
+		Username:  "test-user",
+		Email:     "test-email",
+		Password:  "test-password",
+		Flags:     0,
+		CreatedAt: time.Date(2020, time.January, 1, 0, 0, 0, 0, time.UTC),
+		UpdatedAt: time.Date(2022, time.March, 20, 0, 0, 0, 0, time.UTC),
 	}
 }
 
@@ -25,9 +24,6 @@ func insertUser(client *ent.Client, user *ent.User) (*ent.User, error) {
 		SetUsername(user.Username).
 		SetEmail(user.Email).
 		SetPassword(user.Password).
-		SetLastLoggedInAt(user.LastLoggedInAt).
-		SetFlags(user.Flags).
-		SetCreatedAt(user.CreatedAt).
 		SetUpdatedAt(user.UpdatedAt).
 		Save(context.Background())
 	return u, err
