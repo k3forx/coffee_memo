@@ -7,8 +7,9 @@ import (
 	echo "github.com/labstack/echo/v4"
 )
 
-func Success(w echo.Response) error {
-	return nil
+func Success(ctx echo.Context) error {
+	res := result.OK()
+	return ctx.JSON(http.StatusOK, res)
 }
 
 func JSON(ctx echo.Context, body interface{}) error {

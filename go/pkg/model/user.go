@@ -33,6 +33,13 @@ func NewUser(e *ent.User) User {
 	}
 }
 
+func NewSignUpUser(username, email string) User {
+	return User{
+		Username: username,
+		Email:    email,
+	}
+}
+
 type User struct {
 	ID             int
 	Username       string

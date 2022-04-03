@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 
+	"github.com/k3forx/coffee_memo/pkg/api/v1/auth"
 	"github.com/k3forx/coffee_memo/pkg/api/v1/user"
 	"github.com/k3forx/coffee_memo/pkg/config"
 	"github.com/k3forx/coffee_memo/pkg/inject"
@@ -30,6 +31,10 @@ func (s *Server) Start() error {
 
 func registerRoute(e *echo.Echo, injector inject.Injector) {
 	v1API := e.Group("/v1")
+	{
+		v1APIAuth := v1API.Group("/auth")
+		auth.Route(v1APIAuth, injector)
+	}
 	{
 		v1APIUser := v1API.Group("/users")
 		user.Route(v1APIUser, injector)
