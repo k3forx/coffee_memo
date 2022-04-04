@@ -13,7 +13,7 @@ import (
 	db_helper "github.com/k3forx/coffee_memo/test/db"
 )
 
-func TestUserWriter_SignUp(t *testing.T) {
+func TestUserWriter_Create(t *testing.T) {
 	impl := writer.NewUserWriter(testClient)
 
 	cases := map[string]struct {
