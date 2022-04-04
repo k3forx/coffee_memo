@@ -52,6 +52,7 @@ func TestNewUser(t *testing.T) {
 				Username: "username",
 				Email:    "test-email",
 				Password: "test-pass",
+				Flags:    model.UserFlags{0},
 			},
 		},
 	}

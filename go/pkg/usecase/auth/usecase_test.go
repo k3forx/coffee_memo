@@ -35,7 +35,7 @@ func TestUsecase_SignUp(t *testing.T) {
 
 				userWriter := injector.Writer.User.(*writerMock.MockUser)
 				userWriter.EXPECT().
-					Create(gomock.Any(), gomock.AssignableToTypeOf(model.User{})).Return(nil)
+					Create(gomock.Any(), gomock.AssignableToTypeOf(&model.User{})).Return(nil)
 
 				return injector
 			},
@@ -101,7 +101,7 @@ func TestUsecase_SignUp(t *testing.T) {
 
 				userWriter := injector.Writer.User.(*writerMock.MockUser)
 				userWriter.EXPECT().
-					Create(gomock.Any(), gomock.AssignableToTypeOf(model.User{})).Return(errors.New("server error"))
+					Create(gomock.Any(), gomock.AssignableToTypeOf(&model.User{})).Return(errors.New("server error"))
 
 				return injector
 			},
