@@ -16,7 +16,7 @@ func NewUserWriter(db *ent.Client) *UserWriter {
 
 //go:generate mockgen -source=./user.go -destination=./mock/user_mock.go -package=writer
 type User interface {
-	Create(ctx context.Context, user model.User) error
+	Create(ctx context.Context, user *model.User) error
 }
 
 type UserWriter struct {
@@ -25,17 +25,19 @@ type UserWriter struct {
 
 var _ User = (*UserWriter)(nil)
 
-func (impl *UserWriter) Create(ctx context.Context, user model.User) error {
+func (impl *UserWriter) Create(ctx context.Context, user *model.User) error {
 	now := time.Now().UTC()
-	if _, err := impl.db.User.Create().
+	u, err := impl.db.User.Create().
 		SetUsername(user.Username).
 		SetEmail(user.Email).
 		SetPassword(user.Password).
 		SetFlags(user.Flags.Int()).
 		SetCreatedAt(now).
 		SetUpdatedAt(now).
-		Save(ctx); err != nil {
+		Save(ctx)
+	if err != nil {
 		return err
 	}
+	*user = model.NewUser(u)
 	return nil
 }

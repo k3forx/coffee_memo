@@ -36,7 +36,7 @@ func (m *MockUser) EXPECT() *MockUserMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockUser) Create(ctx context.Context, user model.User) error {
+func (m *MockUser) Create(ctx context.Context, user *model.User) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", ctx, user)
 	ret0, _ := ret[0].(error)

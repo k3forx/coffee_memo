@@ -51,7 +51,7 @@ func (u *AuthUsecase) SignUp(ctx context.Context, in SignUpInput) *result.Result
 	}
 	user.Password = string(hashedPassword)
 
-	if err := u.injector.Writer.User.Create(ctx, user); err != nil {
+	if err := u.injector.Writer.User.Create(ctx, &user); err != nil {
 		// TODO: add error log
 		return result.Error()
 	}

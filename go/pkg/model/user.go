@@ -12,6 +12,14 @@ const (
 	UserFlagEmailActivated UserFlag = 2
 )
 
+var userFlagsList = UserFlags{
+	UserFlagEmailActivated,
+}
+
+func (uf UserFlag) Num() int {
+	return int(uf)
+}
+
 type UserFlags []UserFlag
 
 func (uf UserFlags) Int() int {
@@ -23,10 +31,17 @@ func (uf UserFlags) Int() int {
 }
 
 func NewUser(e *ent.User) User {
+	flags := make([]UserFlag, len(userFlagsList))
+	for i, f := range userFlagsList {
+		if e.Flags&f.Num() == f.Num() {
+			flags[i] = f
+		}
+	}
 	return User{
 		ID:        int(e.ID),
 		Username:  e.Username,
 		Email:     e.Email,
+		Flags:     flags,
 		Password:  e.Password,
 		CreatedAt: e.CreatedAt,
 		UpdatedAt: e.UpdatedAt,

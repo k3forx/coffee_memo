@@ -32,7 +32,7 @@ func insertUser(client *ent.Client, user *ent.User) (*ent.User, error) {
 	return u, err
 }
 
-func deleteUser(ctx context.Context, client *ent.Client, user *ent.User) {
+func DeleteUser(ctx context.Context, client *ent.Client, user *ent.User) {
 	client.User.Delete().Where(entUser.IDEQ(user.ID))
 }
 
@@ -49,7 +49,7 @@ func InsertAndDeleteUsers(tb testing.TB, client *ent.Client, setters ...func(u *
 		tb.Fatalf("InsertAndDeleteUsers failed: %+v\n", err)
 	}
 	tb.Cleanup(func() {
-		deleteUser(context.Background(), client, u)
+		DeleteUser(context.Background(), client, u)
 	})
 
 	return u
