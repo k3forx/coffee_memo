@@ -46,6 +46,17 @@ func TestUsecase_SignUp(t *testing.T) {
 			},
 			res: result.OK(),
 		},
+		"validation_failed_by_empty_username": {
+			setup: func(ctrl *gomock.Controller) inject.Injector {
+				injector := inject.NewMockInjector(ctrl)
+				return injector
+			},
+			in: auth.SignUpInput{
+				Email:    email,
+				Password: "testtesttest",
+			},
+			res: result.New(result.CodeBadRequest, "Username: ユーザー名を指定してください."),
+		},
 		"error_in_getting_email": {
 			setup: func(ctrl *gomock.Controller) inject.Injector {
 				injector := inject.NewMockInjector(ctrl)
