@@ -2,10 +2,8 @@ package auth
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/k3forx/coffee_memo/pkg/inject"
-	"github.com/k3forx/coffee_memo/pkg/logger"
 	"github.com/k3forx/coffee_memo/pkg/model"
 	"github.com/k3forx/coffee_memo/pkg/result"
 	"golang.org/x/crypto/bcrypt"
@@ -17,7 +15,7 @@ func NewUsecase(injector inject.Injector) *AuthUsecase {
 	}
 }
 
-//go:generate mockgen -source=./usecase.go -destination=./usecase_mock.go -package=user
+//go:generate mockgen -source=./usecase.go -destination=./usecase_mock.go -package=auth
 type Usecase interface {
 }
 
@@ -29,16 +27,17 @@ var _ Usecase = (*AuthUsecase)(nil)
 
 func (u *AuthUsecase) SignUp(ctx context.Context, in SignUpInput) *result.Result {
 	if err := in.Validate(); err != nil {
+		// TODO: add error log
 		// logger.Error(ctx, err)
 		return result.New(result.CodeBadRequest, err.Error())
 	}
 
 	user := model.NewSignUpUser(in.Username, in.Email)
-	fmt.Printf("user: %+v\n", user)
 
 	existingUser, err := u.injector.Reader.User.GetByEmail(ctx, in.Email)
 	if err != nil {
-		logger.Error(ctx, err)
+		// TODO: add error log
+		// logger.Error(ctx, err)
 		return result.Error()
 	}
 	if existingUser.Exists() {
