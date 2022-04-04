@@ -13,5 +13,6 @@ comment:
   require_head: yes
 
 ignore:
-  - "**/ent/**/*.go"
+  - "go/pkg/ent"
+  - "**/*_mock.go"
 

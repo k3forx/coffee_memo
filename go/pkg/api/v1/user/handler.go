@@ -1,13 +1,12 @@
 package user
 
 import (
-	"log"
 	"strconv"
 
 	"github.com/k3forx/coffee_memo/pkg/inject"
 	"github.com/k3forx/coffee_memo/pkg/presenter"
 	"github.com/k3forx/coffee_memo/pkg/usecase/user"
-	"github.com/labstack/echo/v4"
+	echo "github.com/labstack/echo/v4"
 )
 
 func newHandler(injector inject.Injector) *Handler {
@@ -29,8 +28,7 @@ func (h Handler) Get(ctx echo.Context) error {
 	u := user.NewUsecase(h.injector)
 	userID, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		log.Fatal(err)
-		return err
+		return presenter.BadRequest(ctx, err.Error())
 	}
 	in := user.GetByIDInput{
 		UserID: userID,

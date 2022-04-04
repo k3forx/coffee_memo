@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/k3forx/coffee_memo/pkg/ent"
+	entUser "github.com/k3forx/coffee_memo/pkg/ent/user"
 )
 
 func newUser() *ent.User {
@@ -24,13 +25,15 @@ func insertUser(client *ent.Client, user *ent.User) (*ent.User, error) {
 		SetUsername(user.Username).
 		SetEmail(user.Email).
 		SetPassword(user.Password).
+		SetFlags(user.Flags).
+		SetCreatedAt(user.CreatedAt).
 		SetUpdatedAt(user.UpdatedAt).
 		Save(context.Background())
 	return u, err
 }
 
-func deleteUser(ctx context.Context, client *ent.Client, user *ent.User) {
-	client.User.DeleteOneID(user.ID)
+func DeleteUser(ctx context.Context, client *ent.Client, user *ent.User) {
+	client.User.Delete().Where(entUser.IDEQ(user.ID))
 }
 
 func InsertAndDeleteUsers(tb testing.TB, client *ent.Client, setters ...func(u *ent.User)) *ent.User {
@@ -46,7 +49,7 @@ func InsertAndDeleteUsers(tb testing.TB, client *ent.Client, setters ...func(u *
 		tb.Fatalf("InsertAndDeleteUsers failed: %+v\n", err)
 	}
 	tb.Cleanup(func() {
-		deleteUser(context.Background(), client, u)
+		DeleteUser(context.Background(), client, u)
 	})
 
 	return u

@@ -5,6 +5,7 @@ import (
 	"github.com/k3forx/coffee_memo/pkg/config"
 	"github.com/k3forx/coffee_memo/pkg/ent"
 	"github.com/k3forx/coffee_memo/pkg/reader"
+	"github.com/k3forx/coffee_memo/pkg/writer"
 )
 
 func New() (Injector, func(), error) {
@@ -27,13 +28,23 @@ func New() (Injector, func(), error) {
 		return Injector{}, nil, err
 	}
 
+	// TODO: change config
+	writerClient, err := ent.Open("mysql", mc.FormatDSN(), opts...)
+	if err != nil {
+		return Injector{}, nil, err
+	}
+
 	fn := func() {
 		_ = readerClient.Close()
+		_ = writerClient.Close()
 	}
 
 	injector := Injector{
 		Reader: Reader{
 			User: reader.NewUserReader(readerClient),
+		},
+		Writer: Writer{
+			User: writer.NewUserWriter(writerClient),
 		},
 	}
 
@@ -42,8 +53,13 @@ func New() (Injector, func(), error) {
 
 type Injector struct {
 	Reader Reader
+	Writer Writer
 }
 
 type Reader struct {
 	User reader.User
+}
+
+type Writer struct {
+	User writer.User
 }
