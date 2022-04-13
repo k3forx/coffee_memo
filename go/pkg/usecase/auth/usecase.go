@@ -25,11 +25,11 @@ type AuthUsecase struct {
 
 var _ Usecase = (*AuthUsecase)(nil)
 
-func (u *AuthUsecase) SignUp(ctx context.Context, in SignUpInput) *result.Result {
+func (u *AuthUsecase) SignUp(ctx context.Context, in SignUpInput) (*SignUpOutput, *result.Result) {
 	if err := in.Validate(); err != nil {
 		// TODO: add error log
 		// logger.Error(ctx, err)
-		return result.New(result.CodeBadRequest, err.Error())
+		return nil, result.New(result.CodeBadRequest, err.Error())
 	}
 
 	user := model.NewSignUpUser(in.Username, in.Email)
@@ -38,23 +38,25 @@ func (u *AuthUsecase) SignUp(ctx context.Context, in SignUpInput) *result.Result
 	if err != nil {
 		// TODO: add error log
 		// logger.Error(ctx, err)
-		return result.Error()
+		return nil, result.Error()
 	}
 	if existingUser.Exists() {
-		return result.New(result.CodeForbidden, "既に使用されているメールアドレスです")
+		return nil, result.New(result.CodeForbidden, "既に使用されているメールアドレスです")
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
 	if err != nil {
 		// TODO: add error log
-		return result.Error()
+		// logger.Error(ctx, err)
+		return nil, result.Error()
 	}
 	user.Password = string(hashedPassword)
 
 	if err := u.injector.Writer.User.Create(ctx, &user); err != nil {
 		// TODO: add error log
-		return result.Error()
+		// logger.Error(ctx, err)
+		return nil, result.Error()
 	}
 
-	return result.OK()
+	return &SignUpOutput{User: user}, result.OK()
 }

@@ -1,10 +1,14 @@
 package auth
 
 import (
-	echo "github.com/labstack/echo/v4"
+	"fmt"
+
+	"github.com/labstack/echo/v4"
 
 	"github.com/k3forx/coffee_memo/pkg/inject"
 	"github.com/k3forx/coffee_memo/pkg/presenter"
+	"github.com/k3forx/coffee_memo/pkg/result"
+	"github.com/k3forx/coffee_memo/pkg/session"
 	"github.com/k3forx/coffee_memo/pkg/usecase/auth"
 )
 
@@ -21,13 +25,14 @@ type Handler struct {
 func Route(r *echo.Group, injector inject.Injector) {
 	h := newHandler(injector)
 	r.POST("/signup", h.SignUp)
+	r.GET("/", h.Get)
 }
 
-func (h Handler) SignUp(ctx echo.Context) error {
+func (h Handler) SignUp(c echo.Context) error {
 	var req SignUpRequest
 
 	// Ignore error because we can catch errors by Validate method
-	_ = ctx.Bind(&req)
+	_ = c.Bind(&req)
 
 	u := auth.NewUsecase(h.injector)
 	in := auth.SignUpInput{
@@ -35,9 +40,26 @@ func (h Handler) SignUp(ctx echo.Context) error {
 		Email:    req.Email,
 		Password: req.Password,
 	}
-	if res := u.SignUp(ctx.Request().Context(), in); !res.IsOK() {
-		return presenter.Error(ctx, res)
+	out, res := u.SignUp(c.Request().Context(), in)
+	if !res.IsOK() {
+		return presenter.Error(c, res)
 	}
 
-	return presenter.Success(ctx)
+	sess, _ := session.NewSession(c)
+	sess.SetSessionUser(&out.User)
+	if err := sess.Save(c); err != nil {
+		return presenter.Error(c, result.Error())
+	}
+
+	return presenter.Success(c)
+}
+
+func (h Handler) Get(c echo.Context) error {
+	sess, err := session.GetSession(c)
+	if err != nil {
+		fmt.Printf("err: %+v\n", err)
+	}
+	u := sess.GetSessionUser()
+	fmt.Printf("user: %+v\n", u)
+	return nil
 }
