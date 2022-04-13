@@ -6,8 +6,6 @@ import (
 	"github.com/k3forx/coffee_memo/pkg/ent"
 	"github.com/k3forx/coffee_memo/pkg/reader"
 	"github.com/k3forx/coffee_memo/pkg/writer"
-
-	"github.com/k3forx/coffee_memo/pkg/session"
 )
 
 func New() (Injector, func(), error) {
@@ -54,9 +52,8 @@ func New() (Injector, func(), error) {
 }
 
 type Injector struct {
-	Reader  Reader
-	Writer  Writer
-	Session session.Session
+	Reader Reader
+	Writer Writer
 }
 
 type Reader struct {
