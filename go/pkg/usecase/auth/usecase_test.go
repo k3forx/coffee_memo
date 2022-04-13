@@ -122,7 +122,7 @@ func TestUsecase_SignUp(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			u := auth.NewUsecase(c.setup(ctrl))
 
-			res := u.SignUp(context.Background(), c.in)
+			_, res := u.SignUp(context.Background(), c.in)
 
 			if diff := cmp.Diff(c.res, res); diff != "" {
 				t.Errorf("SignUp() mismatch (-want +got):\n%s", diff)

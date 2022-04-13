@@ -2,15 +2,14 @@ package auth
 
 import (
 	"fmt"
-	"net/http"
 
-	"github.com/gorilla/sessions"
-	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 
 	"github.com/k3forx/coffee_memo/pkg/inject"
 	"github.com/k3forx/coffee_memo/pkg/presenter"
 	"github.com/k3forx/coffee_memo/pkg/result"
+	"github.com/k3forx/coffee_memo/pkg/session"
+	"github.com/k3forx/coffee_memo/pkg/usecase/auth"
 )
 
 func newHandler(injector inject.Injector) *Handler {
@@ -29,58 +28,38 @@ func Route(r *echo.Group, injector inject.Injector) {
 	r.GET("/", h.Get)
 }
 
-func (h Handler) SignUp(ctx echo.Context) error {
+func (h Handler) SignUp(c echo.Context) error {
 	var req SignUpRequest
 
 	// Ignore error because we can catch errors by Validate method
-	_ = ctx.Bind(&req)
+	_ = c.Bind(&req)
 
-	// u := auth.NewUsecase(h.injector)
-	// in := auth.SignUpInput{
-	// 	Username: req.Username,
-	// 	Email:    req.Email,
-	// 	Password: req.Password,
-	// }
-	// if res := u.SignUp(ctx.Request().Context(), in); !res.IsOK() {
-	// 	// return presenter.Error(ctx, res)
-	// 	presenter.Error(ctx, res)
-	// }
-	sess, err := session.Get("session", ctx)
+	u := auth.NewUsecase(h.injector)
+	in := auth.SignUpInput{
+		Username: req.Username,
+		Email:    req.Email,
+		Password: req.Password,
+	}
+	out, res := u.SignUp(c.Request().Context(), in)
+	if !res.IsOK() {
+		return presenter.Error(c, res)
+	}
+
+	sess, _ := session.NewSession(c)
+	sess.SetSessionUser(&out.User)
+	if err := sess.Save(c); err != nil {
+		return presenter.Error(c, result.Error())
+	}
+
+	return presenter.Success(c)
+}
+
+func (h Handler) Get(c echo.Context) error {
+	sess, err := session.GetSession(c)
 	if err != nil {
 		fmt.Printf("err: %+v\n", err)
 	}
-	sess.Options = &sessions.Options{
-		MaxAge:   86400 * 7,
-		HttpOnly: true,
-	}
-	//テキトウな値
-	sess.Values["foo"] = "bar"
-	//ログインしました
-	sess.Values["auth"] = true
-	if err := sess.Save(ctx.Request(), ctx.Response()); err != nil {
-		return presenter.Error(ctx, result.Error())
-	}
-
-	return ctx.NoContent(http.StatusOK)
-	// return presenter.Success(ctx)
-}
-
-func (h Handler) Get(ctx echo.Context) error {
-	sess, err := session.Get("session", ctx)
-	if err != nil {
-		return err
-	}
-	b, ok := sess.Values["auth"].(bool)
-	if !ok {
-		fmt.Println("not ok")
-	}
-	fmt.Printf("b: %+v\n", b)
-
-	res, ok := sess.Values["foo"].(string)
-	if !ok {
-		fmt.Println("not ok")
-	}
-	fmt.Printf("res: %+v\n", res)
-
+	u := sess.GetSessionUser()
+	fmt.Printf("user: %+v\n", u)
 	return nil
 }
