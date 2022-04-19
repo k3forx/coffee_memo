@@ -2,6 +2,7 @@ package auth
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/labstack/echo/v4"
 
@@ -51,7 +52,13 @@ func (h Handler) SignUp(c echo.Context) error {
 		return presenter.Error(c, result.Error())
 	}
 
-	return presenter.Success(c)
+	cookies := c.Response().Writer.Header().Get("Set-Cookie")
+	cookieMaps := map[string]*http.Cookie{}
+	for _, c := range (&http.Request{Header: http.Header{"Cookie": {cookies}}}).Cookies() {
+		cookieMaps[c.Name] = c
+	}
+
+	return presenter.JSON(c, newSignUpView(&cookieMaps))
 }
 
 func (h Handler) Get(c echo.Context) error {

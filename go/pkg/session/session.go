@@ -10,6 +10,7 @@ import (
 const sessionKey = "session"
 
 var defaultOptions = &sessions.Options{
+	Path:     "/",
 	MaxAge:   86400 * 7,
 	HttpOnly: true,
 }
