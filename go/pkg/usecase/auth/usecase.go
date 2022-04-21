@@ -60,3 +60,25 @@ func (u *AuthUsecase) SignUp(ctx context.Context, in SignUpInput) (*SignUpOutput
 
 	return &SignUpOutput{User: user}, result.OK()
 }
+
+func (u *AuthUsecase) LogIn(ctx context.Context, in LogInInput) *result.Result {
+	if err := in.Validate(); err != nil {
+		// TODO: add error log
+		// logger.Error(ctx, err)
+		return result.New(result.CodeBadRequest, err.Error())
+	}
+
+	user, err := u.injector.Reader.User.GetByEmail(ctx, in.Email)
+	if err != nil {
+		return result.Error()
+	}
+	if !user.Exists() {
+		return result.New(result.CodeNotFound, result.CodeNotFound.String())
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(in.Password)); err != nil {
+		return result.New(result.CodeBadRequest, "パスワードが違います。")
+	}
+
+	return result.OK()
+}

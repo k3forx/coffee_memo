@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -26,7 +25,7 @@ type Handler struct {
 func Route(r *echo.Group, injector inject.Injector) {
 	h := newHandler(injector)
 	r.POST("/signup", h.SignUp)
-	r.GET("/", h.Get)
+	r.POST("/login", h.LogIn)
 }
 
 func (h Handler) SignUp(c echo.Context) error {
@@ -61,12 +60,21 @@ func (h Handler) SignUp(c echo.Context) error {
 	return presenter.JSON(c, newSignUpView(&cookieMaps))
 }
 
-func (h Handler) Get(c echo.Context) error {
-	sess, err := session.GetSession(c)
-	if err != nil {
-		fmt.Printf("err: %+v\n", err)
+func (h Handler) LogIn(c echo.Context) error {
+	var req LogInRequest
+
+	// Ignore error because we can catch errors by validate method
+	_ = c.Bind(&req)
+
+	u := auth.NewUsecase(h.injector)
+	in := auth.LogInInput{
+		Email:    req.Email,
+		Password: req.Password,
 	}
-	u := sess.GetSessionUser()
-	fmt.Printf("user: %+v\n", u)
-	return nil
+
+	if res := u.LogIn(c.Request().Context(), in); !res.IsOK() {
+		return presenter.Error(c, result.Error())
+	}
+
+	return presenter.Success(c)
 }
