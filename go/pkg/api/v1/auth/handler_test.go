@@ -66,7 +66,10 @@ func TestHandler_SignUp(t *testing.T) {
 			testRes := httptest.NewRecorder()
 
 			ctx := echo.New().NewContext(testReq, testRes)
-			h.SignUp(ctx)
+			err := h.SignUp(ctx)
+			if err != nil {
+				t.Errorf("err should be nil, but got %q", err)
+			}
 
 			if diff := cmp.Diff(c.expectedStatusCode, testRes.Code); diff != "" {
 				t.Errorf("SignUp() status code mismatch (-want +got):\n%s", diff)
