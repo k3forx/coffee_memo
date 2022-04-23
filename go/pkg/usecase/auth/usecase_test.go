@@ -230,7 +230,6 @@ func TestUsecase_LogIn(t *testing.T) {
 			res: result.New(result.CodeNotFound, result.CodeNotFound.String()),
 		},
 		"wrong_password": {
-
 			setup: func(ctrl *gomock.Controller) inject.Injector {
 				injector := inject.NewMockInjector(ctrl)
 
