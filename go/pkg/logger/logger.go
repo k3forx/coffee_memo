@@ -28,9 +28,15 @@ func Init() (func(), error) {
 }
 
 func Info(ctx context.Context, msg string, fields ...zap.Field) {
+	if logger == nil {
+		return
+	}
 	logger.Info(msg, fields...)
 }
 
 func Error(ctx context.Context, err error, fields ...zap.Field) {
+	if logger == nil {
+		return
+	}
 	logger.Error(err.Error(), fields...)
 }

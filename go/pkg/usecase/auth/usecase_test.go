@@ -7,7 +7,6 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/k3forx/coffee_memo/pkg/inject"
 	"github.com/k3forx/coffee_memo/pkg/model"
 	readerMock "github.com/k3forx/coffee_memo/pkg/reader/mock"
@@ -24,7 +23,6 @@ func TestUsecase_SignUp(t *testing.T) {
 	cases := map[string]struct {
 		setup func(ctrl *gomock.Controller) inject.Injector
 		in    auth.SignUpInput
-		out   *auth.SignUpOutput
 		res   *result.Result
 	}{
 		"success": {
@@ -51,13 +49,6 @@ func TestUsecase_SignUp(t *testing.T) {
 				Password: "testtesttest",
 				Username: "test user",
 			},
-			out: &auth.SignUpOutput{
-				User: model.User{
-					ID:       1,
-					Email:    email,
-					Username: "test user",
-				},
-			},
 			res: result.OK(),
 		},
 		"validation_failed_by_empty_username": {
@@ -69,7 +60,6 @@ func TestUsecase_SignUp(t *testing.T) {
 				Email:    email,
 				Password: "testtesttest",
 			},
-			out: nil,
 			res: result.New(result.CodeBadRequest, "Username: ユーザー名を指定してください."),
 		},
 		"error_in_getting_email": {
@@ -87,7 +77,6 @@ func TestUsecase_SignUp(t *testing.T) {
 				Password: "testtesttest",
 				Username: "test user",
 			},
-			out: nil,
 			res: result.Error(),
 		},
 		"user_is_already_registered": {
@@ -105,7 +94,6 @@ func TestUsecase_SignUp(t *testing.T) {
 				Password: "testtesttest",
 				Username: "test user",
 			},
-			out: nil,
 			res: result.New(result.CodeForbidden, "既に使用されているメールアドレスです"),
 		},
 		"error_in_creating_user": {
@@ -127,7 +115,6 @@ func TestUsecase_SignUp(t *testing.T) {
 				Password: "testtesttest",
 				Username: "test user",
 			},
-			out: nil,
 			res: result.Error(),
 		},
 	}
@@ -140,12 +127,9 @@ func TestUsecase_SignUp(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			u := auth.NewUsecase(c.setup(ctrl))
 
-			out, res := u.SignUp(context.Background(), c.in)
+			res := u.SignUp(context.Background(), c.in)
 
 			if diff := cmp.Diff(c.res, res); diff != "" {
-				t.Errorf("SignUp() mismatch (-want +got):\n%s", diff)
-			}
-			if diff := cmp.Diff(c.out, out, cmpopts.IgnoreFields(model.User{}, "Password")); diff != "" {
 				t.Errorf("SignUp() mismatch (-want +got):\n%s", diff)
 			}
 		})

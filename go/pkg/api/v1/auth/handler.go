@@ -40,7 +40,26 @@ func (h Handler) SignUp(c echo.Context) error {
 		Email:    req.Email,
 		Password: req.Password,
 	}
-	out, res := u.SignUp(c.Request().Context(), in)
+	if res := u.SignUp(c.Request().Context(), in); !res.IsOK() {
+		return presenter.Error(c, res)
+	}
+
+	return presenter.Success(c)
+}
+
+func (h Handler) LogIn(c echo.Context) error {
+	var req LogInRequest
+
+	// Ignore error because we can catch errors by validate method
+	_ = c.Bind(&req)
+
+	u := auth.NewUsecase(h.injector)
+	in := auth.LogInInput{
+		Email:    req.Email,
+		Password: req.Password,
+	}
+
+	out, res := u.LogIn(c.Request().Context(), in)
 	if !res.IsOK() {
 		return presenter.Error(c, res)
 	}
@@ -57,24 +76,5 @@ func (h Handler) SignUp(c echo.Context) error {
 		cookieMaps[c.Name] = c
 	}
 
-	return presenter.JSON(c, newSignUpView(&cookieMaps))
-}
-
-func (h Handler) LogIn(c echo.Context) error {
-	var req LogInRequest
-
-	// Ignore error because we can catch errors by validate method
-	_ = c.Bind(&req)
-
-	u := auth.NewUsecase(h.injector)
-	in := auth.LogInInput{
-		Email:    req.Email,
-		Password: req.Password,
-	}
-
-	if res := u.LogIn(c.Request().Context(), in); !res.IsOK() {
-		return presenter.Error(c, result.Error())
-	}
-
-	return presenter.Success(c)
+	return presenter.JSON(c, newLogInView(&cookieMaps))
 }
