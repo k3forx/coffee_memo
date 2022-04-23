@@ -22,3 +22,19 @@ func (in SignUpInput) Validate() error {
 		),
 	)
 }
+
+type LogInInput struct {
+	Email    string
+	Password string
+}
+
+func (in LogInInput) Validate() error {
+	return validation.ValidateStruct(&in,
+		validation.Field(&in.Email, validation.Required, is.Email),
+		validation.Field(
+			&in.Password,
+			validation.Required.Error("パスワードは必須項目です"),
+			validation.Length(8, 20).Error("パスワードは8-20文字で指定してください"),
+		),
+	)
+}

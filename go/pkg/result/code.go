@@ -16,7 +16,7 @@ const (
 var codeStringMap = map[Code]string{
 	CodeNotFound:      "not found",
 	CodeBadRequest:    "bad request",
-	CodeForbidden:     "forbbiden",
+	CodeForbidden:     "forbidden",
 	CodeInternalError: "error",
 }
 
