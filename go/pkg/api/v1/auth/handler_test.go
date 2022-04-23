@@ -26,10 +26,10 @@ func TestHandler_SignUp(t *testing.T) {
 	}{
 		"success": {
 			setup: func(ctrl *gomock.Controller) *usecase.MockAuthUsecase {
-				usecase := usecase.NewMockAuthUsecase(ctrl)
+				uc := usecase.NewMockAuthUsecase(ctrl)
 
-				usecase.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(result.OK())
-				return usecase
+				uc.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(result.OK())
+				return uc
 			},
 			expectedStatusCode: http.StatusOK,
 			expectedBody: map[string]interface{}{
@@ -67,6 +67,84 @@ func TestHandler_SignUp(t *testing.T) {
 
 			ctx := echo.New().NewContext(testReq, testRes)
 			err := h.SignUp(ctx)
+			if err != nil {
+				t.Errorf("err should be nil, but got %q", err)
+			}
+
+			if diff := cmp.Diff(c.expectedStatusCode, testRes.Code); diff != "" {
+				t.Errorf("SignUp() status code mismatch (-want +got):\n%s", diff)
+			}
+
+			body := map[string]interface{}{}
+			_ = json.NewDecoder(testRes.Body).Decode(&body)
+			if diff := cmp.Diff(c.expectedBody, body); diff != "" {
+				t.Errorf("SignUp() body mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestHandler_LogIn(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		setup              func(ctrl *gomock.Controller) *usecase.MockAuthUsecase
+		expectedStatusCode int
+		expectedBody       map[string]interface{}
+	}{
+		// "success": {
+		// 	setup: func(ctrl *gomock.Controller) *usecase.MockAuthUsecase {
+		// 		uc := usecase.NewMockAuthUsecase(ctrl)
+
+		// 		uc.EXPECT().LogIn(gomock.Any(), gomock.Any()).
+		// 			Return(
+		// 				&usecase.LogInOutput{
+		// 					User: model.User{
+		// 						ID:    1,
+		// 						Email: "test@test.com",
+		// 					},
+		// 				},
+		// 				result.OK(),
+		// 			)
+		// 		return uc
+		// 	},
+		// 	expectedStatusCode: http.StatusOK,
+		// 	expectedBody: map[string]interface{}{
+		// 		"message": "success",
+		// 		"status":  "success",
+		// 	},
+		// },
+		"usecase_returns_error": {
+			setup: func(ctrl *gomock.Controller) *usecase.MockAuthUsecase {
+				usecase := usecase.NewMockAuthUsecase(ctrl)
+				usecase.EXPECT().LogIn(gomock.Any(), gomock.Any()).
+					Return(nil, result.New(result.CodeBadRequest, "パスワードが違います。"))
+				return usecase
+			},
+			expectedStatusCode: http.StatusBadRequest,
+			expectedBody: map[string]interface{}{
+				"message": "パスワードが違います。",
+				"status":  "bad request",
+			},
+		},
+	}
+
+	for name, c := range cases {
+		c := c
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			injector := inject.NewMockInjector(ctrl)
+			h := auth.NewHandler(injector)
+			uc := c.setup(ctrl)
+			h.SetUsecase(uc)
+
+			testReq := httptest.NewRequest(http.MethodPost, "/v1/auth/login", nil)
+			testRes := httptest.NewRecorder()
+
+			ctx := echo.New().NewContext(testReq, testRes)
+			err := h.LogIn(ctx)
 			if err != nil {
 				t.Errorf("err should be nil, but got %q", err)
 			}
