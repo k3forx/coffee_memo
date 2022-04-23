@@ -12,18 +12,18 @@ import (
 	"github.com/k3forx/coffee_memo/pkg/usecase/auth"
 )
 
-func newHandler(injector inject.Injector) *Handler {
+func NewHandler(injector inject.Injector) *Handler {
 	return &Handler{
-		injector: injector,
+		usecase: auth.NewUsecase(injector),
 	}
 }
 
 type Handler struct {
-	injector inject.Injector
+	usecase auth.Usecase
 }
 
 func Route(r *echo.Group, injector inject.Injector) {
-	h := newHandler(injector)
+	h := NewHandler(injector)
 	r.POST("/signup", h.SignUp)
 	r.POST("/login", h.LogIn)
 }
@@ -34,13 +34,12 @@ func (h Handler) SignUp(c echo.Context) error {
 	// Ignore error because we can catch errors by Validate method
 	_ = c.Bind(&req)
 
-	u := auth.NewUsecase(h.injector)
 	in := auth.SignUpInput{
 		Username: req.Username,
 		Email:    req.Email,
 		Password: req.Password,
 	}
-	if res := u.SignUp(c.Request().Context(), in); !res.IsOK() {
+	if res := h.usecase.SignUp(c.Request().Context(), in); !res.IsOK() {
 		return presenter.Error(c, res)
 	}
 
@@ -53,13 +52,12 @@ func (h Handler) LogIn(c echo.Context) error {
 	// Ignore error because we can catch errors by validate method
 	_ = c.Bind(&req)
 
-	u := auth.NewUsecase(h.injector)
 	in := auth.LogInInput{
 		Email:    req.Email,
 		Password: req.Password,
 	}
 
-	out, res := u.LogIn(c.Request().Context(), in)
+	out, res := h.usecase.LogIn(c.Request().Context(), in)
 	if !res.IsOK() {
 		return presenter.Error(c, res)
 	}

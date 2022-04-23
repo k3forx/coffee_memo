@@ -18,13 +18,13 @@ func NewUsecase(injector inject.Injector) *AuthUsecase {
 
 //go:generate mockgen -source=./usecase.go -destination=./usecase_mock.go -package=auth
 type Usecase interface {
+	SignUp(ctx context.Context, in SignUpInput) *result.Result
+	LogIn(ctx context.Context, in LogInInput) (*LogInOutput, *result.Result)
 }
 
 type AuthUsecase struct {
 	injector inject.Injector
 }
-
-var _ Usecase = (*AuthUsecase)(nil)
 
 func (u *AuthUsecase) SignUp(ctx context.Context, in SignUpInput) *result.Result {
 	if err := in.Validate(); err != nil {

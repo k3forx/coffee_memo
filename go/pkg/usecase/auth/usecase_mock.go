@@ -5,28 +5,61 @@
 package auth
 
 import (
+	context "context"
+	reflect "reflect"
+
 	gomock "github.com/golang/mock/gomock"
+	result "github.com/k3forx/coffee_memo/pkg/result"
 )
 
-// MockUsecase is a mock of Usecase interface.
-type MockUsecase struct {
+// MockAuthUsecase is a mock of AuthUsecase interface.
+type MockAuthUsecase struct {
 	ctrl     *gomock.Controller
-	recorder *MockUsecaseMockRecorder
+	recorder *MockAuthUsecaseMockRecorder
 }
 
-// MockUsecaseMockRecorder is the mock recorder for MockUsecase.
-type MockUsecaseMockRecorder struct {
-	mock *MockUsecase
+// MockAuthUsecaseMockRecorder is the mock recorder for MockAuthUsecase.
+type MockAuthUsecaseMockRecorder struct {
+	mock *MockAuthUsecase
 }
 
-// NewMockUsecase creates a new mock instance.
-func NewMockUsecase(ctrl *gomock.Controller) *MockUsecase {
-	mock := &MockUsecase{ctrl: ctrl}
-	mock.recorder = &MockUsecaseMockRecorder{mock}
+// NewMockAuthUsecase creates a new mock instance.
+func NewMockAuthUsecase(ctrl *gomock.Controller) *MockAuthUsecase {
+	mock := &MockAuthUsecase{ctrl: ctrl}
+	mock.recorder = &MockAuthUsecaseMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockUsecase) EXPECT() *MockUsecaseMockRecorder {
+func (m *MockAuthUsecase) EXPECT() *MockAuthUsecaseMockRecorder {
 	return m.recorder
+}
+
+// LogIn mocks base method.
+func (m *MockAuthUsecase) LogIn(ctx context.Context, in LogInInput) (*LogInOutput, *result.Result) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LogIn", ctx, in)
+	ret0, _ := ret[0].(*LogInOutput)
+	ret1, _ := ret[1].(*result.Result)
+	return ret0, ret1
+}
+
+// LogIn indicates an expected call of LogIn.
+func (mr *MockAuthUsecaseMockRecorder) LogIn(ctx, in interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LogIn", reflect.TypeOf((*MockAuthUsecase)(nil).LogIn), ctx, in)
+}
+
+// SignUp mocks base method.
+func (m *MockAuthUsecase) SignUp(ctx context.Context, in SignUpInput) *result.Result {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SignUp", ctx, in)
+	ret0, _ := ret[0].(*result.Result)
+	return ret0
+}
+
+// SignUp indicates an expected call of SignUp.
+func (mr *MockAuthUsecaseMockRecorder) SignUp(ctx, in interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignUp", reflect.TypeOf((*MockAuthUsecase)(nil).SignUp), ctx, in)
 }
