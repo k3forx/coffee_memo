@@ -55,40 +55,40 @@ func (dru *DripRecipeUpdate) AddCoffeeBeanID(i int32) *DripRecipeUpdate {
 }
 
 // SetCoffeeBeanWeight sets the "coffee_bean_weight" field.
-func (dru *DripRecipeUpdate) SetCoffeeBeanWeight(f float32) *DripRecipeUpdate {
+func (dru *DripRecipeUpdate) SetCoffeeBeanWeight(f float64) *DripRecipeUpdate {
 	dru.mutation.ResetCoffeeBeanWeight()
 	dru.mutation.SetCoffeeBeanWeight(f)
 	return dru
 }
 
 // AddCoffeeBeanWeight adds f to the "coffee_bean_weight" field.
-func (dru *DripRecipeUpdate) AddCoffeeBeanWeight(f float32) *DripRecipeUpdate {
+func (dru *DripRecipeUpdate) AddCoffeeBeanWeight(f float64) *DripRecipeUpdate {
 	dru.mutation.AddCoffeeBeanWeight(f)
 	return dru
 }
 
 // SetLiquidWeight sets the "liquid_weight" field.
-func (dru *DripRecipeUpdate) SetLiquidWeight(f float32) *DripRecipeUpdate {
+func (dru *DripRecipeUpdate) SetLiquidWeight(f float64) *DripRecipeUpdate {
 	dru.mutation.ResetLiquidWeight()
 	dru.mutation.SetLiquidWeight(f)
 	return dru
 }
 
 // AddLiquidWeight adds f to the "liquid_weight" field.
-func (dru *DripRecipeUpdate) AddLiquidWeight(f float32) *DripRecipeUpdate {
+func (dru *DripRecipeUpdate) AddLiquidWeight(f float64) *DripRecipeUpdate {
 	dru.mutation.AddLiquidWeight(f)
 	return dru
 }
 
 // SetTemperature sets the "temperature" field.
-func (dru *DripRecipeUpdate) SetTemperature(f float32) *DripRecipeUpdate {
+func (dru *DripRecipeUpdate) SetTemperature(f float64) *DripRecipeUpdate {
 	dru.mutation.ResetTemperature()
 	dru.mutation.SetTemperature(f)
 	return dru
 }
 
 // AddTemperature adds f to the "temperature" field.
-func (dru *DripRecipeUpdate) AddTemperature(f float32) *DripRecipeUpdate {
+func (dru *DripRecipeUpdate) AddTemperature(f float64) *DripRecipeUpdate {
 	dru.mutation.AddTemperature(f)
 	return dru
 }
@@ -244,42 +244,42 @@ func (dru *DripRecipeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := dru.mutation.CoffeeBeanWeight(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat32,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: driprecipe.FieldCoffeeBeanWeight,
 		})
 	}
 	if value, ok := dru.mutation.AddedCoffeeBeanWeight(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat32,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: driprecipe.FieldCoffeeBeanWeight,
 		})
 	}
 	if value, ok := dru.mutation.LiquidWeight(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat32,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: driprecipe.FieldLiquidWeight,
 		})
 	}
 	if value, ok := dru.mutation.AddedLiquidWeight(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat32,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: driprecipe.FieldLiquidWeight,
 		})
 	}
 	if value, ok := dru.mutation.Temperature(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat32,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: driprecipe.FieldTemperature,
 		})
 	}
 	if value, ok := dru.mutation.AddedTemperature(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat32,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: driprecipe.FieldTemperature,
 		})
@@ -379,40 +379,40 @@ func (druo *DripRecipeUpdateOne) AddCoffeeBeanID(i int32) *DripRecipeUpdateOne {
 }
 
 // SetCoffeeBeanWeight sets the "coffee_bean_weight" field.
-func (druo *DripRecipeUpdateOne) SetCoffeeBeanWeight(f float32) *DripRecipeUpdateOne {
+func (druo *DripRecipeUpdateOne) SetCoffeeBeanWeight(f float64) *DripRecipeUpdateOne {
 	druo.mutation.ResetCoffeeBeanWeight()
 	druo.mutation.SetCoffeeBeanWeight(f)
 	return druo
 }
 
 // AddCoffeeBeanWeight adds f to the "coffee_bean_weight" field.
-func (druo *DripRecipeUpdateOne) AddCoffeeBeanWeight(f float32) *DripRecipeUpdateOne {
+func (druo *DripRecipeUpdateOne) AddCoffeeBeanWeight(f float64) *DripRecipeUpdateOne {
 	druo.mutation.AddCoffeeBeanWeight(f)
 	return druo
 }
 
 // SetLiquidWeight sets the "liquid_weight" field.
-func (druo *DripRecipeUpdateOne) SetLiquidWeight(f float32) *DripRecipeUpdateOne {
+func (druo *DripRecipeUpdateOne) SetLiquidWeight(f float64) *DripRecipeUpdateOne {
 	druo.mutation.ResetLiquidWeight()
 	druo.mutation.SetLiquidWeight(f)
 	return druo
 }
 
 // AddLiquidWeight adds f to the "liquid_weight" field.
-func (druo *DripRecipeUpdateOne) AddLiquidWeight(f float32) *DripRecipeUpdateOne {
+func (druo *DripRecipeUpdateOne) AddLiquidWeight(f float64) *DripRecipeUpdateOne {
 	druo.mutation.AddLiquidWeight(f)
 	return druo
 }
 
 // SetTemperature sets the "temperature" field.
-func (druo *DripRecipeUpdateOne) SetTemperature(f float32) *DripRecipeUpdateOne {
+func (druo *DripRecipeUpdateOne) SetTemperature(f float64) *DripRecipeUpdateOne {
 	druo.mutation.ResetTemperature()
 	druo.mutation.SetTemperature(f)
 	return druo
 }
 
 // AddTemperature adds f to the "temperature" field.
-func (druo *DripRecipeUpdateOne) AddTemperature(f float32) *DripRecipeUpdateOne {
+func (druo *DripRecipeUpdateOne) AddTemperature(f float64) *DripRecipeUpdateOne {
 	druo.mutation.AddTemperature(f)
 	return druo
 }
@@ -592,42 +592,42 @@ func (druo *DripRecipeUpdateOne) sqlSave(ctx context.Context) (_node *DripRecipe
 	}
 	if value, ok := druo.mutation.CoffeeBeanWeight(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat32,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: driprecipe.FieldCoffeeBeanWeight,
 		})
 	}
 	if value, ok := druo.mutation.AddedCoffeeBeanWeight(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat32,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: driprecipe.FieldCoffeeBeanWeight,
 		})
 	}
 	if value, ok := druo.mutation.LiquidWeight(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat32,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: driprecipe.FieldLiquidWeight,
 		})
 	}
 	if value, ok := druo.mutation.AddedLiquidWeight(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat32,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: driprecipe.FieldLiquidWeight,
 		})
 	}
 	if value, ok := druo.mutation.Temperature(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat32,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: driprecipe.FieldTemperature,
 		})
 	}
 	if value, ok := druo.mutation.AddedTemperature(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat32,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: driprecipe.FieldTemperature,
 		})

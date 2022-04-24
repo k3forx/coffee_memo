@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math"
 
@@ -264,15 +263,17 @@ func (cbq *CoffeeBeanQuery) Clone() *CoffeeBeanQuery {
 //		Scan(ctx, &v)
 //
 func (cbq *CoffeeBeanQuery) GroupBy(field string, fields ...string) *CoffeeBeanGroupBy {
-	group := &CoffeeBeanGroupBy{config: cbq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+	grbuild := &CoffeeBeanGroupBy{config: cbq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := cbq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return cbq.sqlQuery(ctx), nil
 	}
-	return group
+	grbuild.label = coffeebean.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
@@ -290,7 +291,10 @@ func (cbq *CoffeeBeanQuery) GroupBy(field string, fields ...string) *CoffeeBeanG
 //
 func (cbq *CoffeeBeanQuery) Select(fields ...string) *CoffeeBeanSelect {
 	cbq.fields = append(cbq.fields, fields...)
-	return &CoffeeBeanSelect{CoffeeBeanQuery: cbq}
+	selbuild := &CoffeeBeanSelect{CoffeeBeanQuery: cbq}
+	selbuild.label = coffeebean.Label
+	selbuild.flds, selbuild.scan = &cbq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (cbq *CoffeeBeanQuery) prepareQuery(ctx context.Context) error {
@@ -309,22 +313,21 @@ func (cbq *CoffeeBeanQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (cbq *CoffeeBeanQuery) sqlAll(ctx context.Context) ([]*CoffeeBean, error) {
+func (cbq *CoffeeBeanQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*CoffeeBean, error) {
 	var (
 		nodes = []*CoffeeBean{}
 		_spec = cbq.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &CoffeeBean{config: cbq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*CoffeeBean).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &CoffeeBean{config: cbq.config}
+		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, cbq.driver, _spec); err != nil {
 		return nil, err
@@ -435,6 +438,7 @@ func (cbq *CoffeeBeanQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // CoffeeBeanGroupBy is the group-by builder for CoffeeBean entities.
 type CoffeeBeanGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -456,209 +460,6 @@ func (cbgb *CoffeeBeanGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	cbgb.sql = query
 	return cbgb.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (cbgb *CoffeeBeanGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := cbgb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (cbgb *CoffeeBeanGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(cbgb.fields) > 1 {
-		return nil, errors.New("ent: CoffeeBeanGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := cbgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (cbgb *CoffeeBeanGroupBy) StringsX(ctx context.Context) []string {
-	v, err := cbgb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (cbgb *CoffeeBeanGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = cbgb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{coffeebean.Label}
-	default:
-		err = fmt.Errorf("ent: CoffeeBeanGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (cbgb *CoffeeBeanGroupBy) StringX(ctx context.Context) string {
-	v, err := cbgb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (cbgb *CoffeeBeanGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(cbgb.fields) > 1 {
-		return nil, errors.New("ent: CoffeeBeanGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := cbgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (cbgb *CoffeeBeanGroupBy) IntsX(ctx context.Context) []int {
-	v, err := cbgb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (cbgb *CoffeeBeanGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = cbgb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{coffeebean.Label}
-	default:
-		err = fmt.Errorf("ent: CoffeeBeanGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (cbgb *CoffeeBeanGroupBy) IntX(ctx context.Context) int {
-	v, err := cbgb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (cbgb *CoffeeBeanGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(cbgb.fields) > 1 {
-		return nil, errors.New("ent: CoffeeBeanGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := cbgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (cbgb *CoffeeBeanGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := cbgb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (cbgb *CoffeeBeanGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = cbgb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{coffeebean.Label}
-	default:
-		err = fmt.Errorf("ent: CoffeeBeanGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (cbgb *CoffeeBeanGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := cbgb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (cbgb *CoffeeBeanGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(cbgb.fields) > 1 {
-		return nil, errors.New("ent: CoffeeBeanGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := cbgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (cbgb *CoffeeBeanGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := cbgb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (cbgb *CoffeeBeanGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = cbgb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{coffeebean.Label}
-	default:
-		err = fmt.Errorf("ent: CoffeeBeanGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (cbgb *CoffeeBeanGroupBy) BoolX(ctx context.Context) bool {
-	v, err := cbgb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (cbgb *CoffeeBeanGroupBy) sqlScan(ctx context.Context, v interface{}) error {
@@ -702,6 +503,7 @@ func (cbgb *CoffeeBeanGroupBy) sqlQuery() *sql.Selector {
 // CoffeeBeanSelect is the builder for selecting fields of CoffeeBean entities.
 type CoffeeBeanSelect struct {
 	*CoffeeBeanQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
@@ -713,201 +515,6 @@ func (cbs *CoffeeBeanSelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	cbs.sql = cbs.CoffeeBeanQuery.sqlQuery(ctx)
 	return cbs.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (cbs *CoffeeBeanSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := cbs.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (cbs *CoffeeBeanSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(cbs.fields) > 1 {
-		return nil, errors.New("ent: CoffeeBeanSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := cbs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (cbs *CoffeeBeanSelect) StringsX(ctx context.Context) []string {
-	v, err := cbs.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (cbs *CoffeeBeanSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = cbs.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{coffeebean.Label}
-	default:
-		err = fmt.Errorf("ent: CoffeeBeanSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (cbs *CoffeeBeanSelect) StringX(ctx context.Context) string {
-	v, err := cbs.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (cbs *CoffeeBeanSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(cbs.fields) > 1 {
-		return nil, errors.New("ent: CoffeeBeanSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := cbs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (cbs *CoffeeBeanSelect) IntsX(ctx context.Context) []int {
-	v, err := cbs.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (cbs *CoffeeBeanSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = cbs.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{coffeebean.Label}
-	default:
-		err = fmt.Errorf("ent: CoffeeBeanSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (cbs *CoffeeBeanSelect) IntX(ctx context.Context) int {
-	v, err := cbs.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (cbs *CoffeeBeanSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(cbs.fields) > 1 {
-		return nil, errors.New("ent: CoffeeBeanSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := cbs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (cbs *CoffeeBeanSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := cbs.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (cbs *CoffeeBeanSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = cbs.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{coffeebean.Label}
-	default:
-		err = fmt.Errorf("ent: CoffeeBeanSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (cbs *CoffeeBeanSelect) Float64X(ctx context.Context) float64 {
-	v, err := cbs.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (cbs *CoffeeBeanSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(cbs.fields) > 1 {
-		return nil, errors.New("ent: CoffeeBeanSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := cbs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (cbs *CoffeeBeanSelect) BoolsX(ctx context.Context) []bool {
-	v, err := cbs.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (cbs *CoffeeBeanSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = cbs.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{coffeebean.Label}
-	default:
-		err = fmt.Errorf("ent: CoffeeBeanSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (cbs *CoffeeBeanSelect) BoolX(ctx context.Context) bool {
-	v, err := cbs.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (cbs *CoffeeBeanSelect) sqlScan(ctx context.Context, v interface{}) error {

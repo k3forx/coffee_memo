@@ -13,7 +13,7 @@ type DripRecipe struct {
 }
 
 func (DripRecipe) Fields() []ent.Field {
-	return []ent.Field{field.Int32("id"), field.Int32("user_id"), field.Int32("coffee_bean_id"), field.Float32("coffee_bean_weight"), field.Float32("liquid_weight"), field.Float32("temperature"), field.Int32("steam_time"), field.Int32("drip_time"), field.String("memo"), field.Time("created_at"), field.Time("updated_at")}
+	return []ent.Field{field.Int32("id"), field.Int32("user_id"), field.Int32("coffee_bean_id"), field.Float("coffee_bean_weight"), field.Float("liquid_weight"), field.Float("temperature"), field.Int32("steam_time"), field.Int32("drip_time"), field.String("memo"), field.Time("created_at"), field.Time("updated_at")}
 }
 func (DripRecipe) Edges() []ent.Edge {
 	return nil

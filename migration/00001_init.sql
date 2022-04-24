@@ -41,6 +41,17 @@ CREATE TABLE `coffee_beans` (
 );
 -- +goose StatementEnd
 -- +goose StatementBegin
+CREATE TABLE `users_coffee_beans` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `coffee_bean_id` INT NOT NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `deleted_at` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`)
+);
+-- +goose StatementEnd
+-- +goose StatementBegin
 CREATE TABLE `drip_recipes` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `user_id` INT NOT NULL,
@@ -62,6 +73,9 @@ DROP TABLE `users`;
 -- +goose StatementEnd
 -- +goose StatementBegin
 DROP TABLE `coffee_shops`;
+-- +goose StatementEnd
+-- +goose StatementBegin
+DROP TABLE `users_coffee_beans`;
 -- +goose StatementEnd
 -- +goose StatementBegin
 DROP TABLE `coffee_beans`;

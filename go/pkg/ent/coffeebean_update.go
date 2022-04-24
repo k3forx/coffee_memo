@@ -75,8 +75,15 @@ func (cbu *CoffeeBeanUpdate) ClearCountry() *CoffeeBeanUpdate {
 }
 
 // SetShopID sets the "shop_id" field.
-func (cbu *CoffeeBeanUpdate) SetShopID(s string) *CoffeeBeanUpdate {
-	cbu.mutation.SetShopID(s)
+func (cbu *CoffeeBeanUpdate) SetShopID(i int32) *CoffeeBeanUpdate {
+	cbu.mutation.ResetShopID()
+	cbu.mutation.SetShopID(i)
+	return cbu
+}
+
+// AddShopID adds i to the "shop_id" field.
+func (cbu *CoffeeBeanUpdate) AddShopID(i int32) *CoffeeBeanUpdate {
+	cbu.mutation.AddShopID(i)
 	return cbu
 }
 
@@ -230,7 +237,14 @@ func (cbu *CoffeeBeanUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := cbu.mutation.ShopID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeInt32,
+			Value:  value,
+			Column: coffeebean.FieldShopID,
+		})
+	}
+	if value, ok := cbu.mutation.AddedShopID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
 			Value:  value,
 			Column: coffeebean.FieldShopID,
 		})
@@ -335,8 +349,15 @@ func (cbuo *CoffeeBeanUpdateOne) ClearCountry() *CoffeeBeanUpdateOne {
 }
 
 // SetShopID sets the "shop_id" field.
-func (cbuo *CoffeeBeanUpdateOne) SetShopID(s string) *CoffeeBeanUpdateOne {
-	cbuo.mutation.SetShopID(s)
+func (cbuo *CoffeeBeanUpdateOne) SetShopID(i int32) *CoffeeBeanUpdateOne {
+	cbuo.mutation.ResetShopID()
+	cbuo.mutation.SetShopID(i)
+	return cbuo
+}
+
+// AddShopID adds i to the "shop_id" field.
+func (cbuo *CoffeeBeanUpdateOne) AddShopID(i int32) *CoffeeBeanUpdateOne {
+	cbuo.mutation.AddShopID(i)
 	return cbuo
 }
 
@@ -514,7 +535,14 @@ func (cbuo *CoffeeBeanUpdateOne) sqlSave(ctx context.Context) (_node *CoffeeBean
 	}
 	if value, ok := cbuo.mutation.ShopID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeInt32,
+			Value:  value,
+			Column: coffeebean.FieldShopID,
+		})
+	}
+	if value, ok := cbuo.mutation.AddedShopID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
 			Value:  value,
 			Column: coffeebean.FieldShopID,
 		})

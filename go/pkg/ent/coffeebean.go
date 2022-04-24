@@ -23,7 +23,7 @@ type CoffeeBean struct {
 	// Country holds the value of the "country" field.
 	Country string `json:"country,omitempty"`
 	// ShopID holds the value of the "shop_id" field.
-	ShopID string `json:"shop_id,omitempty"`
+	ShopID int32 `json:"shop_id,omitempty"`
 	// RoastedDegree holds the value of the "roasted_degree" field.
 	RoastedDegree string `json:"roasted_degree,omitempty"`
 	// RoastedAt holds the value of the "roasted_at" field.
@@ -39,9 +39,9 @@ func (*CoffeeBean) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case coffeebean.FieldID:
+		case coffeebean.FieldID, coffeebean.FieldShopID:
 			values[i] = new(sql.NullInt64)
-		case coffeebean.FieldName, coffeebean.FieldFarmName, coffeebean.FieldCountry, coffeebean.FieldShopID, coffeebean.FieldRoastedDegree:
+		case coffeebean.FieldName, coffeebean.FieldFarmName, coffeebean.FieldCountry, coffeebean.FieldRoastedDegree:
 			values[i] = new(sql.NullString)
 		case coffeebean.FieldRoastedAt, coffeebean.FieldCreatedAt, coffeebean.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -85,10 +85,10 @@ func (cb *CoffeeBean) assignValues(columns []string, values []interface{}) error
 				cb.Country = value.String
 			}
 		case coffeebean.FieldShopID:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field shop_id", values[i])
 			} else if value.Valid {
-				cb.ShopID = value.String
+				cb.ShopID = int32(value.Int64)
 			}
 		case coffeebean.FieldRoastedDegree:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -149,7 +149,7 @@ func (cb *CoffeeBean) String() string {
 	builder.WriteString(", country=")
 	builder.WriteString(cb.Country)
 	builder.WriteString(", shop_id=")
-	builder.WriteString(cb.ShopID)
+	builder.WriteString(fmt.Sprintf("%v", cb.ShopID))
 	builder.WriteString(", roasted_degree=")
 	builder.WriteString(cb.RoastedDegree)
 	builder.WriteString(", roasted_at=")

@@ -14,6 +14,7 @@ import (
 	"github.com/k3forx/coffee_memo/pkg/ent/driprecipe"
 	"github.com/k3forx/coffee_memo/pkg/ent/goosedbversion"
 	"github.com/k3forx/coffee_memo/pkg/ent/user"
+	"github.com/k3forx/coffee_memo/pkg/ent/userscoffeebean"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -34,6 +35,8 @@ type Client struct {
 	GooseDbVersion *GooseDbVersionClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// UsersCoffeeBean is the client for interacting with the UsersCoffeeBean builders.
+	UsersCoffeeBean *UsersCoffeeBeanClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -52,6 +55,7 @@ func (c *Client) init() {
 	c.DripRecipe = NewDripRecipeClient(c.config)
 	c.GooseDbVersion = NewGooseDbVersionClient(c.config)
 	c.User = NewUserClient(c.config)
+	c.UsersCoffeeBean = NewUsersCoffeeBeanClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -83,13 +87,14 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:            ctx,
-		config:         cfg,
-		CoffeeBean:     NewCoffeeBeanClient(cfg),
-		CoffeeShop:     NewCoffeeShopClient(cfg),
-		DripRecipe:     NewDripRecipeClient(cfg),
-		GooseDbVersion: NewGooseDbVersionClient(cfg),
-		User:           NewUserClient(cfg),
+		ctx:             ctx,
+		config:          cfg,
+		CoffeeBean:      NewCoffeeBeanClient(cfg),
+		CoffeeShop:      NewCoffeeShopClient(cfg),
+		DripRecipe:      NewDripRecipeClient(cfg),
+		GooseDbVersion:  NewGooseDbVersionClient(cfg),
+		User:            NewUserClient(cfg),
+		UsersCoffeeBean: NewUsersCoffeeBeanClient(cfg),
 	}, nil
 }
 
@@ -107,13 +112,14 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:            ctx,
-		config:         cfg,
-		CoffeeBean:     NewCoffeeBeanClient(cfg),
-		CoffeeShop:     NewCoffeeShopClient(cfg),
-		DripRecipe:     NewDripRecipeClient(cfg),
-		GooseDbVersion: NewGooseDbVersionClient(cfg),
-		User:           NewUserClient(cfg),
+		ctx:             ctx,
+		config:          cfg,
+		CoffeeBean:      NewCoffeeBeanClient(cfg),
+		CoffeeShop:      NewCoffeeShopClient(cfg),
+		DripRecipe:      NewDripRecipeClient(cfg),
+		GooseDbVersion:  NewGooseDbVersionClient(cfg),
+		User:            NewUserClient(cfg),
+		UsersCoffeeBean: NewUsersCoffeeBeanClient(cfg),
 	}, nil
 }
 
@@ -148,6 +154,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.DripRecipe.Use(hooks...)
 	c.GooseDbVersion.Use(hooks...)
 	c.User.Use(hooks...)
+	c.UsersCoffeeBean.Use(hooks...)
 }
 
 // CoffeeBeanClient is a client for the CoffeeBean schema.
@@ -598,4 +605,94 @@ func (c *UserClient) GetX(ctx context.Context, id int32) *User {
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
+}
+
+// UsersCoffeeBeanClient is a client for the UsersCoffeeBean schema.
+type UsersCoffeeBeanClient struct {
+	config
+}
+
+// NewUsersCoffeeBeanClient returns a client for the UsersCoffeeBean from the given config.
+func NewUsersCoffeeBeanClient(c config) *UsersCoffeeBeanClient {
+	return &UsersCoffeeBeanClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `userscoffeebean.Hooks(f(g(h())))`.
+func (c *UsersCoffeeBeanClient) Use(hooks ...Hook) {
+	c.hooks.UsersCoffeeBean = append(c.hooks.UsersCoffeeBean, hooks...)
+}
+
+// Create returns a create builder for UsersCoffeeBean.
+func (c *UsersCoffeeBeanClient) Create() *UsersCoffeeBeanCreate {
+	mutation := newUsersCoffeeBeanMutation(c.config, OpCreate)
+	return &UsersCoffeeBeanCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of UsersCoffeeBean entities.
+func (c *UsersCoffeeBeanClient) CreateBulk(builders ...*UsersCoffeeBeanCreate) *UsersCoffeeBeanCreateBulk {
+	return &UsersCoffeeBeanCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for UsersCoffeeBean.
+func (c *UsersCoffeeBeanClient) Update() *UsersCoffeeBeanUpdate {
+	mutation := newUsersCoffeeBeanMutation(c.config, OpUpdate)
+	return &UsersCoffeeBeanUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UsersCoffeeBeanClient) UpdateOne(ucb *UsersCoffeeBean) *UsersCoffeeBeanUpdateOne {
+	mutation := newUsersCoffeeBeanMutation(c.config, OpUpdateOne, withUsersCoffeeBean(ucb))
+	return &UsersCoffeeBeanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UsersCoffeeBeanClient) UpdateOneID(id int32) *UsersCoffeeBeanUpdateOne {
+	mutation := newUsersCoffeeBeanMutation(c.config, OpUpdateOne, withUsersCoffeeBeanID(id))
+	return &UsersCoffeeBeanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for UsersCoffeeBean.
+func (c *UsersCoffeeBeanClient) Delete() *UsersCoffeeBeanDelete {
+	mutation := newUsersCoffeeBeanMutation(c.config, OpDelete)
+	return &UsersCoffeeBeanDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *UsersCoffeeBeanClient) DeleteOne(ucb *UsersCoffeeBean) *UsersCoffeeBeanDeleteOne {
+	return c.DeleteOneID(ucb.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *UsersCoffeeBeanClient) DeleteOneID(id int32) *UsersCoffeeBeanDeleteOne {
+	builder := c.Delete().Where(userscoffeebean.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UsersCoffeeBeanDeleteOne{builder}
+}
+
+// Query returns a query builder for UsersCoffeeBean.
+func (c *UsersCoffeeBeanClient) Query() *UsersCoffeeBeanQuery {
+	return &UsersCoffeeBeanQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a UsersCoffeeBean entity by its id.
+func (c *UsersCoffeeBeanClient) Get(ctx context.Context, id int32) (*UsersCoffeeBean, error) {
+	return c.Query().Where(userscoffeebean.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UsersCoffeeBeanClient) GetX(ctx context.Context, id int32) *UsersCoffeeBean {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *UsersCoffeeBeanClient) Hooks() []Hook {
+	return c.hooks.UsersCoffeeBean
 }

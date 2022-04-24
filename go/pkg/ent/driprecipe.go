@@ -21,11 +21,11 @@ type DripRecipe struct {
 	// CoffeeBeanID holds the value of the "coffee_bean_id" field.
 	CoffeeBeanID int32 `json:"coffee_bean_id,omitempty"`
 	// CoffeeBeanWeight holds the value of the "coffee_bean_weight" field.
-	CoffeeBeanWeight float32 `json:"coffee_bean_weight,omitempty"`
+	CoffeeBeanWeight float64 `json:"coffee_bean_weight,omitempty"`
 	// LiquidWeight holds the value of the "liquid_weight" field.
-	LiquidWeight float32 `json:"liquid_weight,omitempty"`
+	LiquidWeight float64 `json:"liquid_weight,omitempty"`
 	// Temperature holds the value of the "temperature" field.
-	Temperature float32 `json:"temperature,omitempty"`
+	Temperature float64 `json:"temperature,omitempty"`
 	// SteamTime holds the value of the "steam_time" field.
 	SteamTime int32 `json:"steam_time,omitempty"`
 	// DripTime holds the value of the "drip_time" field.
@@ -88,19 +88,19 @@ func (dr *DripRecipe) assignValues(columns []string, values []interface{}) error
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field coffee_bean_weight", values[i])
 			} else if value.Valid {
-				dr.CoffeeBeanWeight = float32(value.Float64)
+				dr.CoffeeBeanWeight = value.Float64
 			}
 		case driprecipe.FieldLiquidWeight:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field liquid_weight", values[i])
 			} else if value.Valid {
-				dr.LiquidWeight = float32(value.Float64)
+				dr.LiquidWeight = value.Float64
 			}
 		case driprecipe.FieldTemperature:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field temperature", values[i])
 			} else if value.Valid {
-				dr.Temperature = float32(value.Float64)
+				dr.Temperature = value.Float64
 			}
 		case driprecipe.FieldSteamTime:
 			if value, ok := values[i].(*sql.NullInt64); !ok {

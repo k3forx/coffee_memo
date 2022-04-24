@@ -114,7 +114,7 @@ func Country(v string) predicate.CoffeeBean {
 }
 
 // ShopID applies equality check predicate on the "shop_id" field. It's identical to ShopIDEQ.
-func ShopID(v string) predicate.CoffeeBean {
+func ShopID(v int32) predicate.CoffeeBean {
 	return predicate.CoffeeBean(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldShopID), v))
 	})
@@ -510,21 +510,21 @@ func CountryContainsFold(v string) predicate.CoffeeBean {
 }
 
 // ShopIDEQ applies the EQ predicate on the "shop_id" field.
-func ShopIDEQ(v string) predicate.CoffeeBean {
+func ShopIDEQ(v int32) predicate.CoffeeBean {
 	return predicate.CoffeeBean(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldShopID), v))
 	})
 }
 
 // ShopIDNEQ applies the NEQ predicate on the "shop_id" field.
-func ShopIDNEQ(v string) predicate.CoffeeBean {
+func ShopIDNEQ(v int32) predicate.CoffeeBean {
 	return predicate.CoffeeBean(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldShopID), v))
 	})
 }
 
 // ShopIDIn applies the In predicate on the "shop_id" field.
-func ShopIDIn(vs ...string) predicate.CoffeeBean {
+func ShopIDIn(vs ...int32) predicate.CoffeeBean {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -541,7 +541,7 @@ func ShopIDIn(vs ...string) predicate.CoffeeBean {
 }
 
 // ShopIDNotIn applies the NotIn predicate on the "shop_id" field.
-func ShopIDNotIn(vs ...string) predicate.CoffeeBean {
+func ShopIDNotIn(vs ...int32) predicate.CoffeeBean {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -558,65 +558,30 @@ func ShopIDNotIn(vs ...string) predicate.CoffeeBean {
 }
 
 // ShopIDGT applies the GT predicate on the "shop_id" field.
-func ShopIDGT(v string) predicate.CoffeeBean {
+func ShopIDGT(v int32) predicate.CoffeeBean {
 	return predicate.CoffeeBean(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldShopID), v))
 	})
 }
 
 // ShopIDGTE applies the GTE predicate on the "shop_id" field.
-func ShopIDGTE(v string) predicate.CoffeeBean {
+func ShopIDGTE(v int32) predicate.CoffeeBean {
 	return predicate.CoffeeBean(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldShopID), v))
 	})
 }
 
 // ShopIDLT applies the LT predicate on the "shop_id" field.
-func ShopIDLT(v string) predicate.CoffeeBean {
+func ShopIDLT(v int32) predicate.CoffeeBean {
 	return predicate.CoffeeBean(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldShopID), v))
 	})
 }
 
 // ShopIDLTE applies the LTE predicate on the "shop_id" field.
-func ShopIDLTE(v string) predicate.CoffeeBean {
+func ShopIDLTE(v int32) predicate.CoffeeBean {
 	return predicate.CoffeeBean(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldShopID), v))
-	})
-}
-
-// ShopIDContains applies the Contains predicate on the "shop_id" field.
-func ShopIDContains(v string) predicate.CoffeeBean {
-	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldShopID), v))
-	})
-}
-
-// ShopIDHasPrefix applies the HasPrefix predicate on the "shop_id" field.
-func ShopIDHasPrefix(v string) predicate.CoffeeBean {
-	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldShopID), v))
-	})
-}
-
-// ShopIDHasSuffix applies the HasSuffix predicate on the "shop_id" field.
-func ShopIDHasSuffix(v string) predicate.CoffeeBean {
-	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldShopID), v))
-	})
-}
-
-// ShopIDEqualFold applies the EqualFold predicate on the "shop_id" field.
-func ShopIDEqualFold(v string) predicate.CoffeeBean {
-	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldShopID), v))
-	})
-}
-
-// ShopIDContainsFold applies the ContainsFold predicate on the "shop_id" field.
-func ShopIDContainsFold(v string) predicate.CoffeeBean {
-	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldShopID), v))
 	})
 }
 

@@ -10,6 +10,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	result "github.com/k3forx/coffee_memo/pkg/result"
+	coffee_bean "github.com/k3forx/coffee_memo/pkg/usecase/coffee_bean"
 )
 
 // MockUsecase is a mock of Usecase interface.
@@ -35,31 +36,16 @@ func (m *MockUsecase) EXPECT() *MockUsecaseMockRecorder {
 	return m.recorder
 }
 
-// LogIn mocks base method.
-func (m *MockUsecase) LogIn(ctx context.Context, in LogInInput) (*LogInOutput, *result.Result) {
+// Create mocks base method.
+func (m *MockUsecase) Create(ctx context.Context, in coffee_bean.CreateInput) *result.Result {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "LogIn", ctx, in)
-	ret0, _ := ret[0].(*LogInOutput)
-	ret1, _ := ret[1].(*result.Result)
-	return ret0, ret1
-}
-
-// LogIn indicates an expected call of LogIn.
-func (mr *MockUsecaseMockRecorder) LogIn(ctx, in interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LogIn", reflect.TypeOf((*MockUsecase)(nil).LogIn), ctx, in)
-}
-
-// SignUp mocks base method.
-func (m *MockUsecase) SignUp(ctx context.Context, in SignUpInput) *result.Result {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SignUp", ctx, in)
+	ret := m.ctrl.Call(m, "Create", ctx, in)
 	ret0, _ := ret[0].(*result.Result)
 	return ret0
 }
 
-// SignUp indicates an expected call of SignUp.
-func (mr *MockUsecaseMockRecorder) SignUp(ctx, in interface{}) *gomock.Call {
+// Create indicates an expected call of Create.
+func (mr *MockUsecaseMockRecorder) Create(ctx, in interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignUp", reflect.TypeOf((*MockUsecase)(nil).SignUp), ctx, in)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockUsecase)(nil).Create), ctx, in)
 }

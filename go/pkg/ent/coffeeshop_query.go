@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math"
 
@@ -264,15 +263,17 @@ func (csq *CoffeeShopQuery) Clone() *CoffeeShopQuery {
 //		Scan(ctx, &v)
 //
 func (csq *CoffeeShopQuery) GroupBy(field string, fields ...string) *CoffeeShopGroupBy {
-	group := &CoffeeShopGroupBy{config: csq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+	grbuild := &CoffeeShopGroupBy{config: csq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := csq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return csq.sqlQuery(ctx), nil
 	}
-	return group
+	grbuild.label = coffeeshop.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
@@ -290,7 +291,10 @@ func (csq *CoffeeShopQuery) GroupBy(field string, fields ...string) *CoffeeShopG
 //
 func (csq *CoffeeShopQuery) Select(fields ...string) *CoffeeShopSelect {
 	csq.fields = append(csq.fields, fields...)
-	return &CoffeeShopSelect{CoffeeShopQuery: csq}
+	selbuild := &CoffeeShopSelect{CoffeeShopQuery: csq}
+	selbuild.label = coffeeshop.Label
+	selbuild.flds, selbuild.scan = &csq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (csq *CoffeeShopQuery) prepareQuery(ctx context.Context) error {
@@ -309,22 +313,21 @@ func (csq *CoffeeShopQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (csq *CoffeeShopQuery) sqlAll(ctx context.Context) ([]*CoffeeShop, error) {
+func (csq *CoffeeShopQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*CoffeeShop, error) {
 	var (
 		nodes = []*CoffeeShop{}
 		_spec = csq.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &CoffeeShop{config: csq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*CoffeeShop).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &CoffeeShop{config: csq.config}
+		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, csq.driver, _spec); err != nil {
 		return nil, err
@@ -435,6 +438,7 @@ func (csq *CoffeeShopQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // CoffeeShopGroupBy is the group-by builder for CoffeeShop entities.
 type CoffeeShopGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -456,209 +460,6 @@ func (csgb *CoffeeShopGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	csgb.sql = query
 	return csgb.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (csgb *CoffeeShopGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := csgb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (csgb *CoffeeShopGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(csgb.fields) > 1 {
-		return nil, errors.New("ent: CoffeeShopGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := csgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (csgb *CoffeeShopGroupBy) StringsX(ctx context.Context) []string {
-	v, err := csgb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (csgb *CoffeeShopGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = csgb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{coffeeshop.Label}
-	default:
-		err = fmt.Errorf("ent: CoffeeShopGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (csgb *CoffeeShopGroupBy) StringX(ctx context.Context) string {
-	v, err := csgb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (csgb *CoffeeShopGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(csgb.fields) > 1 {
-		return nil, errors.New("ent: CoffeeShopGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := csgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (csgb *CoffeeShopGroupBy) IntsX(ctx context.Context) []int {
-	v, err := csgb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (csgb *CoffeeShopGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = csgb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{coffeeshop.Label}
-	default:
-		err = fmt.Errorf("ent: CoffeeShopGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (csgb *CoffeeShopGroupBy) IntX(ctx context.Context) int {
-	v, err := csgb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (csgb *CoffeeShopGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(csgb.fields) > 1 {
-		return nil, errors.New("ent: CoffeeShopGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := csgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (csgb *CoffeeShopGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := csgb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (csgb *CoffeeShopGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = csgb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{coffeeshop.Label}
-	default:
-		err = fmt.Errorf("ent: CoffeeShopGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (csgb *CoffeeShopGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := csgb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (csgb *CoffeeShopGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(csgb.fields) > 1 {
-		return nil, errors.New("ent: CoffeeShopGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := csgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (csgb *CoffeeShopGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := csgb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (csgb *CoffeeShopGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = csgb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{coffeeshop.Label}
-	default:
-		err = fmt.Errorf("ent: CoffeeShopGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (csgb *CoffeeShopGroupBy) BoolX(ctx context.Context) bool {
-	v, err := csgb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (csgb *CoffeeShopGroupBy) sqlScan(ctx context.Context, v interface{}) error {
@@ -702,6 +503,7 @@ func (csgb *CoffeeShopGroupBy) sqlQuery() *sql.Selector {
 // CoffeeShopSelect is the builder for selecting fields of CoffeeShop entities.
 type CoffeeShopSelect struct {
 	*CoffeeShopQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
@@ -713,201 +515,6 @@ func (css *CoffeeShopSelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	css.sql = css.CoffeeShopQuery.sqlQuery(ctx)
 	return css.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (css *CoffeeShopSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := css.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (css *CoffeeShopSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(css.fields) > 1 {
-		return nil, errors.New("ent: CoffeeShopSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := css.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (css *CoffeeShopSelect) StringsX(ctx context.Context) []string {
-	v, err := css.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (css *CoffeeShopSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = css.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{coffeeshop.Label}
-	default:
-		err = fmt.Errorf("ent: CoffeeShopSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (css *CoffeeShopSelect) StringX(ctx context.Context) string {
-	v, err := css.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (css *CoffeeShopSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(css.fields) > 1 {
-		return nil, errors.New("ent: CoffeeShopSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := css.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (css *CoffeeShopSelect) IntsX(ctx context.Context) []int {
-	v, err := css.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (css *CoffeeShopSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = css.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{coffeeshop.Label}
-	default:
-		err = fmt.Errorf("ent: CoffeeShopSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (css *CoffeeShopSelect) IntX(ctx context.Context) int {
-	v, err := css.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (css *CoffeeShopSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(css.fields) > 1 {
-		return nil, errors.New("ent: CoffeeShopSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := css.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (css *CoffeeShopSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := css.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (css *CoffeeShopSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = css.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{coffeeshop.Label}
-	default:
-		err = fmt.Errorf("ent: CoffeeShopSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (css *CoffeeShopSelect) Float64X(ctx context.Context) float64 {
-	v, err := css.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (css *CoffeeShopSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(css.fields) > 1 {
-		return nil, errors.New("ent: CoffeeShopSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := css.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (css *CoffeeShopSelect) BoolsX(ctx context.Context) []bool {
-	v, err := css.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (css *CoffeeShopSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = css.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{coffeeshop.Label}
-	default:
-		err = fmt.Errorf("ent: CoffeeShopSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (css *CoffeeShopSelect) BoolX(ctx context.Context) bool {
-	v, err := css.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (css *CoffeeShopSelect) sqlScan(ctx context.Context, v interface{}) error {
