@@ -15,7 +15,7 @@ func NewUsecase(injector inject.Injector) *CoffeeBeanUsecase {
 	}
 }
 
-//go:generate mockgen -source=./usecase.go -destination=./usecase_mock.go -package=auth
+//go:generate mockgen -source=./usecase.go -destination=./usecase_mock.go -package=coffee_bean
 type Usecase interface {
 	Create(ctx context.Context, in CreateInput) *result.Result
 }
