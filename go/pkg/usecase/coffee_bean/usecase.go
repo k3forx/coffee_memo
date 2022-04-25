@@ -25,18 +25,27 @@ type CoffeeBeanUsecase struct {
 }
 
 func (u *CoffeeBeanUsecase) Create(ctx context.Context, in CreateInput) *result.Result {
+	if !in.RoastDegree.Valid() || in.Name == "" {
+		return result.New(result.CodeBadRequest, "無効なデータです。")
+	}
+
+	user, err := u.injector.Reader.User.GetByID(ctx, in.UserId)
+	if err != nil {
+		logger.Error(ctx, err)
+		return result.Error()
+	}
+	if !user.Exists() {
+		return result.New(result.CodeNotFound, "アカウントが見つかりません。")
+	}
+
 	coffeeBean := model.CoffeeBean{
-		User: model.User{
-			ID: in.UserId,
-		},
 		Name:        in.Name,
 		FarmName:    in.FarmName,
 		Country:     in.Country,
 		RoastDegree: in.RoastDegree,
 		RoastedAt:   in.RoastedAt,
 	}
-
-	if err := u.injector.Writer.CoffeeBean.Create(ctx, &coffeeBean); err != nil {
+	if err := u.injector.Writer.CoffeeBean.Create(ctx, &coffeeBean, &user); err != nil {
 		logger.Error(ctx, err)
 		return result.New(result.CodeInternalError, "コービー豆の登録に失敗しました。")
 	}

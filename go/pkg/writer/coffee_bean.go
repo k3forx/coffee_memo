@@ -18,7 +18,7 @@ func NewCoffeeBeanWriter(db *ent.Client) *CoffeeBeanWriter {
 
 //go:generate mockgen -source=./coffee_bean.go -destination=./mock/coffee_bean_mock.go -package=writer
 type CoffeeBean interface {
-	Create(ctx context.Context, coffeeBean *model.CoffeeBean) error
+	Create(ctx context.Context, coffeeBean *model.CoffeeBean, user *model.User) error
 }
 
 type CoffeeBeanWriter struct {
@@ -27,7 +27,7 @@ type CoffeeBeanWriter struct {
 
 var _ CoffeeBean = (*CoffeeBeanWriter)(nil)
 
-func (impl *CoffeeBeanWriter) Create(ctx context.Context, coffeeBean *model.CoffeeBean) error {
+func (impl *CoffeeBeanWriter) Create(ctx context.Context, coffeeBean *model.CoffeeBean, user *model.User) error {
 	now := time.Now().UTC()
 
 	tx, err := impl.db.Tx(ctx)
@@ -48,6 +48,14 @@ func (impl *CoffeeBeanWriter) Create(ctx context.Context, coffeeBean *model.Coff
 		return transaction.Rollback(tx, fmt.Errorf("failed to create coffee beans: %w", err))
 	}
 	*coffeeBean = model.NewCoffeeBean(b)
+
+	_, err = tx.UsersCoffeeBean.Create().
+		SetUserID(int32(user.ID)).
+		SetCoffeeBeanID(int32(coffeeBean.ID)).
+		Save(ctx)
+	if err != nil {
+		return transaction.Rollback(tx, fmt.Errorf("failed to create users coffee beans: %w", err))
+	}
 
 	return tx.Commit()
 }

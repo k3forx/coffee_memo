@@ -50,11 +50,15 @@ func (rd RoastDegree) String() string {
 
 func (rd RoastDegree) LocalizedString() string {
 	for t, localizedString := range roastDegreeLocalizedStringMaps {
-		if rd == t {
+		if rd == t && rd.Valid() {
 			return localizedString + "ロースト"
 		}
 	}
 	return roastDegreeLocalizedStringMaps[RoastDegreeUnknown]
+}
+
+func (rd RoastDegree) Valid() bool {
+	return rd != RoastDegreeUnknown
 }
 
 func NewRoastDegree(str string) RoastDegree {
@@ -68,7 +72,6 @@ func NewRoastDegree(str string) RoastDegree {
 
 type CoffeeBean struct {
 	ID          int
-	User        User
 	Name        string
 	FarmName    string
 	Country     string
@@ -78,10 +81,13 @@ type CoffeeBean struct {
 	UpdatedAt   time.Time
 }
 
+func (cb *CoffeeBean) Exists() bool {
+	return cb.ID > 0
+}
+
 func NewCoffeeBean(e *ent.CoffeeBean) CoffeeBean {
 	return CoffeeBean{
 		ID:          int(e.ID),
-		User:        User{},
 		Name:        e.Name,
 		FarmName:    e.FarmName,
 		Country:     e.Country,

@@ -48,7 +48,9 @@ CREATE TABLE `users_coffee_beans` (
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `deleted_at` DATETIME DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  CONSTRAINT fkey_users_coffee_beans_user_id FOREIGN KEY (user_id) REFERENCES users (id),
+  CONSTRAINT fkey_users_coffee_beans_coffee_bean_id FOREIGN KEY (coffee_bean_id) REFERENCES coffee_beans (id)
 );
 -- +goose StatementEnd
 -- +goose StatementBegin

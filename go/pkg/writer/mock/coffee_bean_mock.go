@@ -36,15 +36,15 @@ func (m *MockCoffeeBean) EXPECT() *MockCoffeeBeanMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockCoffeeBean) Create(ctx context.Context, coffeeBean *model.CoffeeBean) error {
+func (m *MockCoffeeBean) Create(ctx context.Context, coffeeBean *model.CoffeeBean, user *model.User) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", ctx, coffeeBean)
+	ret := m.ctrl.Call(m, "Create", ctx, coffeeBean, user)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockCoffeeBeanMockRecorder) Create(ctx, coffeeBean interface{}) *gomock.Call {
+func (mr *MockCoffeeBeanMockRecorder) Create(ctx, coffeeBean, user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockCoffeeBean)(nil).Create), ctx, coffeeBean)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockCoffeeBean)(nil).Create), ctx, coffeeBean, user)
 }

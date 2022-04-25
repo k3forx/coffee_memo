@@ -12,7 +12,8 @@ func NewMockInjector(ctrl *gomock.Controller) Injector {
 			User: readerMock.NewMockUser(ctrl),
 		},
 		Writer: Writer{
-			User: writerMock.NewMockUser(ctrl),
+			CoffeeBean: writerMock.NewMockCoffeeBean(ctrl),
+			User:       writerMock.NewMockUser(ctrl),
 		},
 	}
 }
