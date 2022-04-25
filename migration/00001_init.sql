@@ -33,7 +33,7 @@ CREATE TABLE `coffee_beans` (
   `farm_name` VARCHAR(255),
   `country` VARCHAR(255),
   `shop_id` INT NOT NULL,
-  `roasted_degree` VARCHAR(255) NOT NULL,
+  `roast_degree` VARCHAR(255) NOT NULL,
   `roasted_at` DATETIME,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -71,9 +71,6 @@ CREATE TABLE `drip_recipes` (
 -- +goose StatementEnd
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE `users`;
--- +goose StatementEnd
--- +goose StatementBegin
 DROP TABLE `coffee_shops`;
 -- +goose StatementEnd
 -- +goose StatementBegin
@@ -84,4 +81,7 @@ DROP TABLE `coffee_beans`;
 -- +goose StatementEnd
 -- +goose StatementBegin
 DROP TABLE `drip_recipes`;
+-- +goose StatementEnd
+-- +goose StatementBegin
+DROP TABLE `users`;
 -- +goose StatementEnd
