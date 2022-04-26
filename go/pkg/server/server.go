@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/k3forx/coffee_memo/pkg/api/v1/auth"
+	"github.com/k3forx/coffee_memo/pkg/api/v1/coffee_bean"
 	"github.com/k3forx/coffee_memo/pkg/api/v1/user"
 	"github.com/k3forx/coffee_memo/pkg/config"
 	"github.com/k3forx/coffee_memo/pkg/inject"
@@ -47,5 +48,9 @@ func registerRoute(e *echo.Echo, injector inject.Injector) {
 	{
 		v1APIUser := v1API.Group("/users")
 		user.Route(v1APIUser, injector)
+	}
+	{
+		v1APICoffeeBean := v1API.Group("/coffee-beans")
+		coffee_bean.Route(v1APICoffeeBean, injector)
 	}
 }

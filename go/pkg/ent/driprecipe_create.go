@@ -33,19 +33,19 @@ func (drc *DripRecipeCreate) SetCoffeeBeanID(i int32) *DripRecipeCreate {
 }
 
 // SetCoffeeBeanWeight sets the "coffee_bean_weight" field.
-func (drc *DripRecipeCreate) SetCoffeeBeanWeight(f float32) *DripRecipeCreate {
+func (drc *DripRecipeCreate) SetCoffeeBeanWeight(f float64) *DripRecipeCreate {
 	drc.mutation.SetCoffeeBeanWeight(f)
 	return drc
 }
 
 // SetLiquidWeight sets the "liquid_weight" field.
-func (drc *DripRecipeCreate) SetLiquidWeight(f float32) *DripRecipeCreate {
+func (drc *DripRecipeCreate) SetLiquidWeight(f float64) *DripRecipeCreate {
 	drc.mutation.SetLiquidWeight(f)
 	return drc
 }
 
 // SetTemperature sets the "temperature" field.
-func (drc *DripRecipeCreate) SetTemperature(f float32) *DripRecipeCreate {
+func (drc *DripRecipeCreate) SetTemperature(f float64) *DripRecipeCreate {
 	drc.mutation.SetTemperature(f)
 	return drc
 }
@@ -237,7 +237,7 @@ func (drc *DripRecipeCreate) createSpec() (*DripRecipe, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := drc.mutation.CoffeeBeanWeight(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat32,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: driprecipe.FieldCoffeeBeanWeight,
 		})
@@ -245,7 +245,7 @@ func (drc *DripRecipeCreate) createSpec() (*DripRecipe, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := drc.mutation.LiquidWeight(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat32,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: driprecipe.FieldLiquidWeight,
 		})
@@ -253,7 +253,7 @@ func (drc *DripRecipeCreate) createSpec() (*DripRecipe, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := drc.mutation.Temperature(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat32,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: driprecipe.FieldTemperature,
 		})

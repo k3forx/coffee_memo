@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math"
 
@@ -264,15 +263,17 @@ func (drq *DripRecipeQuery) Clone() *DripRecipeQuery {
 //		Scan(ctx, &v)
 //
 func (drq *DripRecipeQuery) GroupBy(field string, fields ...string) *DripRecipeGroupBy {
-	group := &DripRecipeGroupBy{config: drq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+	grbuild := &DripRecipeGroupBy{config: drq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := drq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return drq.sqlQuery(ctx), nil
 	}
-	return group
+	grbuild.label = driprecipe.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
@@ -290,7 +291,10 @@ func (drq *DripRecipeQuery) GroupBy(field string, fields ...string) *DripRecipeG
 //
 func (drq *DripRecipeQuery) Select(fields ...string) *DripRecipeSelect {
 	drq.fields = append(drq.fields, fields...)
-	return &DripRecipeSelect{DripRecipeQuery: drq}
+	selbuild := &DripRecipeSelect{DripRecipeQuery: drq}
+	selbuild.label = driprecipe.Label
+	selbuild.flds, selbuild.scan = &drq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (drq *DripRecipeQuery) prepareQuery(ctx context.Context) error {
@@ -309,22 +313,21 @@ func (drq *DripRecipeQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (drq *DripRecipeQuery) sqlAll(ctx context.Context) ([]*DripRecipe, error) {
+func (drq *DripRecipeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*DripRecipe, error) {
 	var (
 		nodes = []*DripRecipe{}
 		_spec = drq.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &DripRecipe{config: drq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*DripRecipe).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &DripRecipe{config: drq.config}
+		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, drq.driver, _spec); err != nil {
 		return nil, err
@@ -435,6 +438,7 @@ func (drq *DripRecipeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // DripRecipeGroupBy is the group-by builder for DripRecipe entities.
 type DripRecipeGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -456,209 +460,6 @@ func (drgb *DripRecipeGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	drgb.sql = query
 	return drgb.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (drgb *DripRecipeGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := drgb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (drgb *DripRecipeGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(drgb.fields) > 1 {
-		return nil, errors.New("ent: DripRecipeGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := drgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (drgb *DripRecipeGroupBy) StringsX(ctx context.Context) []string {
-	v, err := drgb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (drgb *DripRecipeGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = drgb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{driprecipe.Label}
-	default:
-		err = fmt.Errorf("ent: DripRecipeGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (drgb *DripRecipeGroupBy) StringX(ctx context.Context) string {
-	v, err := drgb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (drgb *DripRecipeGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(drgb.fields) > 1 {
-		return nil, errors.New("ent: DripRecipeGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := drgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (drgb *DripRecipeGroupBy) IntsX(ctx context.Context) []int {
-	v, err := drgb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (drgb *DripRecipeGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = drgb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{driprecipe.Label}
-	default:
-		err = fmt.Errorf("ent: DripRecipeGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (drgb *DripRecipeGroupBy) IntX(ctx context.Context) int {
-	v, err := drgb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (drgb *DripRecipeGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(drgb.fields) > 1 {
-		return nil, errors.New("ent: DripRecipeGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := drgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (drgb *DripRecipeGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := drgb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (drgb *DripRecipeGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = drgb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{driprecipe.Label}
-	default:
-		err = fmt.Errorf("ent: DripRecipeGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (drgb *DripRecipeGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := drgb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (drgb *DripRecipeGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(drgb.fields) > 1 {
-		return nil, errors.New("ent: DripRecipeGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := drgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (drgb *DripRecipeGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := drgb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (drgb *DripRecipeGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = drgb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{driprecipe.Label}
-	default:
-		err = fmt.Errorf("ent: DripRecipeGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (drgb *DripRecipeGroupBy) BoolX(ctx context.Context) bool {
-	v, err := drgb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (drgb *DripRecipeGroupBy) sqlScan(ctx context.Context, v interface{}) error {
@@ -702,6 +503,7 @@ func (drgb *DripRecipeGroupBy) sqlQuery() *sql.Selector {
 // DripRecipeSelect is the builder for selecting fields of DripRecipe entities.
 type DripRecipeSelect struct {
 	*DripRecipeQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
@@ -713,201 +515,6 @@ func (drs *DripRecipeSelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	drs.sql = drs.DripRecipeQuery.sqlQuery(ctx)
 	return drs.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (drs *DripRecipeSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := drs.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (drs *DripRecipeSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(drs.fields) > 1 {
-		return nil, errors.New("ent: DripRecipeSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := drs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (drs *DripRecipeSelect) StringsX(ctx context.Context) []string {
-	v, err := drs.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (drs *DripRecipeSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = drs.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{driprecipe.Label}
-	default:
-		err = fmt.Errorf("ent: DripRecipeSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (drs *DripRecipeSelect) StringX(ctx context.Context) string {
-	v, err := drs.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (drs *DripRecipeSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(drs.fields) > 1 {
-		return nil, errors.New("ent: DripRecipeSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := drs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (drs *DripRecipeSelect) IntsX(ctx context.Context) []int {
-	v, err := drs.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (drs *DripRecipeSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = drs.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{driprecipe.Label}
-	default:
-		err = fmt.Errorf("ent: DripRecipeSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (drs *DripRecipeSelect) IntX(ctx context.Context) int {
-	v, err := drs.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (drs *DripRecipeSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(drs.fields) > 1 {
-		return nil, errors.New("ent: DripRecipeSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := drs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (drs *DripRecipeSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := drs.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (drs *DripRecipeSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = drs.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{driprecipe.Label}
-	default:
-		err = fmt.Errorf("ent: DripRecipeSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (drs *DripRecipeSelect) Float64X(ctx context.Context) float64 {
-	v, err := drs.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (drs *DripRecipeSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(drs.fields) > 1 {
-		return nil, errors.New("ent: DripRecipeSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := drs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (drs *DripRecipeSelect) BoolsX(ctx context.Context) []bool {
-	v, err := drs.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (drs *DripRecipeSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = drs.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{driprecipe.Label}
-	default:
-		err = fmt.Errorf("ent: DripRecipeSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (drs *DripRecipeSelect) BoolX(ctx context.Context) bool {
-	v, err := drs.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (drs *DripRecipeSelect) sqlScan(ctx context.Context, v interface{}) error {

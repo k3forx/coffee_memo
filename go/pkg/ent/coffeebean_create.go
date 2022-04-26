@@ -55,8 +55,8 @@ func (cbc *CoffeeBeanCreate) SetNillableCountry(s *string) *CoffeeBeanCreate {
 }
 
 // SetShopID sets the "shop_id" field.
-func (cbc *CoffeeBeanCreate) SetShopID(s string) *CoffeeBeanCreate {
-	cbc.mutation.SetShopID(s)
+func (cbc *CoffeeBeanCreate) SetShopID(i int32) *CoffeeBeanCreate {
+	cbc.mutation.SetShopID(i)
 	return cbc
 }
 
@@ -242,7 +242,7 @@ func (cbc *CoffeeBeanCreate) createSpec() (*CoffeeBean, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := cbc.mutation.ShopID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeInt32,
 			Value:  value,
 			Column: coffeebean.FieldShopID,
 		})

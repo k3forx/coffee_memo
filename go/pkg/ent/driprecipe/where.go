@@ -107,21 +107,21 @@ func CoffeeBeanID(v int32) predicate.DripRecipe {
 }
 
 // CoffeeBeanWeight applies equality check predicate on the "coffee_bean_weight" field. It's identical to CoffeeBeanWeightEQ.
-func CoffeeBeanWeight(v float32) predicate.DripRecipe {
+func CoffeeBeanWeight(v float64) predicate.DripRecipe {
 	return predicate.DripRecipe(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldCoffeeBeanWeight), v))
 	})
 }
 
 // LiquidWeight applies equality check predicate on the "liquid_weight" field. It's identical to LiquidWeightEQ.
-func LiquidWeight(v float32) predicate.DripRecipe {
+func LiquidWeight(v float64) predicate.DripRecipe {
 	return predicate.DripRecipe(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldLiquidWeight), v))
 	})
 }
 
 // Temperature applies equality check predicate on the "temperature" field. It's identical to TemperatureEQ.
-func Temperature(v float32) predicate.DripRecipe {
+func Temperature(v float64) predicate.DripRecipe {
 	return predicate.DripRecipe(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldTemperature), v))
 	})
@@ -315,21 +315,21 @@ func CoffeeBeanIDLTE(v int32) predicate.DripRecipe {
 }
 
 // CoffeeBeanWeightEQ applies the EQ predicate on the "coffee_bean_weight" field.
-func CoffeeBeanWeightEQ(v float32) predicate.DripRecipe {
+func CoffeeBeanWeightEQ(v float64) predicate.DripRecipe {
 	return predicate.DripRecipe(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldCoffeeBeanWeight), v))
 	})
 }
 
 // CoffeeBeanWeightNEQ applies the NEQ predicate on the "coffee_bean_weight" field.
-func CoffeeBeanWeightNEQ(v float32) predicate.DripRecipe {
+func CoffeeBeanWeightNEQ(v float64) predicate.DripRecipe {
 	return predicate.DripRecipe(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldCoffeeBeanWeight), v))
 	})
 }
 
 // CoffeeBeanWeightIn applies the In predicate on the "coffee_bean_weight" field.
-func CoffeeBeanWeightIn(vs ...float32) predicate.DripRecipe {
+func CoffeeBeanWeightIn(vs ...float64) predicate.DripRecipe {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -346,7 +346,7 @@ func CoffeeBeanWeightIn(vs ...float32) predicate.DripRecipe {
 }
 
 // CoffeeBeanWeightNotIn applies the NotIn predicate on the "coffee_bean_weight" field.
-func CoffeeBeanWeightNotIn(vs ...float32) predicate.DripRecipe {
+func CoffeeBeanWeightNotIn(vs ...float64) predicate.DripRecipe {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -363,49 +363,49 @@ func CoffeeBeanWeightNotIn(vs ...float32) predicate.DripRecipe {
 }
 
 // CoffeeBeanWeightGT applies the GT predicate on the "coffee_bean_weight" field.
-func CoffeeBeanWeightGT(v float32) predicate.DripRecipe {
+func CoffeeBeanWeightGT(v float64) predicate.DripRecipe {
 	return predicate.DripRecipe(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldCoffeeBeanWeight), v))
 	})
 }
 
 // CoffeeBeanWeightGTE applies the GTE predicate on the "coffee_bean_weight" field.
-func CoffeeBeanWeightGTE(v float32) predicate.DripRecipe {
+func CoffeeBeanWeightGTE(v float64) predicate.DripRecipe {
 	return predicate.DripRecipe(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldCoffeeBeanWeight), v))
 	})
 }
 
 // CoffeeBeanWeightLT applies the LT predicate on the "coffee_bean_weight" field.
-func CoffeeBeanWeightLT(v float32) predicate.DripRecipe {
+func CoffeeBeanWeightLT(v float64) predicate.DripRecipe {
 	return predicate.DripRecipe(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldCoffeeBeanWeight), v))
 	})
 }
 
 // CoffeeBeanWeightLTE applies the LTE predicate on the "coffee_bean_weight" field.
-func CoffeeBeanWeightLTE(v float32) predicate.DripRecipe {
+func CoffeeBeanWeightLTE(v float64) predicate.DripRecipe {
 	return predicate.DripRecipe(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldCoffeeBeanWeight), v))
 	})
 }
 
 // LiquidWeightEQ applies the EQ predicate on the "liquid_weight" field.
-func LiquidWeightEQ(v float32) predicate.DripRecipe {
+func LiquidWeightEQ(v float64) predicate.DripRecipe {
 	return predicate.DripRecipe(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldLiquidWeight), v))
 	})
 }
 
 // LiquidWeightNEQ applies the NEQ predicate on the "liquid_weight" field.
-func LiquidWeightNEQ(v float32) predicate.DripRecipe {
+func LiquidWeightNEQ(v float64) predicate.DripRecipe {
 	return predicate.DripRecipe(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldLiquidWeight), v))
 	})
 }
 
 // LiquidWeightIn applies the In predicate on the "liquid_weight" field.
-func LiquidWeightIn(vs ...float32) predicate.DripRecipe {
+func LiquidWeightIn(vs ...float64) predicate.DripRecipe {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -422,7 +422,7 @@ func LiquidWeightIn(vs ...float32) predicate.DripRecipe {
 }
 
 // LiquidWeightNotIn applies the NotIn predicate on the "liquid_weight" field.
-func LiquidWeightNotIn(vs ...float32) predicate.DripRecipe {
+func LiquidWeightNotIn(vs ...float64) predicate.DripRecipe {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -439,49 +439,49 @@ func LiquidWeightNotIn(vs ...float32) predicate.DripRecipe {
 }
 
 // LiquidWeightGT applies the GT predicate on the "liquid_weight" field.
-func LiquidWeightGT(v float32) predicate.DripRecipe {
+func LiquidWeightGT(v float64) predicate.DripRecipe {
 	return predicate.DripRecipe(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldLiquidWeight), v))
 	})
 }
 
 // LiquidWeightGTE applies the GTE predicate on the "liquid_weight" field.
-func LiquidWeightGTE(v float32) predicate.DripRecipe {
+func LiquidWeightGTE(v float64) predicate.DripRecipe {
 	return predicate.DripRecipe(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldLiquidWeight), v))
 	})
 }
 
 // LiquidWeightLT applies the LT predicate on the "liquid_weight" field.
-func LiquidWeightLT(v float32) predicate.DripRecipe {
+func LiquidWeightLT(v float64) predicate.DripRecipe {
 	return predicate.DripRecipe(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldLiquidWeight), v))
 	})
 }
 
 // LiquidWeightLTE applies the LTE predicate on the "liquid_weight" field.
-func LiquidWeightLTE(v float32) predicate.DripRecipe {
+func LiquidWeightLTE(v float64) predicate.DripRecipe {
 	return predicate.DripRecipe(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldLiquidWeight), v))
 	})
 }
 
 // TemperatureEQ applies the EQ predicate on the "temperature" field.
-func TemperatureEQ(v float32) predicate.DripRecipe {
+func TemperatureEQ(v float64) predicate.DripRecipe {
 	return predicate.DripRecipe(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldTemperature), v))
 	})
 }
 
 // TemperatureNEQ applies the NEQ predicate on the "temperature" field.
-func TemperatureNEQ(v float32) predicate.DripRecipe {
+func TemperatureNEQ(v float64) predicate.DripRecipe {
 	return predicate.DripRecipe(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldTemperature), v))
 	})
 }
 
 // TemperatureIn applies the In predicate on the "temperature" field.
-func TemperatureIn(vs ...float32) predicate.DripRecipe {
+func TemperatureIn(vs ...float64) predicate.DripRecipe {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -498,7 +498,7 @@ func TemperatureIn(vs ...float32) predicate.DripRecipe {
 }
 
 // TemperatureNotIn applies the NotIn predicate on the "temperature" field.
-func TemperatureNotIn(vs ...float32) predicate.DripRecipe {
+func TemperatureNotIn(vs ...float64) predicate.DripRecipe {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -515,28 +515,28 @@ func TemperatureNotIn(vs ...float32) predicate.DripRecipe {
 }
 
 // TemperatureGT applies the GT predicate on the "temperature" field.
-func TemperatureGT(v float32) predicate.DripRecipe {
+func TemperatureGT(v float64) predicate.DripRecipe {
 	return predicate.DripRecipe(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldTemperature), v))
 	})
 }
 
 // TemperatureGTE applies the GTE predicate on the "temperature" field.
-func TemperatureGTE(v float32) predicate.DripRecipe {
+func TemperatureGTE(v float64) predicate.DripRecipe {
 	return predicate.DripRecipe(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldTemperature), v))
 	})
 }
 
 // TemperatureLT applies the LT predicate on the "temperature" field.
-func TemperatureLT(v float32) predicate.DripRecipe {
+func TemperatureLT(v float64) predicate.DripRecipe {
 	return predicate.DripRecipe(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldTemperature), v))
 	})
 }
 
 // TemperatureLTE applies the LTE predicate on the "temperature" field.
-func TemperatureLTE(v float32) predicate.DripRecipe {
+func TemperatureLTE(v float64) predicate.DripRecipe {
 	return predicate.DripRecipe(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldTemperature), v))
 	})

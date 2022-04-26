@@ -15,7 +15,7 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "farm_name", Type: field.TypeString, Nullable: true},
 		{Name: "country", Type: field.TypeString, Nullable: true},
-		{Name: "shop_id", Type: field.TypeString},
+		{Name: "shop_id", Type: field.TypeInt32},
 		{Name: "roasted_degree", Type: field.TypeString},
 		{Name: "roasted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
@@ -49,9 +49,9 @@ var (
 		{Name: "id", Type: field.TypeInt32, Increment: true},
 		{Name: "user_id", Type: field.TypeInt32},
 		{Name: "coffee_bean_id", Type: field.TypeInt32},
-		{Name: "coffee_bean_weight", Type: field.TypeFloat32},
-		{Name: "liquid_weight", Type: field.TypeFloat32},
-		{Name: "temperature", Type: field.TypeFloat32},
+		{Name: "coffee_bean_weight", Type: field.TypeFloat64},
+		{Name: "liquid_weight", Type: field.TypeFloat64},
+		{Name: "temperature", Type: field.TypeFloat64},
 		{Name: "steam_time", Type: field.TypeInt32},
 		{Name: "drip_time", Type: field.TypeInt32},
 		{Name: "memo", Type: field.TypeString},
@@ -94,6 +94,21 @@ var (
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
+	// UsersCoffeeBeansColumns holds the columns for the "users_coffee_beans" table.
+	UsersCoffeeBeansColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt32, Increment: true},
+		{Name: "user_id", Type: field.TypeInt32},
+		{Name: "coffee_bean_id", Type: field.TypeInt32},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+	}
+	// UsersCoffeeBeansTable holds the schema information for the "users_coffee_beans" table.
+	UsersCoffeeBeansTable = &schema.Table{
+		Name:       "users_coffee_beans",
+		Columns:    UsersCoffeeBeansColumns,
+		PrimaryKey: []*schema.Column{UsersCoffeeBeansColumns[0]},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		CoffeeBeansTable,
@@ -101,6 +116,7 @@ var (
 		DripRecipesTable,
 		GooseDbVersionTable,
 		UsersTable,
+		UsersCoffeeBeansTable,
 	}
 )
 

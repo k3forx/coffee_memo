@@ -20,13 +20,13 @@ func TestHandler_SignUp(t *testing.T) {
 	t.Parallel()
 
 	cases := map[string]struct {
-		setup              func(ctrl *gomock.Controller) *usecase.MockAuthUsecase
+		setup              func(ctrl *gomock.Controller) *usecase.MockUsecase
 		expectedStatusCode int
 		expectedBody       map[string]interface{}
 	}{
 		"success": {
-			setup: func(ctrl *gomock.Controller) *usecase.MockAuthUsecase {
-				uc := usecase.NewMockAuthUsecase(ctrl)
+			setup: func(ctrl *gomock.Controller) *usecase.MockUsecase {
+				uc := usecase.NewMockUsecase(ctrl)
 
 				uc.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(result.OK())
 				return uc
@@ -38,8 +38,8 @@ func TestHandler_SignUp(t *testing.T) {
 			},
 		},
 		"usecase_returns_error": {
-			setup: func(ctrl *gomock.Controller) *usecase.MockAuthUsecase {
-				usecase := usecase.NewMockAuthUsecase(ctrl)
+			setup: func(ctrl *gomock.Controller) *usecase.MockUsecase {
+				usecase := usecase.NewMockUsecase(ctrl)
 				usecase.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(result.New(result.CodeForbidden, "既に使用されているメールアドレスです。"))
 				return usecase
 			},
@@ -88,7 +88,7 @@ func TestHandler_LogIn(t *testing.T) {
 	t.Parallel()
 
 	cases := map[string]struct {
-		setup              func(ctrl *gomock.Controller) *usecase.MockAuthUsecase
+		setup              func(ctrl *gomock.Controller) *usecase.MockUsecase
 		expectedStatusCode int
 		expectedBody       map[string]interface{}
 	}{
@@ -115,8 +115,8 @@ func TestHandler_LogIn(t *testing.T) {
 		// 	},
 		// },
 		"usecase_returns_error": {
-			setup: func(ctrl *gomock.Controller) *usecase.MockAuthUsecase {
-				usecase := usecase.NewMockAuthUsecase(ctrl)
+			setup: func(ctrl *gomock.Controller) *usecase.MockUsecase {
+				usecase := usecase.NewMockUsecase(ctrl)
 				usecase.EXPECT().LogIn(gomock.Any(), gomock.Any()).
 					Return(nil, result.New(result.CodeBadRequest, "パスワードが違います。"))
 				return usecase
