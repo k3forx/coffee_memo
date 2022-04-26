@@ -8,23 +8,23 @@ CREATE TABLE `users` (
   `flags` BIGINT NOT NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `deleted_at` DATETIME,
+  `deleted_at` DATETIME DEFAULT NULL,
   PRIMARY KEY (id),
   UNIQUE KEY ukey_users_email (email)
 );
 -- +goose StatementEnd
 -- +goose StatementBegin
-CREATE TABLE `coffee_shops` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(255) NOT NULL,
-  `shop_url` VARCHAR(255),
-  `open_time` DATETIME,
-  `close_time` DATETIME,
-  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `closed_at` DATETIME,
-  PRIMARY KEY (`id`)
-);
+-- CREATE TABLE `coffee_shops` (
+--   `id` INT NOT NULL AUTO_INCREMENT,
+--   `name` VARCHAR(255) NOT NULL,
+--   `shop_url` VARCHAR(255),
+--   `open_time` DATETIME,
+--   `close_time` DATETIME,
+--   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+--   `closed_at` DATETIME,
+--   PRIMARY KEY (`id`)
+-- );
 -- +goose StatementEnd
 -- +goose StatementBegin
 CREATE TABLE `coffee_beans` (
@@ -66,6 +66,7 @@ CREATE TABLE `drip_recipes` (
   `memo` VARCHAR(255) NOT NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `deleted_at` DATETIME DEFAULT NULL,
   PRIMARY KEY (`id`)
 );
 -- +goose StatementEnd
