@@ -24,14 +24,35 @@ type CoffeeBean struct {
 	Country string `json:"country,omitempty"`
 	// ShopID holds the value of the "shop_id" field.
 	ShopID int32 `json:"shop_id,omitempty"`
-	// RoastedDegree holds the value of the "roasted_degree" field.
-	RoastedDegree string `json:"roasted_degree,omitempty"`
+	// RoastDegree holds the value of the "roast_degree" field.
+	RoastDegree string `json:"roast_degree,omitempty"`
 	// RoastedAt holds the value of the "roasted_at" field.
 	RoastedAt time.Time `json:"roasted_at,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the CoffeeBeanQuery when eager-loading is set.
+	Edges CoffeeBeanEdges `json:"edges"`
+}
+
+// CoffeeBeanEdges holds the relations/edges for other nodes in the graph.
+type CoffeeBeanEdges struct {
+	// UsersCoffeeBeans holds the value of the users_coffee_beans edge.
+	UsersCoffeeBeans []*UsersCoffeeBean `json:"users_coffee_beans,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// UsersCoffeeBeansOrErr returns the UsersCoffeeBeans value or an error if the edge
+// was not loaded in eager-loading.
+func (e CoffeeBeanEdges) UsersCoffeeBeansOrErr() ([]*UsersCoffeeBean, error) {
+	if e.loadedTypes[0] {
+		return e.UsersCoffeeBeans, nil
+	}
+	return nil, &NotLoadedError{edge: "users_coffee_beans"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -41,7 +62,7 @@ func (*CoffeeBean) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case coffeebean.FieldID, coffeebean.FieldShopID:
 			values[i] = new(sql.NullInt64)
-		case coffeebean.FieldName, coffeebean.FieldFarmName, coffeebean.FieldCountry, coffeebean.FieldRoastedDegree:
+		case coffeebean.FieldName, coffeebean.FieldFarmName, coffeebean.FieldCountry, coffeebean.FieldRoastDegree:
 			values[i] = new(sql.NullString)
 		case coffeebean.FieldRoastedAt, coffeebean.FieldCreatedAt, coffeebean.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -90,11 +111,11 @@ func (cb *CoffeeBean) assignValues(columns []string, values []interface{}) error
 			} else if value.Valid {
 				cb.ShopID = int32(value.Int64)
 			}
-		case coffeebean.FieldRoastedDegree:
+		case coffeebean.FieldRoastDegree:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field roasted_degree", values[i])
+				return fmt.Errorf("unexpected type %T for field roast_degree", values[i])
 			} else if value.Valid {
-				cb.RoastedDegree = value.String
+				cb.RoastDegree = value.String
 			}
 		case coffeebean.FieldRoastedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -117,6 +138,11 @@ func (cb *CoffeeBean) assignValues(columns []string, values []interface{}) error
 		}
 	}
 	return nil
+}
+
+// QueryUsersCoffeeBeans queries the "users_coffee_beans" edge of the CoffeeBean entity.
+func (cb *CoffeeBean) QueryUsersCoffeeBeans() *UsersCoffeeBeanQuery {
+	return (&CoffeeBeanClient{config: cb.config}).QueryUsersCoffeeBeans(cb)
 }
 
 // Update returns a builder for updating this CoffeeBean.
@@ -150,8 +176,8 @@ func (cb *CoffeeBean) String() string {
 	builder.WriteString(cb.Country)
 	builder.WriteString(", shop_id=")
 	builder.WriteString(fmt.Sprintf("%v", cb.ShopID))
-	builder.WriteString(", roasted_degree=")
-	builder.WriteString(cb.RoastedDegree)
+	builder.WriteString(", roast_degree=")
+	builder.WriteString(cb.RoastDegree)
 	builder.WriteString(", roasted_at=")
 	builder.WriteString(cb.RoastedAt.Format(time.ANSIC))
 	builder.WriteString(", created_at=")

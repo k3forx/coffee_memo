@@ -6,6 +6,10 @@ import (
 	"github.com/k3forx/coffee_memo/pkg/model"
 )
 
+type GetAllInput struct {
+	UserID int
+}
+
 type CreateInput struct {
 	UserId      int
 	Name        string

@@ -91,7 +91,7 @@ func NewCoffeeBean(e *ent.CoffeeBean) CoffeeBean {
 		Name:        e.Name,
 		FarmName:    e.FarmName,
 		Country:     e.Country,
-		RoastDegree: NewRoastDegree(e.RoastedDegree),
+		RoastDegree: NewRoastDegree(e.RoastDegree),
 		RoastedAt:   e.RoastedAt,
 		CreatedAt:   e.CreatedAt,
 		UpdatedAt:   e.UpdatedAt,

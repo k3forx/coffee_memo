@@ -39,7 +39,7 @@ func (impl *CoffeeBeanWriter) Create(ctx context.Context, coffeeBean *model.Coff
 		SetName(coffeeBean.Name).
 		SetFarmName(coffeeBean.FarmName).
 		SetCountry(coffeeBean.Country).
-		SetRoastedDegree(coffeeBean.RoastDegree.String()).
+		SetRoastDegree(coffeeBean.RoastDegree.String()).
 		SetRoastedAt(coffeeBean.RoastedAt).
 		SetCreatedAt(now).
 		SetUpdatedAt(now).

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/k3forx/coffee_memo/pkg/ent/predicate"
 )
 
@@ -789,6 +790,34 @@ func DeletedAtIsNil() predicate.User {
 func DeletedAtNotNil() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldDeletedAt)))
+	})
+}
+
+// HasUsersCoffeeBeans applies the HasEdge predicate on the "users_coffee_beans" edge.
+func HasUsersCoffeeBeans() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(UsersCoffeeBeansTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, UsersCoffeeBeansTable, UsersCoffeeBeansColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasUsersCoffeeBeansWith applies the HasEdge predicate on the "users_coffee_beans" edge with a given conditions (other predicates).
+func HasUsersCoffeeBeansWith(preds ...predicate.UsersCoffeeBean) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(UsersCoffeeBeansInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, UsersCoffeeBeansTable, UsersCoffeeBeansColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
 	})
 }
 

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/k3forx/coffee_memo/pkg/ent/predicate"
 )
 
@@ -175,31 +176,17 @@ func UserIDNotIn(vs ...int32) predicate.UsersCoffeeBean {
 	})
 }
 
-// UserIDGT applies the GT predicate on the "user_id" field.
-func UserIDGT(v int32) predicate.UsersCoffeeBean {
+// UserIDIsNil applies the IsNil predicate on the "user_id" field.
+func UserIDIsNil() predicate.UsersCoffeeBean {
 	return predicate.UsersCoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldUserID), v))
+		s.Where(sql.IsNull(s.C(FieldUserID)))
 	})
 }
 
-// UserIDGTE applies the GTE predicate on the "user_id" field.
-func UserIDGTE(v int32) predicate.UsersCoffeeBean {
+// UserIDNotNil applies the NotNil predicate on the "user_id" field.
+func UserIDNotNil() predicate.UsersCoffeeBean {
 	return predicate.UsersCoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldUserID), v))
-	})
-}
-
-// UserIDLT applies the LT predicate on the "user_id" field.
-func UserIDLT(v int32) predicate.UsersCoffeeBean {
-	return predicate.UsersCoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldUserID), v))
-	})
-}
-
-// UserIDLTE applies the LTE predicate on the "user_id" field.
-func UserIDLTE(v int32) predicate.UsersCoffeeBean {
-	return predicate.UsersCoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldUserID), v))
+		s.Where(sql.NotNull(s.C(FieldUserID)))
 	})
 }
 
@@ -251,31 +238,17 @@ func CoffeeBeanIDNotIn(vs ...int32) predicate.UsersCoffeeBean {
 	})
 }
 
-// CoffeeBeanIDGT applies the GT predicate on the "coffee_bean_id" field.
-func CoffeeBeanIDGT(v int32) predicate.UsersCoffeeBean {
+// CoffeeBeanIDIsNil applies the IsNil predicate on the "coffee_bean_id" field.
+func CoffeeBeanIDIsNil() predicate.UsersCoffeeBean {
 	return predicate.UsersCoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldCoffeeBeanID), v))
+		s.Where(sql.IsNull(s.C(FieldCoffeeBeanID)))
 	})
 }
 
-// CoffeeBeanIDGTE applies the GTE predicate on the "coffee_bean_id" field.
-func CoffeeBeanIDGTE(v int32) predicate.UsersCoffeeBean {
+// CoffeeBeanIDNotNil applies the NotNil predicate on the "coffee_bean_id" field.
+func CoffeeBeanIDNotNil() predicate.UsersCoffeeBean {
 	return predicate.UsersCoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldCoffeeBeanID), v))
-	})
-}
-
-// CoffeeBeanIDLT applies the LT predicate on the "coffee_bean_id" field.
-func CoffeeBeanIDLT(v int32) predicate.UsersCoffeeBean {
-	return predicate.UsersCoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldCoffeeBeanID), v))
-	})
-}
-
-// CoffeeBeanIDLTE applies the LTE predicate on the "coffee_bean_id" field.
-func CoffeeBeanIDLTE(v int32) predicate.UsersCoffeeBean {
-	return predicate.UsersCoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldCoffeeBeanID), v))
+		s.Where(sql.NotNull(s.C(FieldCoffeeBeanID)))
 	})
 }
 
@@ -518,6 +491,62 @@ func DeletedAtIsNil() predicate.UsersCoffeeBean {
 func DeletedAtNotNil() predicate.UsersCoffeeBean {
 	return predicate.UsersCoffeeBean(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldDeletedAt)))
+	})
+}
+
+// HasCoffeeBean applies the HasEdge predicate on the "coffee_bean" edge.
+func HasCoffeeBean() predicate.UsersCoffeeBean {
+	return predicate.UsersCoffeeBean(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(CoffeeBeanTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, CoffeeBeanTable, CoffeeBeanColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCoffeeBeanWith applies the HasEdge predicate on the "coffee_bean" edge with a given conditions (other predicates).
+func HasCoffeeBeanWith(preds ...predicate.CoffeeBean) predicate.UsersCoffeeBean {
+	return predicate.UsersCoffeeBean(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(CoffeeBeanInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, CoffeeBeanTable, CoffeeBeanColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasUser applies the HasEdge predicate on the "user" edge.
+func HasUser() predicate.UsersCoffeeBean {
+	return predicate.UsersCoffeeBean(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(UserTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
+func HasUserWith(preds ...predicate.User) predicate.UsersCoffeeBean {
+	return predicate.UsersCoffeeBean(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(UserInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
 	})
 }
 

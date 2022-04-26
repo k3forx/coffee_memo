@@ -40,22 +40,25 @@ const (
 // CoffeeBeanMutation represents an operation that mutates the CoffeeBean nodes in the graph.
 type CoffeeBeanMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *int32
-	name           *string
-	farm_name      *string
-	country        *string
-	shop_id        *int32
-	addshop_id     *int32
-	roasted_degree *string
-	roasted_at     *time.Time
-	created_at     *time.Time
-	updated_at     *time.Time
-	clearedFields  map[string]struct{}
-	done           bool
-	oldValue       func(context.Context) (*CoffeeBean, error)
-	predicates     []predicate.CoffeeBean
+	op                        Op
+	typ                       string
+	id                        *int32
+	name                      *string
+	farm_name                 *string
+	country                   *string
+	shop_id                   *int32
+	addshop_id                *int32
+	roast_degree              *string
+	roasted_at                *time.Time
+	created_at                *time.Time
+	updated_at                *time.Time
+	clearedFields             map[string]struct{}
+	users_coffee_beans        map[int32]struct{}
+	removedusers_coffee_beans map[int32]struct{}
+	clearedusers_coffee_beans bool
+	done                      bool
+	oldValue                  func(context.Context) (*CoffeeBean, error)
+	predicates                []predicate.CoffeeBean
 }
 
 var _ ent.Mutation = (*CoffeeBeanMutation)(nil)
@@ -352,40 +355,40 @@ func (m *CoffeeBeanMutation) ResetShopID() {
 	m.addshop_id = nil
 }
 
-// SetRoastedDegree sets the "roasted_degree" field.
-func (m *CoffeeBeanMutation) SetRoastedDegree(s string) {
-	m.roasted_degree = &s
+// SetRoastDegree sets the "roast_degree" field.
+func (m *CoffeeBeanMutation) SetRoastDegree(s string) {
+	m.roast_degree = &s
 }
 
-// RoastedDegree returns the value of the "roasted_degree" field in the mutation.
-func (m *CoffeeBeanMutation) RoastedDegree() (r string, exists bool) {
-	v := m.roasted_degree
+// RoastDegree returns the value of the "roast_degree" field in the mutation.
+func (m *CoffeeBeanMutation) RoastDegree() (r string, exists bool) {
+	v := m.roast_degree
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldRoastedDegree returns the old "roasted_degree" field's value of the CoffeeBean entity.
+// OldRoastDegree returns the old "roast_degree" field's value of the CoffeeBean entity.
 // If the CoffeeBean object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CoffeeBeanMutation) OldRoastedDegree(ctx context.Context) (v string, err error) {
+func (m *CoffeeBeanMutation) OldRoastDegree(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldRoastedDegree is only allowed on UpdateOne operations")
+		return v, errors.New("OldRoastDegree is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldRoastedDegree requires an ID field in the mutation")
+		return v, errors.New("OldRoastDegree requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldRoastedDegree: %w", err)
+		return v, fmt.Errorf("querying old value for OldRoastDegree: %w", err)
 	}
-	return oldValue.RoastedDegree, nil
+	return oldValue.RoastDegree, nil
 }
 
-// ResetRoastedDegree resets all changes to the "roasted_degree" field.
-func (m *CoffeeBeanMutation) ResetRoastedDegree() {
-	m.roasted_degree = nil
+// ResetRoastDegree resets all changes to the "roast_degree" field.
+func (m *CoffeeBeanMutation) ResetRoastDegree() {
+	m.roast_degree = nil
 }
 
 // SetRoastedAt sets the "roasted_at" field.
@@ -509,6 +512,60 @@ func (m *CoffeeBeanMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
+// AddUsersCoffeeBeanIDs adds the "users_coffee_beans" edge to the UsersCoffeeBean entity by ids.
+func (m *CoffeeBeanMutation) AddUsersCoffeeBeanIDs(ids ...int32) {
+	if m.users_coffee_beans == nil {
+		m.users_coffee_beans = make(map[int32]struct{})
+	}
+	for i := range ids {
+		m.users_coffee_beans[ids[i]] = struct{}{}
+	}
+}
+
+// ClearUsersCoffeeBeans clears the "users_coffee_beans" edge to the UsersCoffeeBean entity.
+func (m *CoffeeBeanMutation) ClearUsersCoffeeBeans() {
+	m.clearedusers_coffee_beans = true
+}
+
+// UsersCoffeeBeansCleared reports if the "users_coffee_beans" edge to the UsersCoffeeBean entity was cleared.
+func (m *CoffeeBeanMutation) UsersCoffeeBeansCleared() bool {
+	return m.clearedusers_coffee_beans
+}
+
+// RemoveUsersCoffeeBeanIDs removes the "users_coffee_beans" edge to the UsersCoffeeBean entity by IDs.
+func (m *CoffeeBeanMutation) RemoveUsersCoffeeBeanIDs(ids ...int32) {
+	if m.removedusers_coffee_beans == nil {
+		m.removedusers_coffee_beans = make(map[int32]struct{})
+	}
+	for i := range ids {
+		delete(m.users_coffee_beans, ids[i])
+		m.removedusers_coffee_beans[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedUsersCoffeeBeans returns the removed IDs of the "users_coffee_beans" edge to the UsersCoffeeBean entity.
+func (m *CoffeeBeanMutation) RemovedUsersCoffeeBeansIDs() (ids []int32) {
+	for id := range m.removedusers_coffee_beans {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// UsersCoffeeBeansIDs returns the "users_coffee_beans" edge IDs in the mutation.
+func (m *CoffeeBeanMutation) UsersCoffeeBeansIDs() (ids []int32) {
+	for id := range m.users_coffee_beans {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetUsersCoffeeBeans resets all changes to the "users_coffee_beans" edge.
+func (m *CoffeeBeanMutation) ResetUsersCoffeeBeans() {
+	m.users_coffee_beans = nil
+	m.clearedusers_coffee_beans = false
+	m.removedusers_coffee_beans = nil
+}
+
 // Where appends a list predicates to the CoffeeBeanMutation builder.
 func (m *CoffeeBeanMutation) Where(ps ...predicate.CoffeeBean) {
 	m.predicates = append(m.predicates, ps...)
@@ -541,8 +598,8 @@ func (m *CoffeeBeanMutation) Fields() []string {
 	if m.shop_id != nil {
 		fields = append(fields, coffeebean.FieldShopID)
 	}
-	if m.roasted_degree != nil {
-		fields = append(fields, coffeebean.FieldRoastedDegree)
+	if m.roast_degree != nil {
+		fields = append(fields, coffeebean.FieldRoastDegree)
 	}
 	if m.roasted_at != nil {
 		fields = append(fields, coffeebean.FieldRoastedAt)
@@ -569,8 +626,8 @@ func (m *CoffeeBeanMutation) Field(name string) (ent.Value, bool) {
 		return m.Country()
 	case coffeebean.FieldShopID:
 		return m.ShopID()
-	case coffeebean.FieldRoastedDegree:
-		return m.RoastedDegree()
+	case coffeebean.FieldRoastDegree:
+		return m.RoastDegree()
 	case coffeebean.FieldRoastedAt:
 		return m.RoastedAt()
 	case coffeebean.FieldCreatedAt:
@@ -594,8 +651,8 @@ func (m *CoffeeBeanMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldCountry(ctx)
 	case coffeebean.FieldShopID:
 		return m.OldShopID(ctx)
-	case coffeebean.FieldRoastedDegree:
-		return m.OldRoastedDegree(ctx)
+	case coffeebean.FieldRoastDegree:
+		return m.OldRoastDegree(ctx)
 	case coffeebean.FieldRoastedAt:
 		return m.OldRoastedAt(ctx)
 	case coffeebean.FieldCreatedAt:
@@ -639,12 +696,12 @@ func (m *CoffeeBeanMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetShopID(v)
 		return nil
-	case coffeebean.FieldRoastedDegree:
+	case coffeebean.FieldRoastDegree:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetRoastedDegree(v)
+		m.SetRoastDegree(v)
 		return nil
 	case coffeebean.FieldRoastedAt:
 		v, ok := value.(time.Time)
@@ -764,8 +821,8 @@ func (m *CoffeeBeanMutation) ResetField(name string) error {
 	case coffeebean.FieldShopID:
 		m.ResetShopID()
 		return nil
-	case coffeebean.FieldRoastedDegree:
-		m.ResetRoastedDegree()
+	case coffeebean.FieldRoastDegree:
+		m.ResetRoastDegree()
 		return nil
 	case coffeebean.FieldRoastedAt:
 		m.ResetRoastedAt()
@@ -782,49 +839,85 @@ func (m *CoffeeBeanMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *CoffeeBeanMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.users_coffee_beans != nil {
+		edges = append(edges, coffeebean.EdgeUsersCoffeeBeans)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *CoffeeBeanMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case coffeebean.EdgeUsersCoffeeBeans:
+		ids := make([]ent.Value, 0, len(m.users_coffee_beans))
+		for id := range m.users_coffee_beans {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *CoffeeBeanMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.removedusers_coffee_beans != nil {
+		edges = append(edges, coffeebean.EdgeUsersCoffeeBeans)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *CoffeeBeanMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case coffeebean.EdgeUsersCoffeeBeans:
+		ids := make([]ent.Value, 0, len(m.removedusers_coffee_beans))
+		for id := range m.removedusers_coffee_beans {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *CoffeeBeanMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.clearedusers_coffee_beans {
+		edges = append(edges, coffeebean.EdgeUsersCoffeeBeans)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *CoffeeBeanMutation) EdgeCleared(name string) bool {
+	switch name {
+	case coffeebean.EdgeUsersCoffeeBeans:
+		return m.clearedusers_coffee_beans
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *CoffeeBeanMutation) ClearEdge(name string) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown CoffeeBean unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *CoffeeBeanMutation) ResetEdge(name string) error {
+	switch name {
+	case coffeebean.EdgeUsersCoffeeBeans:
+		m.ResetUsersCoffeeBeans()
+		return nil
+	}
 	return fmt.Errorf("unknown CoffeeBean edge %s", name)
 }
 
@@ -1571,6 +1664,7 @@ type DripRecipeMutation struct {
 	memo                  *string
 	created_at            *time.Time
 	updated_at            *time.Time
+	deleted_at            *time.Time
 	clearedFields         map[string]struct{}
 	done                  bool
 	oldValue              func(context.Context) (*DripRecipe, error)
@@ -2181,6 +2275,55 @@ func (m *DripRecipeMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (m *DripRecipeMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *DripRecipeMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the DripRecipe entity.
+// If the DripRecipe object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DripRecipeMutation) OldDeletedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *DripRecipeMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[driprecipe.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *DripRecipeMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[driprecipe.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *DripRecipeMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, driprecipe.FieldDeletedAt)
+}
+
 // Where appends a list predicates to the DripRecipeMutation builder.
 func (m *DripRecipeMutation) Where(ps ...predicate.DripRecipe) {
 	m.predicates = append(m.predicates, ps...)
@@ -2200,7 +2343,7 @@ func (m *DripRecipeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DripRecipeMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m.user_id != nil {
 		fields = append(fields, driprecipe.FieldUserID)
 	}
@@ -2231,6 +2374,9 @@ func (m *DripRecipeMutation) Fields() []string {
 	if m.updated_at != nil {
 		fields = append(fields, driprecipe.FieldUpdatedAt)
 	}
+	if m.deleted_at != nil {
+		fields = append(fields, driprecipe.FieldDeletedAt)
+	}
 	return fields
 }
 
@@ -2259,6 +2405,8 @@ func (m *DripRecipeMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case driprecipe.FieldUpdatedAt:
 		return m.UpdatedAt()
+	case driprecipe.FieldDeletedAt:
+		return m.DeletedAt()
 	}
 	return nil, false
 }
@@ -2288,6 +2436,8 @@ func (m *DripRecipeMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldCreatedAt(ctx)
 	case driprecipe.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
+	case driprecipe.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown DripRecipe field %s", name)
 }
@@ -2366,6 +2516,13 @@ func (m *DripRecipeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUpdatedAt(v)
+		return nil
+	case driprecipe.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
 		return nil
 	}
 	return fmt.Errorf("unknown DripRecipe field %s", name)
@@ -2483,7 +2640,11 @@ func (m *DripRecipeMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *DripRecipeMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(driprecipe.FieldDeletedAt) {
+		fields = append(fields, driprecipe.FieldDeletedAt)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -2496,6 +2657,11 @@ func (m *DripRecipeMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *DripRecipeMutation) ClearField(name string) error {
+	switch name {
+	case driprecipe.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	}
 	return fmt.Errorf("unknown DripRecipe nullable field %s", name)
 }
 
@@ -2532,6 +2698,9 @@ func (m *DripRecipeMutation) ResetField(name string) error {
 		return nil
 	case driprecipe.FieldUpdatedAt:
 		m.ResetUpdatedAt()
+		return nil
+	case driprecipe.FieldDeletedAt:
+		m.ResetDeletedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown DripRecipe field %s", name)
@@ -3071,21 +3240,24 @@ func (m *GooseDbVersionMutation) ResetEdge(name string) error {
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int32
-	username      *string
-	email         *string
-	password      *string
-	flags         *int
-	addflags      *int
-	created_at    *time.Time
-	updated_at    *time.Time
-	deleted_at    *time.Time
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*User, error)
-	predicates    []predicate.User
+	op                        Op
+	typ                       string
+	id                        *int32
+	username                  *string
+	email                     *string
+	password                  *string
+	flags                     *int
+	addflags                  *int
+	created_at                *time.Time
+	updated_at                *time.Time
+	deleted_at                *time.Time
+	clearedFields             map[string]struct{}
+	users_coffee_beans        map[int32]struct{}
+	removedusers_coffee_beans map[int32]struct{}
+	clearedusers_coffee_beans bool
+	done                      bool
+	oldValue                  func(context.Context) (*User, error)
+	predicates                []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -3477,6 +3649,60 @@ func (m *UserMutation) ResetDeletedAt() {
 	delete(m.clearedFields, user.FieldDeletedAt)
 }
 
+// AddUsersCoffeeBeanIDs adds the "users_coffee_beans" edge to the UsersCoffeeBean entity by ids.
+func (m *UserMutation) AddUsersCoffeeBeanIDs(ids ...int32) {
+	if m.users_coffee_beans == nil {
+		m.users_coffee_beans = make(map[int32]struct{})
+	}
+	for i := range ids {
+		m.users_coffee_beans[ids[i]] = struct{}{}
+	}
+}
+
+// ClearUsersCoffeeBeans clears the "users_coffee_beans" edge to the UsersCoffeeBean entity.
+func (m *UserMutation) ClearUsersCoffeeBeans() {
+	m.clearedusers_coffee_beans = true
+}
+
+// UsersCoffeeBeansCleared reports if the "users_coffee_beans" edge to the UsersCoffeeBean entity was cleared.
+func (m *UserMutation) UsersCoffeeBeansCleared() bool {
+	return m.clearedusers_coffee_beans
+}
+
+// RemoveUsersCoffeeBeanIDs removes the "users_coffee_beans" edge to the UsersCoffeeBean entity by IDs.
+func (m *UserMutation) RemoveUsersCoffeeBeanIDs(ids ...int32) {
+	if m.removedusers_coffee_beans == nil {
+		m.removedusers_coffee_beans = make(map[int32]struct{})
+	}
+	for i := range ids {
+		delete(m.users_coffee_beans, ids[i])
+		m.removedusers_coffee_beans[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedUsersCoffeeBeans returns the removed IDs of the "users_coffee_beans" edge to the UsersCoffeeBean entity.
+func (m *UserMutation) RemovedUsersCoffeeBeansIDs() (ids []int32) {
+	for id := range m.removedusers_coffee_beans {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// UsersCoffeeBeansIDs returns the "users_coffee_beans" edge IDs in the mutation.
+func (m *UserMutation) UsersCoffeeBeansIDs() (ids []int32) {
+	for id := range m.users_coffee_beans {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetUsersCoffeeBeans resets all changes to the "users_coffee_beans" edge.
+func (m *UserMutation) ResetUsersCoffeeBeans() {
+	m.users_coffee_beans = nil
+	m.clearedusers_coffee_beans = false
+	m.removedusers_coffee_beans = nil
+}
+
 // Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
@@ -3721,69 +3947,105 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.users_coffee_beans != nil {
+		edges = append(edges, user.EdgeUsersCoffeeBeans)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *UserMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case user.EdgeUsersCoffeeBeans:
+		ids := make([]ent.Value, 0, len(m.users_coffee_beans))
+		for id := range m.users_coffee_beans {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.removedusers_coffee_beans != nil {
+		edges = append(edges, user.EdgeUsersCoffeeBeans)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *UserMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case user.EdgeUsersCoffeeBeans:
+		ids := make([]ent.Value, 0, len(m.removedusers_coffee_beans))
+		for id := range m.removedusers_coffee_beans {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.clearedusers_coffee_beans {
+		edges = append(edges, user.EdgeUsersCoffeeBeans)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *UserMutation) EdgeCleared(name string) bool {
+	switch name {
+	case user.EdgeUsersCoffeeBeans:
+		return m.clearedusers_coffee_beans
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *UserMutation) ClearEdge(name string) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown User unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *UserMutation) ResetEdge(name string) error {
+	switch name {
+	case user.EdgeUsersCoffeeBeans:
+		m.ResetUsersCoffeeBeans()
+		return nil
+	}
 	return fmt.Errorf("unknown User edge %s", name)
 }
 
 // UsersCoffeeBeanMutation represents an operation that mutates the UsersCoffeeBean nodes in the graph.
 type UsersCoffeeBeanMutation struct {
 	config
-	op                Op
-	typ               string
-	id                *int32
-	user_id           *int32
-	adduser_id        *int32
-	coffee_bean_id    *int32
-	addcoffee_bean_id *int32
-	created_at        *time.Time
-	updated_at        *time.Time
-	deleted_at        *time.Time
-	clearedFields     map[string]struct{}
-	done              bool
-	oldValue          func(context.Context) (*UsersCoffeeBean, error)
-	predicates        []predicate.UsersCoffeeBean
+	op                 Op
+	typ                string
+	id                 *int32
+	created_at         *time.Time
+	updated_at         *time.Time
+	deleted_at         *time.Time
+	clearedFields      map[string]struct{}
+	coffee_bean        *int32
+	clearedcoffee_bean bool
+	user               *int32
+	cleareduser        bool
+	done               bool
+	oldValue           func(context.Context) (*UsersCoffeeBean, error)
+	predicates         []predicate.UsersCoffeeBean
 }
 
 var _ ent.Mutation = (*UsersCoffeeBeanMutation)(nil)
@@ -3892,13 +4154,12 @@ func (m *UsersCoffeeBeanMutation) IDs(ctx context.Context) ([]int32, error) {
 
 // SetUserID sets the "user_id" field.
 func (m *UsersCoffeeBeanMutation) SetUserID(i int32) {
-	m.user_id = &i
-	m.adduser_id = nil
+	m.user = &i
 }
 
 // UserID returns the value of the "user_id" field in the mutation.
 func (m *UsersCoffeeBeanMutation) UserID() (r int32, exists bool) {
-	v := m.user_id
+	v := m.user
 	if v == nil {
 		return
 	}
@@ -3922,39 +4183,32 @@ func (m *UsersCoffeeBeanMutation) OldUserID(ctx context.Context) (v int32, err e
 	return oldValue.UserID, nil
 }
 
-// AddUserID adds i to the "user_id" field.
-func (m *UsersCoffeeBeanMutation) AddUserID(i int32) {
-	if m.adduser_id != nil {
-		*m.adduser_id += i
-	} else {
-		m.adduser_id = &i
-	}
+// ClearUserID clears the value of the "user_id" field.
+func (m *UsersCoffeeBeanMutation) ClearUserID() {
+	m.user = nil
+	m.clearedFields[userscoffeebean.FieldUserID] = struct{}{}
 }
 
-// AddedUserID returns the value that was added to the "user_id" field in this mutation.
-func (m *UsersCoffeeBeanMutation) AddedUserID() (r int32, exists bool) {
-	v := m.adduser_id
-	if v == nil {
-		return
-	}
-	return *v, true
+// UserIDCleared returns if the "user_id" field was cleared in this mutation.
+func (m *UsersCoffeeBeanMutation) UserIDCleared() bool {
+	_, ok := m.clearedFields[userscoffeebean.FieldUserID]
+	return ok
 }
 
 // ResetUserID resets all changes to the "user_id" field.
 func (m *UsersCoffeeBeanMutation) ResetUserID() {
-	m.user_id = nil
-	m.adduser_id = nil
+	m.user = nil
+	delete(m.clearedFields, userscoffeebean.FieldUserID)
 }
 
 // SetCoffeeBeanID sets the "coffee_bean_id" field.
 func (m *UsersCoffeeBeanMutation) SetCoffeeBeanID(i int32) {
-	m.coffee_bean_id = &i
-	m.addcoffee_bean_id = nil
+	m.coffee_bean = &i
 }
 
 // CoffeeBeanID returns the value of the "coffee_bean_id" field in the mutation.
 func (m *UsersCoffeeBeanMutation) CoffeeBeanID() (r int32, exists bool) {
-	v := m.coffee_bean_id
+	v := m.coffee_bean
 	if v == nil {
 		return
 	}
@@ -3978,28 +4232,22 @@ func (m *UsersCoffeeBeanMutation) OldCoffeeBeanID(ctx context.Context) (v int32,
 	return oldValue.CoffeeBeanID, nil
 }
 
-// AddCoffeeBeanID adds i to the "coffee_bean_id" field.
-func (m *UsersCoffeeBeanMutation) AddCoffeeBeanID(i int32) {
-	if m.addcoffee_bean_id != nil {
-		*m.addcoffee_bean_id += i
-	} else {
-		m.addcoffee_bean_id = &i
-	}
+// ClearCoffeeBeanID clears the value of the "coffee_bean_id" field.
+func (m *UsersCoffeeBeanMutation) ClearCoffeeBeanID() {
+	m.coffee_bean = nil
+	m.clearedFields[userscoffeebean.FieldCoffeeBeanID] = struct{}{}
 }
 
-// AddedCoffeeBeanID returns the value that was added to the "coffee_bean_id" field in this mutation.
-func (m *UsersCoffeeBeanMutation) AddedCoffeeBeanID() (r int32, exists bool) {
-	v := m.addcoffee_bean_id
-	if v == nil {
-		return
-	}
-	return *v, true
+// CoffeeBeanIDCleared returns if the "coffee_bean_id" field was cleared in this mutation.
+func (m *UsersCoffeeBeanMutation) CoffeeBeanIDCleared() bool {
+	_, ok := m.clearedFields[userscoffeebean.FieldCoffeeBeanID]
+	return ok
 }
 
 // ResetCoffeeBeanID resets all changes to the "coffee_bean_id" field.
 func (m *UsersCoffeeBeanMutation) ResetCoffeeBeanID() {
-	m.coffee_bean_id = nil
-	m.addcoffee_bean_id = nil
+	m.coffee_bean = nil
+	delete(m.clearedFields, userscoffeebean.FieldCoffeeBeanID)
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -4123,6 +4371,58 @@ func (m *UsersCoffeeBeanMutation) ResetDeletedAt() {
 	delete(m.clearedFields, userscoffeebean.FieldDeletedAt)
 }
 
+// ClearCoffeeBean clears the "coffee_bean" edge to the CoffeeBean entity.
+func (m *UsersCoffeeBeanMutation) ClearCoffeeBean() {
+	m.clearedcoffee_bean = true
+}
+
+// CoffeeBeanCleared reports if the "coffee_bean" edge to the CoffeeBean entity was cleared.
+func (m *UsersCoffeeBeanMutation) CoffeeBeanCleared() bool {
+	return m.CoffeeBeanIDCleared() || m.clearedcoffee_bean
+}
+
+// CoffeeBeanIDs returns the "coffee_bean" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// CoffeeBeanID instead. It exists only for internal usage by the builders.
+func (m *UsersCoffeeBeanMutation) CoffeeBeanIDs() (ids []int32) {
+	if id := m.coffee_bean; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetCoffeeBean resets all changes to the "coffee_bean" edge.
+func (m *UsersCoffeeBeanMutation) ResetCoffeeBean() {
+	m.coffee_bean = nil
+	m.clearedcoffee_bean = false
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (m *UsersCoffeeBeanMutation) ClearUser() {
+	m.cleareduser = true
+}
+
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *UsersCoffeeBeanMutation) UserCleared() bool {
+	return m.UserIDCleared() || m.cleareduser
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *UsersCoffeeBeanMutation) UserIDs() (ids []int32) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *UsersCoffeeBeanMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+}
+
 // Where appends a list predicates to the UsersCoffeeBeanMutation builder.
 func (m *UsersCoffeeBeanMutation) Where(ps ...predicate.UsersCoffeeBean) {
 	m.predicates = append(m.predicates, ps...)
@@ -4143,10 +4443,10 @@ func (m *UsersCoffeeBeanMutation) Type() string {
 // AddedFields().
 func (m *UsersCoffeeBeanMutation) Fields() []string {
 	fields := make([]string, 0, 5)
-	if m.user_id != nil {
+	if m.user != nil {
 		fields = append(fields, userscoffeebean.FieldUserID)
 	}
-	if m.coffee_bean_id != nil {
+	if m.coffee_bean != nil {
 		fields = append(fields, userscoffeebean.FieldCoffeeBeanID)
 	}
 	if m.created_at != nil {
@@ -4247,12 +4547,6 @@ func (m *UsersCoffeeBeanMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *UsersCoffeeBeanMutation) AddedFields() []string {
 	var fields []string
-	if m.adduser_id != nil {
-		fields = append(fields, userscoffeebean.FieldUserID)
-	}
-	if m.addcoffee_bean_id != nil {
-		fields = append(fields, userscoffeebean.FieldCoffeeBeanID)
-	}
 	return fields
 }
 
@@ -4261,10 +4555,6 @@ func (m *UsersCoffeeBeanMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *UsersCoffeeBeanMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case userscoffeebean.FieldUserID:
-		return m.AddedUserID()
-	case userscoffeebean.FieldCoffeeBeanID:
-		return m.AddedCoffeeBeanID()
 	}
 	return nil, false
 }
@@ -4274,20 +4564,6 @@ func (m *UsersCoffeeBeanMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *UsersCoffeeBeanMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case userscoffeebean.FieldUserID:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddUserID(v)
-		return nil
-	case userscoffeebean.FieldCoffeeBeanID:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddCoffeeBeanID(v)
-		return nil
 	}
 	return fmt.Errorf("unknown UsersCoffeeBean numeric field %s", name)
 }
@@ -4296,6 +4572,12 @@ func (m *UsersCoffeeBeanMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *UsersCoffeeBeanMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(userscoffeebean.FieldUserID) {
+		fields = append(fields, userscoffeebean.FieldUserID)
+	}
+	if m.FieldCleared(userscoffeebean.FieldCoffeeBeanID) {
+		fields = append(fields, userscoffeebean.FieldCoffeeBeanID)
+	}
 	if m.FieldCleared(userscoffeebean.FieldDeletedAt) {
 		fields = append(fields, userscoffeebean.FieldDeletedAt)
 	}
@@ -4313,6 +4595,12 @@ func (m *UsersCoffeeBeanMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *UsersCoffeeBeanMutation) ClearField(name string) error {
 	switch name {
+	case userscoffeebean.FieldUserID:
+		m.ClearUserID()
+		return nil
+	case userscoffeebean.FieldCoffeeBeanID:
+		m.ClearCoffeeBeanID()
+		return nil
 	case userscoffeebean.FieldDeletedAt:
 		m.ClearDeletedAt()
 		return nil
@@ -4345,48 +4633,94 @@ func (m *UsersCoffeeBeanMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UsersCoffeeBeanMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
+	if m.coffee_bean != nil {
+		edges = append(edges, userscoffeebean.EdgeCoffeeBean)
+	}
+	if m.user != nil {
+		edges = append(edges, userscoffeebean.EdgeUser)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *UsersCoffeeBeanMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case userscoffeebean.EdgeCoffeeBean:
+		if id := m.coffee_bean; id != nil {
+			return []ent.Value{*id}
+		}
+	case userscoffeebean.EdgeUser:
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UsersCoffeeBeanMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *UsersCoffeeBeanMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UsersCoffeeBeanMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
+	if m.clearedcoffee_bean {
+		edges = append(edges, userscoffeebean.EdgeCoffeeBean)
+	}
+	if m.cleareduser {
+		edges = append(edges, userscoffeebean.EdgeUser)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *UsersCoffeeBeanMutation) EdgeCleared(name string) bool {
+	switch name {
+	case userscoffeebean.EdgeCoffeeBean:
+		return m.clearedcoffee_bean
+	case userscoffeebean.EdgeUser:
+		return m.cleareduser
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *UsersCoffeeBeanMutation) ClearEdge(name string) error {
+	switch name {
+	case userscoffeebean.EdgeCoffeeBean:
+		m.ClearCoffeeBean()
+		return nil
+	case userscoffeebean.EdgeUser:
+		m.ClearUser()
+		return nil
+	}
 	return fmt.Errorf("unknown UsersCoffeeBean unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *UsersCoffeeBeanMutation) ResetEdge(name string) error {
+	switch name {
+	case userscoffeebean.EdgeCoffeeBean:
+		m.ResetCoffeeBean()
+		return nil
+	case userscoffeebean.EdgeUser:
+		m.ResetUser()
+		return nil
+	}
 	return fmt.Errorf("unknown UsersCoffeeBean edge %s", name)
 }

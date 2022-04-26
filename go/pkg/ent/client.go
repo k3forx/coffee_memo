@@ -18,6 +18,7 @@ import (
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -240,6 +241,22 @@ func (c *CoffeeBeanClient) GetX(ctx context.Context, id int32) *CoffeeBean {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryUsersCoffeeBeans queries the users_coffee_beans edge of a CoffeeBean.
+func (c *CoffeeBeanClient) QueryUsersCoffeeBeans(cb *CoffeeBean) *UsersCoffeeBeanQuery {
+	query := &UsersCoffeeBeanQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := cb.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(coffeebean.Table, coffeebean.FieldID, id),
+			sqlgraph.To(userscoffeebean.Table, userscoffeebean.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, coffeebean.UsersCoffeeBeansTable, coffeebean.UsersCoffeeBeansColumn),
+		)
+		fromV = sqlgraph.Neighbors(cb.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.
@@ -602,6 +619,22 @@ func (c *UserClient) GetX(ctx context.Context, id int32) *User {
 	return obj
 }
 
+// QueryUsersCoffeeBeans queries the users_coffee_beans edge of a User.
+func (c *UserClient) QueryUsersCoffeeBeans(u *User) *UsersCoffeeBeanQuery {
+	query := &UsersCoffeeBeanQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(userscoffeebean.Table, userscoffeebean.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.UsersCoffeeBeansTable, user.UsersCoffeeBeansColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
@@ -690,6 +723,38 @@ func (c *UsersCoffeeBeanClient) GetX(ctx context.Context, id int32) *UsersCoffee
 		panic(err)
 	}
 	return obj
+}
+
+// QueryCoffeeBean queries the coffee_bean edge of a UsersCoffeeBean.
+func (c *UsersCoffeeBeanClient) QueryCoffeeBean(ucb *UsersCoffeeBean) *CoffeeBeanQuery {
+	query := &CoffeeBeanQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ucb.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(userscoffeebean.Table, userscoffeebean.FieldID, id),
+			sqlgraph.To(coffeebean.Table, coffeebean.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, userscoffeebean.CoffeeBeanTable, userscoffeebean.CoffeeBeanColumn),
+		)
+		fromV = sqlgraph.Neighbors(ucb.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUser queries the user edge of a UsersCoffeeBean.
+func (c *UsersCoffeeBeanClient) QueryUser(ucb *UsersCoffeeBean) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ucb.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(userscoffeebean.Table, userscoffeebean.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, userscoffeebean.UserTable, userscoffeebean.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(ucb.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.

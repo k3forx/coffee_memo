@@ -11,7 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/k3forx/coffee_memo/pkg/ent/coffeebean"
 	"github.com/k3forx/coffee_memo/pkg/ent/predicate"
+	"github.com/k3forx/coffee_memo/pkg/ent/user"
 	"github.com/k3forx/coffee_memo/pkg/ent/userscoffeebean"
 )
 
@@ -30,27 +32,41 @@ func (ucbu *UsersCoffeeBeanUpdate) Where(ps ...predicate.UsersCoffeeBean) *Users
 
 // SetUserID sets the "user_id" field.
 func (ucbu *UsersCoffeeBeanUpdate) SetUserID(i int32) *UsersCoffeeBeanUpdate {
-	ucbu.mutation.ResetUserID()
 	ucbu.mutation.SetUserID(i)
 	return ucbu
 }
 
-// AddUserID adds i to the "user_id" field.
-func (ucbu *UsersCoffeeBeanUpdate) AddUserID(i int32) *UsersCoffeeBeanUpdate {
-	ucbu.mutation.AddUserID(i)
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (ucbu *UsersCoffeeBeanUpdate) SetNillableUserID(i *int32) *UsersCoffeeBeanUpdate {
+	if i != nil {
+		ucbu.SetUserID(*i)
+	}
+	return ucbu
+}
+
+// ClearUserID clears the value of the "user_id" field.
+func (ucbu *UsersCoffeeBeanUpdate) ClearUserID() *UsersCoffeeBeanUpdate {
+	ucbu.mutation.ClearUserID()
 	return ucbu
 }
 
 // SetCoffeeBeanID sets the "coffee_bean_id" field.
 func (ucbu *UsersCoffeeBeanUpdate) SetCoffeeBeanID(i int32) *UsersCoffeeBeanUpdate {
-	ucbu.mutation.ResetCoffeeBeanID()
 	ucbu.mutation.SetCoffeeBeanID(i)
 	return ucbu
 }
 
-// AddCoffeeBeanID adds i to the "coffee_bean_id" field.
-func (ucbu *UsersCoffeeBeanUpdate) AddCoffeeBeanID(i int32) *UsersCoffeeBeanUpdate {
-	ucbu.mutation.AddCoffeeBeanID(i)
+// SetNillableCoffeeBeanID sets the "coffee_bean_id" field if the given value is not nil.
+func (ucbu *UsersCoffeeBeanUpdate) SetNillableCoffeeBeanID(i *int32) *UsersCoffeeBeanUpdate {
+	if i != nil {
+		ucbu.SetCoffeeBeanID(*i)
+	}
+	return ucbu
+}
+
+// ClearCoffeeBeanID clears the value of the "coffee_bean_id" field.
+func (ucbu *UsersCoffeeBeanUpdate) ClearCoffeeBeanID() *UsersCoffeeBeanUpdate {
+	ucbu.mutation.ClearCoffeeBeanID()
 	return ucbu
 }
 
@@ -86,9 +102,31 @@ func (ucbu *UsersCoffeeBeanUpdate) ClearDeletedAt() *UsersCoffeeBeanUpdate {
 	return ucbu
 }
 
+// SetCoffeeBean sets the "coffee_bean" edge to the CoffeeBean entity.
+func (ucbu *UsersCoffeeBeanUpdate) SetCoffeeBean(c *CoffeeBean) *UsersCoffeeBeanUpdate {
+	return ucbu.SetCoffeeBeanID(c.ID)
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (ucbu *UsersCoffeeBeanUpdate) SetUser(u *User) *UsersCoffeeBeanUpdate {
+	return ucbu.SetUserID(u.ID)
+}
+
 // Mutation returns the UsersCoffeeBeanMutation object of the builder.
 func (ucbu *UsersCoffeeBeanUpdate) Mutation() *UsersCoffeeBeanMutation {
 	return ucbu.mutation
+}
+
+// ClearCoffeeBean clears the "coffee_bean" edge to the CoffeeBean entity.
+func (ucbu *UsersCoffeeBeanUpdate) ClearCoffeeBean() *UsersCoffeeBeanUpdate {
+	ucbu.mutation.ClearCoffeeBean()
+	return ucbu
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (ucbu *UsersCoffeeBeanUpdate) ClearUser() *UsersCoffeeBeanUpdate {
+	ucbu.mutation.ClearUser()
+	return ucbu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -163,34 +201,6 @@ func (ucbu *UsersCoffeeBeanUpdate) sqlSave(ctx context.Context) (n int, err erro
 			}
 		}
 	}
-	if value, ok := ucbu.mutation.UserID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
-			Value:  value,
-			Column: userscoffeebean.FieldUserID,
-		})
-	}
-	if value, ok := ucbu.mutation.AddedUserID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
-			Value:  value,
-			Column: userscoffeebean.FieldUserID,
-		})
-	}
-	if value, ok := ucbu.mutation.CoffeeBeanID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
-			Value:  value,
-			Column: userscoffeebean.FieldCoffeeBeanID,
-		})
-	}
-	if value, ok := ucbu.mutation.AddedCoffeeBeanID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
-			Value:  value,
-			Column: userscoffeebean.FieldCoffeeBeanID,
-		})
-	}
 	if value, ok := ucbu.mutation.CreatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -218,6 +228,76 @@ func (ucbu *UsersCoffeeBeanUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Column: userscoffeebean.FieldDeletedAt,
 		})
 	}
+	if ucbu.mutation.CoffeeBeanCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   userscoffeebean.CoffeeBeanTable,
+			Columns: []string{userscoffeebean.CoffeeBeanColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: coffeebean.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ucbu.mutation.CoffeeBeanIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   userscoffeebean.CoffeeBeanTable,
+			Columns: []string{userscoffeebean.CoffeeBeanColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: coffeebean.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ucbu.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   userscoffeebean.UserTable,
+			Columns: []string{userscoffeebean.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ucbu.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   userscoffeebean.UserTable,
+			Columns: []string{userscoffeebean.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ucbu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{userscoffeebean.Label}
@@ -239,27 +319,41 @@ type UsersCoffeeBeanUpdateOne struct {
 
 // SetUserID sets the "user_id" field.
 func (ucbuo *UsersCoffeeBeanUpdateOne) SetUserID(i int32) *UsersCoffeeBeanUpdateOne {
-	ucbuo.mutation.ResetUserID()
 	ucbuo.mutation.SetUserID(i)
 	return ucbuo
 }
 
-// AddUserID adds i to the "user_id" field.
-func (ucbuo *UsersCoffeeBeanUpdateOne) AddUserID(i int32) *UsersCoffeeBeanUpdateOne {
-	ucbuo.mutation.AddUserID(i)
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (ucbuo *UsersCoffeeBeanUpdateOne) SetNillableUserID(i *int32) *UsersCoffeeBeanUpdateOne {
+	if i != nil {
+		ucbuo.SetUserID(*i)
+	}
+	return ucbuo
+}
+
+// ClearUserID clears the value of the "user_id" field.
+func (ucbuo *UsersCoffeeBeanUpdateOne) ClearUserID() *UsersCoffeeBeanUpdateOne {
+	ucbuo.mutation.ClearUserID()
 	return ucbuo
 }
 
 // SetCoffeeBeanID sets the "coffee_bean_id" field.
 func (ucbuo *UsersCoffeeBeanUpdateOne) SetCoffeeBeanID(i int32) *UsersCoffeeBeanUpdateOne {
-	ucbuo.mutation.ResetCoffeeBeanID()
 	ucbuo.mutation.SetCoffeeBeanID(i)
 	return ucbuo
 }
 
-// AddCoffeeBeanID adds i to the "coffee_bean_id" field.
-func (ucbuo *UsersCoffeeBeanUpdateOne) AddCoffeeBeanID(i int32) *UsersCoffeeBeanUpdateOne {
-	ucbuo.mutation.AddCoffeeBeanID(i)
+// SetNillableCoffeeBeanID sets the "coffee_bean_id" field if the given value is not nil.
+func (ucbuo *UsersCoffeeBeanUpdateOne) SetNillableCoffeeBeanID(i *int32) *UsersCoffeeBeanUpdateOne {
+	if i != nil {
+		ucbuo.SetCoffeeBeanID(*i)
+	}
+	return ucbuo
+}
+
+// ClearCoffeeBeanID clears the value of the "coffee_bean_id" field.
+func (ucbuo *UsersCoffeeBeanUpdateOne) ClearCoffeeBeanID() *UsersCoffeeBeanUpdateOne {
+	ucbuo.mutation.ClearCoffeeBeanID()
 	return ucbuo
 }
 
@@ -295,9 +389,31 @@ func (ucbuo *UsersCoffeeBeanUpdateOne) ClearDeletedAt() *UsersCoffeeBeanUpdateOn
 	return ucbuo
 }
 
+// SetCoffeeBean sets the "coffee_bean" edge to the CoffeeBean entity.
+func (ucbuo *UsersCoffeeBeanUpdateOne) SetCoffeeBean(c *CoffeeBean) *UsersCoffeeBeanUpdateOne {
+	return ucbuo.SetCoffeeBeanID(c.ID)
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (ucbuo *UsersCoffeeBeanUpdateOne) SetUser(u *User) *UsersCoffeeBeanUpdateOne {
+	return ucbuo.SetUserID(u.ID)
+}
+
 // Mutation returns the UsersCoffeeBeanMutation object of the builder.
 func (ucbuo *UsersCoffeeBeanUpdateOne) Mutation() *UsersCoffeeBeanMutation {
 	return ucbuo.mutation
+}
+
+// ClearCoffeeBean clears the "coffee_bean" edge to the CoffeeBean entity.
+func (ucbuo *UsersCoffeeBeanUpdateOne) ClearCoffeeBean() *UsersCoffeeBeanUpdateOne {
+	ucbuo.mutation.ClearCoffeeBean()
+	return ucbuo
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (ucbuo *UsersCoffeeBeanUpdateOne) ClearUser() *UsersCoffeeBeanUpdateOne {
+	ucbuo.mutation.ClearUser()
+	return ucbuo
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -396,34 +512,6 @@ func (ucbuo *UsersCoffeeBeanUpdateOne) sqlSave(ctx context.Context) (_node *User
 			}
 		}
 	}
-	if value, ok := ucbuo.mutation.UserID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
-			Value:  value,
-			Column: userscoffeebean.FieldUserID,
-		})
-	}
-	if value, ok := ucbuo.mutation.AddedUserID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
-			Value:  value,
-			Column: userscoffeebean.FieldUserID,
-		})
-	}
-	if value, ok := ucbuo.mutation.CoffeeBeanID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
-			Value:  value,
-			Column: userscoffeebean.FieldCoffeeBeanID,
-		})
-	}
-	if value, ok := ucbuo.mutation.AddedCoffeeBeanID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
-			Value:  value,
-			Column: userscoffeebean.FieldCoffeeBeanID,
-		})
-	}
 	if value, ok := ucbuo.mutation.CreatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -450,6 +538,76 @@ func (ucbuo *UsersCoffeeBeanUpdateOne) sqlSave(ctx context.Context) (_node *User
 			Type:   field.TypeTime,
 			Column: userscoffeebean.FieldDeletedAt,
 		})
+	}
+	if ucbuo.mutation.CoffeeBeanCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   userscoffeebean.CoffeeBeanTable,
+			Columns: []string{userscoffeebean.CoffeeBeanColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: coffeebean.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ucbuo.mutation.CoffeeBeanIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   userscoffeebean.CoffeeBeanTable,
+			Columns: []string{userscoffeebean.CoffeeBeanColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: coffeebean.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ucbuo.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   userscoffeebean.UserTable,
+			Columns: []string{userscoffeebean.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ucbuo.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   userscoffeebean.UserTable,
+			Columns: []string{userscoffeebean.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &UsersCoffeeBean{config: ucbuo.config}
 	_spec.Assign = _node.assignValues

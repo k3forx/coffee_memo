@@ -80,6 +80,20 @@ func (drc *DripRecipeCreate) SetUpdatedAt(t time.Time) *DripRecipeCreate {
 	return drc
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (drc *DripRecipeCreate) SetDeletedAt(t time.Time) *DripRecipeCreate {
+	drc.mutation.SetDeletedAt(t)
+	return drc
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (drc *DripRecipeCreate) SetNillableDeletedAt(t *time.Time) *DripRecipeCreate {
+	if t != nil {
+		drc.SetDeletedAt(*t)
+	}
+	return drc
+}
+
 // SetID sets the "id" field.
 func (drc *DripRecipeCreate) SetID(i int32) *DripRecipeCreate {
 	drc.mutation.SetID(i)
@@ -298,6 +312,14 @@ func (drc *DripRecipeCreate) createSpec() (*DripRecipe, *sqlgraph.CreateSpec) {
 			Column: driprecipe.FieldUpdatedAt,
 		})
 		_node.UpdatedAt = value
+	}
+	if value, ok := drc.mutation.DeletedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: driprecipe.FieldDeletedAt,
+		})
+		_node.DeletedAt = value
 	}
 	return _node, _spec
 }

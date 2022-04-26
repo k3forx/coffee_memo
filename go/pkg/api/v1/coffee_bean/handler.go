@@ -22,7 +22,26 @@ type Handler struct {
 
 func Route(r *echo.Group, injector inject.Injector) {
 	h := NewHandler(injector)
+	r.GET("/", h.GetAll)
 	r.POST("/", h.Create)
+}
+
+func (h Handler) GetAll(c echo.Context) error {
+	s, err := session.GetSession(c)
+	if err != nil {
+		return presenter.Error(c, result.Error())
+	}
+	sessionUser := s.GetSessionUser()
+
+	in := coffee_bean.GetAllInput{
+		UserID: sessionUser.ID,
+	}
+	out, res := h.usecase.GetAll(c.Request().Context(), in)
+	if !res.IsOK() {
+		return presenter.Error(c, res)
+	}
+
+	return presenter.JSON(c, newGetAllView(out))
 }
 
 func (h Handler) Create(c echo.Context) error {

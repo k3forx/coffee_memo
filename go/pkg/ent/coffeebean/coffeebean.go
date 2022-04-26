@@ -15,16 +15,25 @@ const (
 	FieldCountry = "country"
 	// FieldShopID holds the string denoting the shop_id field in the database.
 	FieldShopID = "shop_id"
-	// FieldRoastedDegree holds the string denoting the roasted_degree field in the database.
-	FieldRoastedDegree = "roasted_degree"
+	// FieldRoastDegree holds the string denoting the roast_degree field in the database.
+	FieldRoastDegree = "roast_degree"
 	// FieldRoastedAt holds the string denoting the roasted_at field in the database.
 	FieldRoastedAt = "roasted_at"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
+	// EdgeUsersCoffeeBeans holds the string denoting the users_coffee_beans edge name in mutations.
+	EdgeUsersCoffeeBeans = "users_coffee_beans"
 	// Table holds the table name of the coffeebean in the database.
 	Table = "coffee_beans"
+	// UsersCoffeeBeansTable is the table that holds the users_coffee_beans relation/edge.
+	UsersCoffeeBeansTable = "users_coffee_beans"
+	// UsersCoffeeBeansInverseTable is the table name for the UsersCoffeeBean entity.
+	// It exists in this package in order to avoid circular dependency with the "userscoffeebean" package.
+	UsersCoffeeBeansInverseTable = "users_coffee_beans"
+	// UsersCoffeeBeansColumn is the table column denoting the users_coffee_beans relation/edge.
+	UsersCoffeeBeansColumn = "coffee_bean_id"
 )
 
 // Columns holds all SQL columns for coffeebean fields.
@@ -34,7 +43,7 @@ var Columns = []string{
 	FieldFarmName,
 	FieldCountry,
 	FieldShopID,
-	FieldRoastedDegree,
+	FieldRoastDegree,
 	FieldRoastedAt,
 	FieldCreatedAt,
 	FieldUpdatedAt,
