@@ -17,7 +17,9 @@ func TestCoffeeBean_GetAllByUserID(t *testing.T) {
 	t.Parallel()
 
 	coffeeBeanReader := reader.NewCoffeeBeanReader(testClient)
-	user := db_helper.InsertAndDeleteUsers(t, testClient)
+	user := db_helper.InsertAndDeleteUsers(t, testClient, func(u *ent.User) {
+		u.Email = "GetAllByUserID@example.com"
+	})
 	coffeeBean1 := db_helper.InsertAndDeleteCoffeeBean(t, testClient)
 	coffeeBean2 := db_helper.InsertAndDeleteCoffeeBean(t, testClient, func(cb *ent.CoffeeBean) {
 		cb.Name = "test"
