@@ -22,8 +22,8 @@ type Handler struct {
 
 func Route(r *echo.Group, injector inject.Injector) {
 	h := NewHandler(injector)
-	r.GET("/", h.GetAll)
-	r.POST("/", h.Create)
+	r.GET("", h.GetAll)
+	r.POST("", h.Create)
 }
 
 func (h Handler) GetAll(c echo.Context) error {
