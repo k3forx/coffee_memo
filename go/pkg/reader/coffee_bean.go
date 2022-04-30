@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/k3forx/coffee_memo/pkg/ent"
+	"github.com/k3forx/coffee_memo/pkg/ent/userscoffeebean"
 	"github.com/k3forx/coffee_memo/pkg/model"
 )
 
@@ -25,5 +26,19 @@ type CoffeeBeanReader struct {
 var _ CoffeeBean = (*CoffeeBeanReader)(nil)
 
 func (impl *CoffeeBeanReader) GetAllByUserID(ctx context.Context, userID int) ([]model.CoffeeBean, error) {
-	return []model.CoffeeBean{}, nil
+	es, err := impl.db.UsersCoffeeBean.
+		Query().
+		Where(userscoffeebean.UserIDEQ(int32(userID))).
+		WithCoffeeBean().
+		WithUser().
+		All(ctx)
+	if err != nil {
+		return nil, ent.MaskNotFound(err)
+	}
+
+	ms := make([]model.CoffeeBean, len(es))
+	for i, e := range es {
+		ms[i] = model.NewCoffeeBeanWithUser(e)
+	}
+	return ms, nil
 }

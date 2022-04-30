@@ -55,12 +55,6 @@ func (cbc *CoffeeBeanCreate) SetNillableCountry(s *string) *CoffeeBeanCreate {
 	return cbc
 }
 
-// SetShopID sets the "shop_id" field.
-func (cbc *CoffeeBeanCreate) SetShopID(i int32) *CoffeeBeanCreate {
-	cbc.mutation.SetShopID(i)
-	return cbc
-}
-
 // SetRoastDegree sets the "roast_degree" field.
 func (cbc *CoffeeBeanCreate) SetRoastDegree(s string) *CoffeeBeanCreate {
 	cbc.mutation.SetRoastDegree(s)
@@ -187,9 +181,6 @@ func (cbc *CoffeeBeanCreate) check() error {
 	if _, ok := cbc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "CoffeeBean.name"`)}
 	}
-	if _, ok := cbc.mutation.ShopID(); !ok {
-		return &ValidationError{Name: "shop_id", err: errors.New(`ent: missing required field "CoffeeBean.shop_id"`)}
-	}
 	if _, ok := cbc.mutation.RoastDegree(); !ok {
 		return &ValidationError{Name: "roast_degree", err: errors.New(`ent: missing required field "CoffeeBean.roast_degree"`)}
 	}
@@ -255,14 +246,6 @@ func (cbc *CoffeeBeanCreate) createSpec() (*CoffeeBean, *sqlgraph.CreateSpec) {
 			Column: coffeebean.FieldCountry,
 		})
 		_node.Country = value
-	}
-	if value, ok := cbc.mutation.ShopID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
-			Value:  value,
-			Column: coffeebean.FieldShopID,
-		})
-		_node.ShopID = value
 	}
 	if value, ok := cbc.mutation.RoastDegree(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

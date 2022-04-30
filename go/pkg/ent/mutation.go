@@ -46,8 +46,6 @@ type CoffeeBeanMutation struct {
 	name                      *string
 	farm_name                 *string
 	country                   *string
-	shop_id                   *int32
-	addshop_id                *int32
 	roast_degree              *string
 	roasted_at                *time.Time
 	created_at                *time.Time
@@ -299,62 +297,6 @@ func (m *CoffeeBeanMutation) ResetCountry() {
 	delete(m.clearedFields, coffeebean.FieldCountry)
 }
 
-// SetShopID sets the "shop_id" field.
-func (m *CoffeeBeanMutation) SetShopID(i int32) {
-	m.shop_id = &i
-	m.addshop_id = nil
-}
-
-// ShopID returns the value of the "shop_id" field in the mutation.
-func (m *CoffeeBeanMutation) ShopID() (r int32, exists bool) {
-	v := m.shop_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldShopID returns the old "shop_id" field's value of the CoffeeBean entity.
-// If the CoffeeBean object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CoffeeBeanMutation) OldShopID(ctx context.Context) (v int32, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldShopID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldShopID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldShopID: %w", err)
-	}
-	return oldValue.ShopID, nil
-}
-
-// AddShopID adds i to the "shop_id" field.
-func (m *CoffeeBeanMutation) AddShopID(i int32) {
-	if m.addshop_id != nil {
-		*m.addshop_id += i
-	} else {
-		m.addshop_id = &i
-	}
-}
-
-// AddedShopID returns the value that was added to the "shop_id" field in this mutation.
-func (m *CoffeeBeanMutation) AddedShopID() (r int32, exists bool) {
-	v := m.addshop_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetShopID resets all changes to the "shop_id" field.
-func (m *CoffeeBeanMutation) ResetShopID() {
-	m.shop_id = nil
-	m.addshop_id = nil
-}
-
 // SetRoastDegree sets the "roast_degree" field.
 func (m *CoffeeBeanMutation) SetRoastDegree(s string) {
 	m.roast_degree = &s
@@ -585,7 +527,7 @@ func (m *CoffeeBeanMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CoffeeBeanMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 7)
 	if m.name != nil {
 		fields = append(fields, coffeebean.FieldName)
 	}
@@ -594,9 +536,6 @@ func (m *CoffeeBeanMutation) Fields() []string {
 	}
 	if m.country != nil {
 		fields = append(fields, coffeebean.FieldCountry)
-	}
-	if m.shop_id != nil {
-		fields = append(fields, coffeebean.FieldShopID)
 	}
 	if m.roast_degree != nil {
 		fields = append(fields, coffeebean.FieldRoastDegree)
@@ -624,8 +563,6 @@ func (m *CoffeeBeanMutation) Field(name string) (ent.Value, bool) {
 		return m.FarmName()
 	case coffeebean.FieldCountry:
 		return m.Country()
-	case coffeebean.FieldShopID:
-		return m.ShopID()
 	case coffeebean.FieldRoastDegree:
 		return m.RoastDegree()
 	case coffeebean.FieldRoastedAt:
@@ -649,8 +586,6 @@ func (m *CoffeeBeanMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldFarmName(ctx)
 	case coffeebean.FieldCountry:
 		return m.OldCountry(ctx)
-	case coffeebean.FieldShopID:
-		return m.OldShopID(ctx)
 	case coffeebean.FieldRoastDegree:
 		return m.OldRoastDegree(ctx)
 	case coffeebean.FieldRoastedAt:
@@ -689,13 +624,6 @@ func (m *CoffeeBeanMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetCountry(v)
 		return nil
-	case coffeebean.FieldShopID:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetShopID(v)
-		return nil
 	case coffeebean.FieldRoastDegree:
 		v, ok := value.(string)
 		if !ok {
@@ -731,21 +659,13 @@ func (m *CoffeeBeanMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *CoffeeBeanMutation) AddedFields() []string {
-	var fields []string
-	if m.addshop_id != nil {
-		fields = append(fields, coffeebean.FieldShopID)
-	}
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *CoffeeBeanMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case coffeebean.FieldShopID:
-		return m.AddedShopID()
-	}
 	return nil, false
 }
 
@@ -754,13 +674,6 @@ func (m *CoffeeBeanMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *CoffeeBeanMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case coffeebean.FieldShopID:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddShopID(v)
-		return nil
 	}
 	return fmt.Errorf("unknown CoffeeBean numeric field %s", name)
 }
@@ -817,9 +730,6 @@ func (m *CoffeeBeanMutation) ResetField(name string) error {
 		return nil
 	case coffeebean.FieldCountry:
 		m.ResetCountry()
-		return nil
-	case coffeebean.FieldShopID:
-		m.ResetShopID()
 		return nil
 	case coffeebean.FieldRoastDegree:
 		m.ResetRoastDegree()

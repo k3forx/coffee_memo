@@ -114,13 +114,6 @@ func Country(v string) predicate.CoffeeBean {
 	})
 }
 
-// ShopID applies equality check predicate on the "shop_id" field. It's identical to ShopIDEQ.
-func ShopID(v int32) predicate.CoffeeBean {
-	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldShopID), v))
-	})
-}
-
 // RoastDegree applies equality check predicate on the "roast_degree" field. It's identical to RoastDegreeEQ.
 func RoastDegree(v string) predicate.CoffeeBean {
 	return predicate.CoffeeBean(func(s *sql.Selector) {
@@ -507,82 +500,6 @@ func CountryEqualFold(v string) predicate.CoffeeBean {
 func CountryContainsFold(v string) predicate.CoffeeBean {
 	return predicate.CoffeeBean(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldCountry), v))
-	})
-}
-
-// ShopIDEQ applies the EQ predicate on the "shop_id" field.
-func ShopIDEQ(v int32) predicate.CoffeeBean {
-	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldShopID), v))
-	})
-}
-
-// ShopIDNEQ applies the NEQ predicate on the "shop_id" field.
-func ShopIDNEQ(v int32) predicate.CoffeeBean {
-	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldShopID), v))
-	})
-}
-
-// ShopIDIn applies the In predicate on the "shop_id" field.
-func ShopIDIn(vs ...int32) predicate.CoffeeBean {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.CoffeeBean(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldShopID), v...))
-	})
-}
-
-// ShopIDNotIn applies the NotIn predicate on the "shop_id" field.
-func ShopIDNotIn(vs ...int32) predicate.CoffeeBean {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.CoffeeBean(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldShopID), v...))
-	})
-}
-
-// ShopIDGT applies the GT predicate on the "shop_id" field.
-func ShopIDGT(v int32) predicate.CoffeeBean {
-	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldShopID), v))
-	})
-}
-
-// ShopIDGTE applies the GTE predicate on the "shop_id" field.
-func ShopIDGTE(v int32) predicate.CoffeeBean {
-	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldShopID), v))
-	})
-}
-
-// ShopIDLT applies the LT predicate on the "shop_id" field.
-func ShopIDLT(v int32) predicate.CoffeeBean {
-	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldShopID), v))
-	})
-}
-
-// ShopIDLTE applies the LTE predicate on the "shop_id" field.
-func ShopIDLTE(v int32) predicate.CoffeeBean {
-	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldShopID), v))
 	})
 }
 

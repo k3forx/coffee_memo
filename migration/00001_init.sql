@@ -11,7 +11,7 @@ CREATE TABLE `users` (
   `deleted_at` DATETIME DEFAULT NULL,
   PRIMARY KEY (id),
   UNIQUE KEY ukey_users_email (email)
-);
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- +goose StatementEnd
 -- +goose StatementBegin
 -- CREATE TABLE `coffee_shops` (
@@ -32,13 +32,13 @@ CREATE TABLE `coffee_beans` (
   `name` VARCHAR(255) NOT NULL,
   `farm_name` VARCHAR(255),
   `country` VARCHAR(255),
-  `shop_id` INT NOT NULL,
+  -- `shop_id` INT NOT NULL,
   `roast_degree` VARCHAR(255) NOT NULL,
   `roasted_at` DATETIME,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-);
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- +goose StatementEnd
 -- +goose StatementBegin
 CREATE TABLE `users_coffee_beans` (
@@ -51,7 +51,7 @@ CREATE TABLE `users_coffee_beans` (
   PRIMARY KEY (`id`),
   CONSTRAINT fkey_users_coffee_beans_user_id FOREIGN KEY (user_id) REFERENCES users (id),
   CONSTRAINT fkey_users_coffee_beans_coffee_bean_id FOREIGN KEY (coffee_bean_id) REFERENCES coffee_beans (id)
-);
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- +goose StatementEnd
 -- +goose StatementBegin
 CREATE TABLE `drip_recipes` (
@@ -68,11 +68,11 @@ CREATE TABLE `drip_recipes` (
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `deleted_at` DATETIME DEFAULT NULL,
   PRIMARY KEY (`id`)
-);
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- +goose StatementEnd
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE `coffee_shops`;
+-- DROP TABLE `coffee_shops`;
 -- +goose StatementEnd
 -- +goose StatementBegin
 DROP TABLE `users_coffee_beans`;

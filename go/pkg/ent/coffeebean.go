@@ -22,8 +22,6 @@ type CoffeeBean struct {
 	FarmName string `json:"farm_name,omitempty"`
 	// Country holds the value of the "country" field.
 	Country string `json:"country,omitempty"`
-	// ShopID holds the value of the "shop_id" field.
-	ShopID int32 `json:"shop_id,omitempty"`
 	// RoastDegree holds the value of the "roast_degree" field.
 	RoastDegree string `json:"roast_degree,omitempty"`
 	// RoastedAt holds the value of the "roasted_at" field.
@@ -60,7 +58,7 @@ func (*CoffeeBean) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case coffeebean.FieldID, coffeebean.FieldShopID:
+		case coffeebean.FieldID:
 			values[i] = new(sql.NullInt64)
 		case coffeebean.FieldName, coffeebean.FieldFarmName, coffeebean.FieldCountry, coffeebean.FieldRoastDegree:
 			values[i] = new(sql.NullString)
@@ -104,12 +102,6 @@ func (cb *CoffeeBean) assignValues(columns []string, values []interface{}) error
 				return fmt.Errorf("unexpected type %T for field country", values[i])
 			} else if value.Valid {
 				cb.Country = value.String
-			}
-		case coffeebean.FieldShopID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field shop_id", values[i])
-			} else if value.Valid {
-				cb.ShopID = int32(value.Int64)
 			}
 		case coffeebean.FieldRoastDegree:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -174,8 +166,6 @@ func (cb *CoffeeBean) String() string {
 	builder.WriteString(cb.FarmName)
 	builder.WriteString(", country=")
 	builder.WriteString(cb.Country)
-	builder.WriteString(", shop_id=")
-	builder.WriteString(fmt.Sprintf("%v", cb.ShopID))
 	builder.WriteString(", roast_degree=")
 	builder.WriteString(cb.RoastDegree)
 	builder.WriteString(", roasted_at=")

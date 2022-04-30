@@ -13,8 +13,6 @@ const (
 	FieldFarmName = "farm_name"
 	// FieldCountry holds the string denoting the country field in the database.
 	FieldCountry = "country"
-	// FieldShopID holds the string denoting the shop_id field in the database.
-	FieldShopID = "shop_id"
 	// FieldRoastDegree holds the string denoting the roast_degree field in the database.
 	FieldRoastDegree = "roast_degree"
 	// FieldRoastedAt holds the string denoting the roasted_at field in the database.
@@ -42,7 +40,6 @@ var Columns = []string{
 	FieldName,
 	FieldFarmName,
 	FieldCountry,
-	FieldShopID,
 	FieldRoastDegree,
 	FieldRoastedAt,
 	FieldCreatedAt,

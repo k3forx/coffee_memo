@@ -15,7 +15,6 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "farm_name", Type: field.TypeString, Nullable: true},
 		{Name: "country", Type: field.TypeString, Nullable: true},
-		{Name: "shop_id", Type: field.TypeInt32},
 		{Name: "roast_degree", Type: field.TypeString},
 		{Name: "roasted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
