@@ -49,7 +49,7 @@ func TestCoffeeBean_GetAllByUserID(t *testing.T) {
 					Country:  "エチオピア",
 					User: model.User{
 						Username:  "test-user",
-						Email:     "test-email",
+						Email:     "GetAllByUserID@example.com",
 						Flags:     model.UserFlags{0},
 						CreatedAt: time.Date(2020, time.January, 01, 0, 0, 0, 0, time.UTC),
 						UpdatedAt: time.Date(2022, time.March, 20, 0, 0, 0, 0, time.UTC),
@@ -65,7 +65,7 @@ func TestCoffeeBean_GetAllByUserID(t *testing.T) {
 					Country:  "エチオピア",
 					User: model.User{
 						Username:  "test-user",
-						Email:     "test-email",
+						Email:     "GetAllByUserID@example.com",
 						Flags:     model.UserFlags{0},
 						CreatedAt: time.Date(2020, time.January, 01, 0, 0, 0, 0, time.UTC),
 						UpdatedAt: time.Date(2022, time.March, 20, 0, 0, 0, 0, time.UTC),
