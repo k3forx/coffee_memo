@@ -33,10 +33,10 @@ func (h Handler) GetAll(c echo.Context) error {
 	}
 	sessionUser := s.GetSessionUser()
 
-	in := coffee_bean.GetAllInput{
+	in := coffee_bean.GetAllByUserIDInput{
 		UserID: sessionUser.ID,
 	}
-	out, res := h.usecase.GetAll(c.Request().Context(), in)
+	out, res := h.usecase.GetAllByUserID(c.Request().Context(), in)
 	if !res.IsOK() {
 		return presenter.Error(c, res)
 	}

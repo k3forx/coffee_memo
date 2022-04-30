@@ -16,7 +16,7 @@ type CoffeeBeans struct {
 	CoffeeBeans []CoffeeBean `json:"coffeeBeans"`
 }
 
-func newGetAllView(out *coffee_bean.GetAllOutput) CoffeeBeans {
+func newGetAllView(out *coffee_bean.GetAllByUserIDOutput) CoffeeBeans {
 	coffeeBeans := make([]CoffeeBean, len(out.CoffeeBeans))
 	for i, cb := range out.CoffeeBeans {
 		coffeeBeans[i] = CoffeeBean{

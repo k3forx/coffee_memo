@@ -48,3 +48,18 @@ func (mr *MockUsecaseMockRecorder) Create(ctx, in interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockUsecase)(nil).Create), ctx, in)
 }
+
+// GetAllByUserID mocks base method.
+func (m *MockUsecase) GetAllByUserID(ctx context.Context, in GetAllByUserIDInput) (*GetAllByUserIDOutput, *result.Result) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllByUserID", ctx, in)
+	ret0, _ := ret[0].(*GetAllByUserIDOutput)
+	ret1, _ := ret[1].(*result.Result)
+	return ret0, ret1
+}
+
+// GetAllByUserID indicates an expected call of GetAllByUserID.
+func (mr *MockUsecaseMockRecorder) GetAllByUserID(ctx, in interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllByUserID", reflect.TypeOf((*MockUsecase)(nil).GetAllByUserID), ctx, in)
+}

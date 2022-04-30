@@ -6,7 +6,7 @@ import (
 	"github.com/k3forx/coffee_memo/pkg/model"
 )
 
-type GetAllInput struct {
+type GetAllByUserIDInput struct {
 	UserID int
 }
 
