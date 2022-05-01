@@ -14,7 +14,7 @@ type UsersCoffeeBean struct {
 }
 
 func (UsersCoffeeBean) Fields() []ent.Field {
-	return []ent.Field{field.Int32("id"), field.Int32("user_id").Optional(), field.Int32("coffee_bean_id").Optional(), field.Time("created_at"), field.Time("updated_at"), field.Time("deleted_at").Optional()}
+	return []ent.Field{field.Int32("id"), field.Int32("status"), field.Int32("user_id").Optional(), field.Int32("coffee_bean_id").Optional(), field.Time("created_at"), field.Time("updated_at"), field.Time("deleted_at").Optional()}
 }
 func (UsersCoffeeBean) Edges() []ent.Edge {
 	return []ent.Edge{edge.From("coffee_bean", CoffeeBean.Type).Ref("users_coffee_beans").Unique().Field("coffee_bean_id"), edge.From("user", User.Type).Ref("users_coffee_beans").Unique().Field("user_id")}

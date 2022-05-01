@@ -7,6 +7,8 @@ const (
 	Label = "users_coffee_bean"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
 	// FieldCoffeeBeanID holds the string denoting the coffee_bean_id field in the database.
@@ -42,6 +44,7 @@ const (
 // Columns holds all SQL columns for userscoffeebean fields.
 var Columns = []string{
 	FieldID,
+	FieldStatus,
 	FieldUserID,
 	FieldCoffeeBeanID,
 	FieldCreatedAt,

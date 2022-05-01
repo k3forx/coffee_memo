@@ -9,7 +9,7 @@ import (
 	entUser "github.com/k3forx/coffee_memo/pkg/ent/user"
 )
 
-func newUser() *ent.User {
+func NewUser() *ent.User {
 	return &ent.User{
 		Username:  "test-user",
 		Email:     "test-email",
@@ -20,7 +20,7 @@ func newUser() *ent.User {
 	}
 }
 
-func insertUser(client *ent.Client, user *ent.User) (*ent.User, error) {
+func InsertUser(client *ent.Client, user *ent.User) (*ent.User, error) {
 	u, err := client.User.Create().
 		SetUsername(user.Username).
 		SetEmail(user.Email).
@@ -39,12 +39,12 @@ func DeleteUser(ctx context.Context, client *ent.Client, user *ent.User) {
 func InsertAndDeleteUsers(tb testing.TB, client *ent.Client, setters ...func(u *ent.User)) *ent.User {
 	tb.Helper()
 
-	user := newUser()
+	user := NewUser()
 	for _, set := range setters {
 		set(user)
 	}
 
-	u, err := insertUser(client, user)
+	u, err := InsertUser(client, user)
 	if err != nil {
 		tb.Fatalf("InsertAndDeleteUsers failed: %+v\n", err)
 	}

@@ -326,12 +326,12 @@ func (ucbq *UsersCoffeeBeanQuery) WithUser(opts ...func(*UserQuery)) *UsersCoffe
 // Example:
 //
 //	var v []struct {
-//		UserID int32 `json:"user_id,omitempty"`
+//		Status int32 `json:"status,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.UsersCoffeeBean.Query().
-//		GroupBy(userscoffeebean.FieldUserID).
+//		GroupBy(userscoffeebean.FieldStatus).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -355,11 +355,11 @@ func (ucbq *UsersCoffeeBeanQuery) GroupBy(field string, fields ...string) *Users
 // Example:
 //
 //	var v []struct {
-//		UserID int32 `json:"user_id,omitempty"`
+//		Status int32 `json:"status,omitempty"`
 //	}
 //
 //	client.UsersCoffeeBean.Query().
-//		Select(userscoffeebean.FieldUserID).
+//		Select(userscoffeebean.FieldStatus).
 //		Scan(ctx, &v)
 //
 func (ucbq *UsersCoffeeBeanQuery) Select(fields ...string) *UsersCoffeeBeanSelect {
