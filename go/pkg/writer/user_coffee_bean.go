@@ -18,6 +18,7 @@ func NewUserCoffeeBeanWriter(db *ent.Client) *UserCoffeeBeanWriter {
 //go:generate mockgen -source=./user_coffee_bean.go -destination=./mock/user_coffee_bean_mock.go -package=writer
 type UserCoffeeBean interface {
 	Create(ctx context.Context, coffeeBean *model.UserCoffeeBean, user *model.User) error
+	UpdateByID(ctx context.Context, userCoffeeBean *model.UserCoffeeBean) error
 	DeleteByID(ctx context.Context, coffeeBean *model.UserCoffeeBean) error
 }
 
@@ -44,6 +45,23 @@ func (impl *UserCoffeeBeanWriter) Create(ctx context.Context, userCoffeeBean *mo
 		return err
 	}
 	*userCoffeeBean = model.NewUserCoffeeBean(ucb)
+	return nil
+}
+
+func (impl *UserCoffeeBeanWriter) UpdateByID(ctx context.Context, userCoffeeBean *model.UserCoffeeBean) error {
+	if _, err := impl.db.UserCoffeeBean.
+		Update().
+		SetStatus(int32(userCoffeeBean.Status.Num())).
+		SetUserID(int32(userCoffeeBean.User.ID)).
+		SetName(userCoffeeBean.Name).
+		SetFarmName(userCoffeeBean.FarmName).
+		SetCountry(userCoffeeBean.Country).
+		SetRoastDegree(userCoffeeBean.RoastDegree.String()).
+		SetRoastedAt(userCoffeeBean.RoastedAt).
+		SetUpdatedAt(time.Now().In(time.UTC)).
+		Save(ctx); err != nil {
+		return err
+	}
 	return nil
 }
 
