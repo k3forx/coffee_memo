@@ -13,6 +13,51 @@ import (
 	db_helper "github.com/k3forx/coffee_memo/test/db"
 )
 
+func TestCoffeeBean_GetByID(t *testing.T) {
+	t.Parallel()
+
+	coffeeBeanReader := reader.NewCoffeeBeanReader(testClient)
+	coffeeBean := db_helper.InsertAndDeleteCoffeeBean(t, testClient)
+
+	cases := map[string]struct {
+		coffeeBeanID int
+		expected     model.CoffeeBean
+	}{
+		"has_row": {
+			coffeeBeanID: int(coffeeBean.ID),
+			expected: model.CoffeeBean{
+				ID:          int(coffeeBean.ID),
+				Name:        "イルガチャフィ",
+				FarmName:    "",
+				Country:     "エチオピア",
+				RoastDegree: model.RoastDegreeLight,
+				RoastedAt:   time.Date(2022, time.April, 1, 0, 0, 0, 0, time.UTC),
+				CreatedAt:   time.Date(2022, time.April, 29, 0, 0, 0, 0, time.UTC),
+				UpdatedAt:   time.Date(2022, time.April, 29, 0, 0, 0, 0, time.UTC),
+			},
+		},
+		"no_row": {
+			coffeeBeanID: -111,
+			expected:     model.CoffeeBean{},
+		},
+	}
+
+	for name, c := range cases {
+		c := c
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			actual, err := coffeeBeanReader.GetByID(context.Background(), c.coffeeBeanID)
+			if err != nil {
+				t.Errorf("err should be nil, but got %q", err)
+			}
+			if diff := cmp.Diff(c.expected, actual); diff != "" {
+				t.Errorf("GetByID mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
 func TestCoffeeBean_GetAllByUserID(t *testing.T) {
 	t.Parallel()
 
