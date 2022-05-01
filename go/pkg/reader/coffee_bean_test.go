@@ -58,6 +58,70 @@ func TestCoffeeBean_GetByID(t *testing.T) {
 	}
 }
 
+func TestCoffeeBean_GetByIDWithUser(t *testing.T) {
+	t.Parallel()
+
+	impl := reader.NewCoffeeBeanReader(testClient)
+	user := db_helper.InsertAndDeleteUsers(t, testClient, func(u *ent.User) {
+		u.Email = "get-by-id-with-user@example.com"
+	})
+	coffeeBean := db_helper.InsertAndDeleteCoffeeBean(t, testClient)
+	_ = db_helper.InsertAndDeleteUsersCoffeeBeans(t, testClient, user, coffeeBean)
+
+	cases := map[string]struct {
+		coffeeBeanID int
+		expected     model.CoffeeBean
+	}{
+		"has_row": {
+			coffeeBeanID: int(coffeeBean.ID),
+			expected: model.CoffeeBean{
+				Status:   model.CoffeeBeanStatusActive,
+				Name:     "イルガチャフィ",
+				FarmName: "",
+				Country:  "エチオピア",
+				User: model.User{
+					Username:  "test-user",
+					Email:     "get-by-id-with-user@example.com",
+					Flags:     model.UserFlags{0},
+					CreatedAt: time.Date(2020, time.January, 1, 0, 0, 0, 0, time.UTC),
+					UpdatedAt: time.Date(2022, time.March, 20, 0, 0, 0, 0, time.UTC),
+				},
+				RoastDegree: model.RoastDegreeLight,
+				RoastedAt:   time.Date(2022, time.April, 1, 0, 0, 0, 0, time.UTC),
+				CreatedAt:   time.Date(2022, time.April, 29, 0, 0, 0, 0, time.UTC),
+				UpdatedAt:   time.Date(2022, time.April, 29, 0, 0, 0, 0, time.UTC),
+			},
+		},
+		"no_row": {
+			coffeeBeanID: -111,
+			expected: model.CoffeeBean{
+				User: model.User{
+					Flags: nil,
+				},
+			},
+		},
+	}
+
+	for name, c := range cases {
+		c := c
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			actual, err := impl.GetByIDWithUser(context.Background(), c.coffeeBeanID)
+			if err != nil {
+				t.Errorf("err should be nil, but got %q", err)
+			}
+			opts := cmp.Options{
+				cmpopts.IgnoreFields(model.CoffeeBean{}, "ID"),
+				cmpopts.IgnoreFields(model.User{}, "ID"),
+			}
+			if diff := cmp.Diff(c.expected, actual, opts); diff != "" {
+				t.Errorf("GetByIDWithUser mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
 func TestCoffeeBean_GetAllByUserID(t *testing.T) {
 	t.Parallel()
 
@@ -134,7 +198,6 @@ func TestCoffeeBean_GetAllByUserID(t *testing.T) {
 			t.Parallel()
 
 			actual, err := coffeeBeanReader.GetAllByUserID(context.Background(), c.userID)
-
 			if err != nil {
 				t.Errorf("err should be nil, but got %q", err)
 			}

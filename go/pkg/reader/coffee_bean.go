@@ -41,6 +41,7 @@ func (impl *CoffeeBeanReader) GetByIDWithUser(ctx context.Context, coffeeBeanID 
 		Query().
 		Where(userscoffeebean.CoffeeBeanIDEQ(int32(coffeeBeanID))).
 		WithCoffeeBean().
+		WithUser().
 		Only(ctx)
 	if err != nil {
 		return model.CoffeeBean{}, ent.MaskNotFound(err)
