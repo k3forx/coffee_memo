@@ -64,3 +64,18 @@ func (mr *MockCoffeeBeanMockRecorder) GetByID(ctx, coffeeBeanID interface{}) *go
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockCoffeeBean)(nil).GetByID), ctx, coffeeBeanID)
 }
+
+// GetByIDWithUser mocks base method.
+func (m *MockCoffeeBean) GetByIDWithUser(ctx context.Context, coffeeBeanID int) (model.CoffeeBean, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByIDWithUser", ctx, coffeeBeanID)
+	ret0, _ := ret[0].(model.CoffeeBean)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByIDWithUser indicates an expected call of GetByIDWithUser.
+func (mr *MockCoffeeBeanMockRecorder) GetByIDWithUser(ctx, coffeeBeanID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByIDWithUser", reflect.TypeOf((*MockCoffeeBean)(nil).GetByIDWithUser), ctx, coffeeBeanID)
+}

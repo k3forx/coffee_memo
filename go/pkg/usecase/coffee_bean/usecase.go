@@ -83,5 +83,23 @@ func (u *CoffeeBeanUsecase) DeleteByID(ctx context.Context, in DeleteByIDInput) 
 		return result.New(result.CodeNotFound, "アカウントが見つかりません")
 	}
 
+	coffeeBean, err := u.injector.Reader.CoffeeBean.GetByIDWithUser(ctx, in.CoffeeBeanID)
+	if err != nil {
+		logger.Error(ctx, err)
+		return result.Error()
+	}
+	if !coffeeBean.Exists() {
+		return result.New(result.CodeNotFound, "コーヒー豆が存在しません")
+	}
+	if coffeeBean.User.ID != user.ID {
+		return result.New(result.CodeForbidden, "削除できません")
+	}
+
+	coffeeBean.Status = model.CoffeeBeanStatusDeleted
+	if err := u.injector.Writer.CoffeeBean.DeleteByID(ctx, &coffeeBean); err != nil {
+		logger.Error(ctx, err)
+		return result.New(result.CodeInternalError, "削除に失敗しました")
+	}
+
 	return result.OK()
 }

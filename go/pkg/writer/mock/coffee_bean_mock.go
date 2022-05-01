@@ -48,3 +48,17 @@ func (mr *MockCoffeeBeanMockRecorder) Create(ctx, coffeeBean, user interface{}) 
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockCoffeeBean)(nil).Create), ctx, coffeeBean, user)
 }
+
+// DeleteByID mocks base method.
+func (m *MockCoffeeBean) DeleteByID(ctx context.Context, coffeeBean *model.CoffeeBean) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteByID", ctx, coffeeBean)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteByID indicates an expected call of DeleteByID.
+func (mr *MockCoffeeBeanMockRecorder) DeleteByID(ctx, coffeeBean interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteByID", reflect.TypeOf((*MockCoffeeBean)(nil).DeleteByID), ctx, coffeeBean)
+}
