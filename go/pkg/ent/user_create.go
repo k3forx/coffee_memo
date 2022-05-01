@@ -11,7 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/k3forx/coffee_memo/pkg/ent/user"
-	"github.com/k3forx/coffee_memo/pkg/ent/userscoffeebean"
+	"github.com/k3forx/coffee_memo/pkg/ent/usercoffeebean"
 )
 
 // UserCreate is the builder for creating a User entity.
@@ -77,19 +77,19 @@ func (uc *UserCreate) SetID(i int32) *UserCreate {
 	return uc
 }
 
-// AddUsersCoffeeBeanIDs adds the "users_coffee_beans" edge to the UsersCoffeeBean entity by IDs.
-func (uc *UserCreate) AddUsersCoffeeBeanIDs(ids ...int32) *UserCreate {
-	uc.mutation.AddUsersCoffeeBeanIDs(ids...)
+// AddUserCoffeeBeanIDs adds the "user_coffee_beans" edge to the UserCoffeeBean entity by IDs.
+func (uc *UserCreate) AddUserCoffeeBeanIDs(ids ...int32) *UserCreate {
+	uc.mutation.AddUserCoffeeBeanIDs(ids...)
 	return uc
 }
 
-// AddUsersCoffeeBeans adds the "users_coffee_beans" edges to the UsersCoffeeBean entity.
-func (uc *UserCreate) AddUsersCoffeeBeans(u ...*UsersCoffeeBean) *UserCreate {
+// AddUserCoffeeBeans adds the "user_coffee_beans" edges to the UserCoffeeBean entity.
+func (uc *UserCreate) AddUserCoffeeBeans(u ...*UserCoffeeBean) *UserCreate {
 	ids := make([]int32, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uc.AddUsersCoffeeBeanIDs(ids...)
+	return uc.AddUserCoffeeBeanIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -269,17 +269,17 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		})
 		_node.DeletedAt = value
 	}
-	if nodes := uc.mutation.UsersCoffeeBeansIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.UserCoffeeBeansIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.UsersCoffeeBeansTable,
-			Columns: []string{user.UsersCoffeeBeansColumn},
+			Table:   user.UserCoffeeBeansTable,
+			Columns: []string{user.UserCoffeeBeansColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt32,
-					Column: userscoffeebean.FieldID,
+					Column: usercoffeebean.FieldID,
 				},
 			},
 		}

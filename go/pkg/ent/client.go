@@ -9,12 +9,9 @@ import (
 
 	"github.com/k3forx/coffee_memo/pkg/ent/migrate"
 
-	"github.com/k3forx/coffee_memo/pkg/ent/coffeebean"
-	"github.com/k3forx/coffee_memo/pkg/ent/coffeeshop"
-	"github.com/k3forx/coffee_memo/pkg/ent/driprecipe"
 	"github.com/k3forx/coffee_memo/pkg/ent/goosedbversion"
 	"github.com/k3forx/coffee_memo/pkg/ent/user"
-	"github.com/k3forx/coffee_memo/pkg/ent/userscoffeebean"
+	"github.com/k3forx/coffee_memo/pkg/ent/usercoffeebean"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -26,18 +23,12 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
-	// CoffeeBean is the client for interacting with the CoffeeBean builders.
-	CoffeeBean *CoffeeBeanClient
-	// CoffeeShop is the client for interacting with the CoffeeShop builders.
-	CoffeeShop *CoffeeShopClient
-	// DripRecipe is the client for interacting with the DripRecipe builders.
-	DripRecipe *DripRecipeClient
 	// GooseDbVersion is the client for interacting with the GooseDbVersion builders.
 	GooseDbVersion *GooseDbVersionClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
-	// UsersCoffeeBean is the client for interacting with the UsersCoffeeBean builders.
-	UsersCoffeeBean *UsersCoffeeBeanClient
+	// UserCoffeeBean is the client for interacting with the UserCoffeeBean builders.
+	UserCoffeeBean *UserCoffeeBeanClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -51,12 +42,9 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
-	c.CoffeeBean = NewCoffeeBeanClient(c.config)
-	c.CoffeeShop = NewCoffeeShopClient(c.config)
-	c.DripRecipe = NewDripRecipeClient(c.config)
 	c.GooseDbVersion = NewGooseDbVersionClient(c.config)
 	c.User = NewUserClient(c.config)
-	c.UsersCoffeeBean = NewUsersCoffeeBeanClient(c.config)
+	c.UserCoffeeBean = NewUserCoffeeBeanClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -88,14 +76,11 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:             ctx,
-		config:          cfg,
-		CoffeeBean:      NewCoffeeBeanClient(cfg),
-		CoffeeShop:      NewCoffeeShopClient(cfg),
-		DripRecipe:      NewDripRecipeClient(cfg),
-		GooseDbVersion:  NewGooseDbVersionClient(cfg),
-		User:            NewUserClient(cfg),
-		UsersCoffeeBean: NewUsersCoffeeBeanClient(cfg),
+		ctx:            ctx,
+		config:         cfg,
+		GooseDbVersion: NewGooseDbVersionClient(cfg),
+		User:           NewUserClient(cfg),
+		UserCoffeeBean: NewUserCoffeeBeanClient(cfg),
 	}, nil
 }
 
@@ -113,21 +98,18 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:             ctx,
-		config:          cfg,
-		CoffeeBean:      NewCoffeeBeanClient(cfg),
-		CoffeeShop:      NewCoffeeShopClient(cfg),
-		DripRecipe:      NewDripRecipeClient(cfg),
-		GooseDbVersion:  NewGooseDbVersionClient(cfg),
-		User:            NewUserClient(cfg),
-		UsersCoffeeBean: NewUsersCoffeeBeanClient(cfg),
+		ctx:            ctx,
+		config:         cfg,
+		GooseDbVersion: NewGooseDbVersionClient(cfg),
+		User:           NewUserClient(cfg),
+		UserCoffeeBean: NewUserCoffeeBeanClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		CoffeeBean.
+//		GooseDbVersion.
 //		Query().
 //		Count(ctx)
 //
@@ -150,298 +132,9 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.CoffeeBean.Use(hooks...)
-	c.CoffeeShop.Use(hooks...)
-	c.DripRecipe.Use(hooks...)
 	c.GooseDbVersion.Use(hooks...)
 	c.User.Use(hooks...)
-	c.UsersCoffeeBean.Use(hooks...)
-}
-
-// CoffeeBeanClient is a client for the CoffeeBean schema.
-type CoffeeBeanClient struct {
-	config
-}
-
-// NewCoffeeBeanClient returns a client for the CoffeeBean from the given config.
-func NewCoffeeBeanClient(c config) *CoffeeBeanClient {
-	return &CoffeeBeanClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `coffeebean.Hooks(f(g(h())))`.
-func (c *CoffeeBeanClient) Use(hooks ...Hook) {
-	c.hooks.CoffeeBean = append(c.hooks.CoffeeBean, hooks...)
-}
-
-// Create returns a create builder for CoffeeBean.
-func (c *CoffeeBeanClient) Create() *CoffeeBeanCreate {
-	mutation := newCoffeeBeanMutation(c.config, OpCreate)
-	return &CoffeeBeanCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of CoffeeBean entities.
-func (c *CoffeeBeanClient) CreateBulk(builders ...*CoffeeBeanCreate) *CoffeeBeanCreateBulk {
-	return &CoffeeBeanCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for CoffeeBean.
-func (c *CoffeeBeanClient) Update() *CoffeeBeanUpdate {
-	mutation := newCoffeeBeanMutation(c.config, OpUpdate)
-	return &CoffeeBeanUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *CoffeeBeanClient) UpdateOne(cb *CoffeeBean) *CoffeeBeanUpdateOne {
-	mutation := newCoffeeBeanMutation(c.config, OpUpdateOne, withCoffeeBean(cb))
-	return &CoffeeBeanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *CoffeeBeanClient) UpdateOneID(id int32) *CoffeeBeanUpdateOne {
-	mutation := newCoffeeBeanMutation(c.config, OpUpdateOne, withCoffeeBeanID(id))
-	return &CoffeeBeanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for CoffeeBean.
-func (c *CoffeeBeanClient) Delete() *CoffeeBeanDelete {
-	mutation := newCoffeeBeanMutation(c.config, OpDelete)
-	return &CoffeeBeanDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a delete builder for the given entity.
-func (c *CoffeeBeanClient) DeleteOne(cb *CoffeeBean) *CoffeeBeanDeleteOne {
-	return c.DeleteOneID(cb.ID)
-}
-
-// DeleteOneID returns a delete builder for the given id.
-func (c *CoffeeBeanClient) DeleteOneID(id int32) *CoffeeBeanDeleteOne {
-	builder := c.Delete().Where(coffeebean.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &CoffeeBeanDeleteOne{builder}
-}
-
-// Query returns a query builder for CoffeeBean.
-func (c *CoffeeBeanClient) Query() *CoffeeBeanQuery {
-	return &CoffeeBeanQuery{
-		config: c.config,
-	}
-}
-
-// Get returns a CoffeeBean entity by its id.
-func (c *CoffeeBeanClient) Get(ctx context.Context, id int32) (*CoffeeBean, error) {
-	return c.Query().Where(coffeebean.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *CoffeeBeanClient) GetX(ctx context.Context, id int32) *CoffeeBean {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryUsersCoffeeBeans queries the users_coffee_beans edge of a CoffeeBean.
-func (c *CoffeeBeanClient) QueryUsersCoffeeBeans(cb *CoffeeBean) *UsersCoffeeBeanQuery {
-	query := &UsersCoffeeBeanQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := cb.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(coffeebean.Table, coffeebean.FieldID, id),
-			sqlgraph.To(userscoffeebean.Table, userscoffeebean.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, coffeebean.UsersCoffeeBeansTable, coffeebean.UsersCoffeeBeansColumn),
-		)
-		fromV = sqlgraph.Neighbors(cb.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *CoffeeBeanClient) Hooks() []Hook {
-	return c.hooks.CoffeeBean
-}
-
-// CoffeeShopClient is a client for the CoffeeShop schema.
-type CoffeeShopClient struct {
-	config
-}
-
-// NewCoffeeShopClient returns a client for the CoffeeShop from the given config.
-func NewCoffeeShopClient(c config) *CoffeeShopClient {
-	return &CoffeeShopClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `coffeeshop.Hooks(f(g(h())))`.
-func (c *CoffeeShopClient) Use(hooks ...Hook) {
-	c.hooks.CoffeeShop = append(c.hooks.CoffeeShop, hooks...)
-}
-
-// Create returns a create builder for CoffeeShop.
-func (c *CoffeeShopClient) Create() *CoffeeShopCreate {
-	mutation := newCoffeeShopMutation(c.config, OpCreate)
-	return &CoffeeShopCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of CoffeeShop entities.
-func (c *CoffeeShopClient) CreateBulk(builders ...*CoffeeShopCreate) *CoffeeShopCreateBulk {
-	return &CoffeeShopCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for CoffeeShop.
-func (c *CoffeeShopClient) Update() *CoffeeShopUpdate {
-	mutation := newCoffeeShopMutation(c.config, OpUpdate)
-	return &CoffeeShopUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *CoffeeShopClient) UpdateOne(cs *CoffeeShop) *CoffeeShopUpdateOne {
-	mutation := newCoffeeShopMutation(c.config, OpUpdateOne, withCoffeeShop(cs))
-	return &CoffeeShopUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *CoffeeShopClient) UpdateOneID(id int32) *CoffeeShopUpdateOne {
-	mutation := newCoffeeShopMutation(c.config, OpUpdateOne, withCoffeeShopID(id))
-	return &CoffeeShopUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for CoffeeShop.
-func (c *CoffeeShopClient) Delete() *CoffeeShopDelete {
-	mutation := newCoffeeShopMutation(c.config, OpDelete)
-	return &CoffeeShopDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a delete builder for the given entity.
-func (c *CoffeeShopClient) DeleteOne(cs *CoffeeShop) *CoffeeShopDeleteOne {
-	return c.DeleteOneID(cs.ID)
-}
-
-// DeleteOneID returns a delete builder for the given id.
-func (c *CoffeeShopClient) DeleteOneID(id int32) *CoffeeShopDeleteOne {
-	builder := c.Delete().Where(coffeeshop.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &CoffeeShopDeleteOne{builder}
-}
-
-// Query returns a query builder for CoffeeShop.
-func (c *CoffeeShopClient) Query() *CoffeeShopQuery {
-	return &CoffeeShopQuery{
-		config: c.config,
-	}
-}
-
-// Get returns a CoffeeShop entity by its id.
-func (c *CoffeeShopClient) Get(ctx context.Context, id int32) (*CoffeeShop, error) {
-	return c.Query().Where(coffeeshop.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *CoffeeShopClient) GetX(ctx context.Context, id int32) *CoffeeShop {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// Hooks returns the client hooks.
-func (c *CoffeeShopClient) Hooks() []Hook {
-	return c.hooks.CoffeeShop
-}
-
-// DripRecipeClient is a client for the DripRecipe schema.
-type DripRecipeClient struct {
-	config
-}
-
-// NewDripRecipeClient returns a client for the DripRecipe from the given config.
-func NewDripRecipeClient(c config) *DripRecipeClient {
-	return &DripRecipeClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `driprecipe.Hooks(f(g(h())))`.
-func (c *DripRecipeClient) Use(hooks ...Hook) {
-	c.hooks.DripRecipe = append(c.hooks.DripRecipe, hooks...)
-}
-
-// Create returns a create builder for DripRecipe.
-func (c *DripRecipeClient) Create() *DripRecipeCreate {
-	mutation := newDripRecipeMutation(c.config, OpCreate)
-	return &DripRecipeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of DripRecipe entities.
-func (c *DripRecipeClient) CreateBulk(builders ...*DripRecipeCreate) *DripRecipeCreateBulk {
-	return &DripRecipeCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for DripRecipe.
-func (c *DripRecipeClient) Update() *DripRecipeUpdate {
-	mutation := newDripRecipeMutation(c.config, OpUpdate)
-	return &DripRecipeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *DripRecipeClient) UpdateOne(dr *DripRecipe) *DripRecipeUpdateOne {
-	mutation := newDripRecipeMutation(c.config, OpUpdateOne, withDripRecipe(dr))
-	return &DripRecipeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *DripRecipeClient) UpdateOneID(id int32) *DripRecipeUpdateOne {
-	mutation := newDripRecipeMutation(c.config, OpUpdateOne, withDripRecipeID(id))
-	return &DripRecipeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for DripRecipe.
-func (c *DripRecipeClient) Delete() *DripRecipeDelete {
-	mutation := newDripRecipeMutation(c.config, OpDelete)
-	return &DripRecipeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a delete builder for the given entity.
-func (c *DripRecipeClient) DeleteOne(dr *DripRecipe) *DripRecipeDeleteOne {
-	return c.DeleteOneID(dr.ID)
-}
-
-// DeleteOneID returns a delete builder for the given id.
-func (c *DripRecipeClient) DeleteOneID(id int32) *DripRecipeDeleteOne {
-	builder := c.Delete().Where(driprecipe.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &DripRecipeDeleteOne{builder}
-}
-
-// Query returns a query builder for DripRecipe.
-func (c *DripRecipeClient) Query() *DripRecipeQuery {
-	return &DripRecipeQuery{
-		config: c.config,
-	}
-}
-
-// Get returns a DripRecipe entity by its id.
-func (c *DripRecipeClient) Get(ctx context.Context, id int32) (*DripRecipe, error) {
-	return c.Query().Where(driprecipe.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *DripRecipeClient) GetX(ctx context.Context, id int32) *DripRecipe {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// Hooks returns the client hooks.
-func (c *DripRecipeClient) Hooks() []Hook {
-	return c.hooks.DripRecipe
+	c.UserCoffeeBean.Use(hooks...)
 }
 
 // GooseDbVersionClient is a client for the GooseDbVersion schema.
@@ -619,15 +312,15 @@ func (c *UserClient) GetX(ctx context.Context, id int32) *User {
 	return obj
 }
 
-// QueryUsersCoffeeBeans queries the users_coffee_beans edge of a User.
-func (c *UserClient) QueryUsersCoffeeBeans(u *User) *UsersCoffeeBeanQuery {
-	query := &UsersCoffeeBeanQuery{config: c.config}
+// QueryUserCoffeeBeans queries the user_coffee_beans edge of a User.
+func (c *UserClient) QueryUserCoffeeBeans(u *User) *UserCoffeeBeanQuery {
+	query := &UserCoffeeBeanQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(userscoffeebean.Table, userscoffeebean.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.UsersCoffeeBeansTable, user.UsersCoffeeBeansColumn),
+			sqlgraph.To(usercoffeebean.Table, usercoffeebean.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.UserCoffeeBeansTable, user.UserCoffeeBeansColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
@@ -640,84 +333,84 @@ func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
 }
 
-// UsersCoffeeBeanClient is a client for the UsersCoffeeBean schema.
-type UsersCoffeeBeanClient struct {
+// UserCoffeeBeanClient is a client for the UserCoffeeBean schema.
+type UserCoffeeBeanClient struct {
 	config
 }
 
-// NewUsersCoffeeBeanClient returns a client for the UsersCoffeeBean from the given config.
-func NewUsersCoffeeBeanClient(c config) *UsersCoffeeBeanClient {
-	return &UsersCoffeeBeanClient{config: c}
+// NewUserCoffeeBeanClient returns a client for the UserCoffeeBean from the given config.
+func NewUserCoffeeBeanClient(c config) *UserCoffeeBeanClient {
+	return &UserCoffeeBeanClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `userscoffeebean.Hooks(f(g(h())))`.
-func (c *UsersCoffeeBeanClient) Use(hooks ...Hook) {
-	c.hooks.UsersCoffeeBean = append(c.hooks.UsersCoffeeBean, hooks...)
+// A call to `Use(f, g, h)` equals to `usercoffeebean.Hooks(f(g(h())))`.
+func (c *UserCoffeeBeanClient) Use(hooks ...Hook) {
+	c.hooks.UserCoffeeBean = append(c.hooks.UserCoffeeBean, hooks...)
 }
 
-// Create returns a create builder for UsersCoffeeBean.
-func (c *UsersCoffeeBeanClient) Create() *UsersCoffeeBeanCreate {
-	mutation := newUsersCoffeeBeanMutation(c.config, OpCreate)
-	return &UsersCoffeeBeanCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a create builder for UserCoffeeBean.
+func (c *UserCoffeeBeanClient) Create() *UserCoffeeBeanCreate {
+	mutation := newUserCoffeeBeanMutation(c.config, OpCreate)
+	return &UserCoffeeBeanCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of UsersCoffeeBean entities.
-func (c *UsersCoffeeBeanClient) CreateBulk(builders ...*UsersCoffeeBeanCreate) *UsersCoffeeBeanCreateBulk {
-	return &UsersCoffeeBeanCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of UserCoffeeBean entities.
+func (c *UserCoffeeBeanClient) CreateBulk(builders ...*UserCoffeeBeanCreate) *UserCoffeeBeanCreateBulk {
+	return &UserCoffeeBeanCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for UsersCoffeeBean.
-func (c *UsersCoffeeBeanClient) Update() *UsersCoffeeBeanUpdate {
-	mutation := newUsersCoffeeBeanMutation(c.config, OpUpdate)
-	return &UsersCoffeeBeanUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for UserCoffeeBean.
+func (c *UserCoffeeBeanClient) Update() *UserCoffeeBeanUpdate {
+	mutation := newUserCoffeeBeanMutation(c.config, OpUpdate)
+	return &UserCoffeeBeanUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *UsersCoffeeBeanClient) UpdateOne(ucb *UsersCoffeeBean) *UsersCoffeeBeanUpdateOne {
-	mutation := newUsersCoffeeBeanMutation(c.config, OpUpdateOne, withUsersCoffeeBean(ucb))
-	return &UsersCoffeeBeanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *UserCoffeeBeanClient) UpdateOne(ucb *UserCoffeeBean) *UserCoffeeBeanUpdateOne {
+	mutation := newUserCoffeeBeanMutation(c.config, OpUpdateOne, withUserCoffeeBean(ucb))
+	return &UserCoffeeBeanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *UsersCoffeeBeanClient) UpdateOneID(id int32) *UsersCoffeeBeanUpdateOne {
-	mutation := newUsersCoffeeBeanMutation(c.config, OpUpdateOne, withUsersCoffeeBeanID(id))
-	return &UsersCoffeeBeanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *UserCoffeeBeanClient) UpdateOneID(id int32) *UserCoffeeBeanUpdateOne {
+	mutation := newUserCoffeeBeanMutation(c.config, OpUpdateOne, withUserCoffeeBeanID(id))
+	return &UserCoffeeBeanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for UsersCoffeeBean.
-func (c *UsersCoffeeBeanClient) Delete() *UsersCoffeeBeanDelete {
-	mutation := newUsersCoffeeBeanMutation(c.config, OpDelete)
-	return &UsersCoffeeBeanDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for UserCoffeeBean.
+func (c *UserCoffeeBeanClient) Delete() *UserCoffeeBeanDelete {
+	mutation := newUserCoffeeBeanMutation(c.config, OpDelete)
+	return &UserCoffeeBeanDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
-func (c *UsersCoffeeBeanClient) DeleteOne(ucb *UsersCoffeeBean) *UsersCoffeeBeanDeleteOne {
+func (c *UserCoffeeBeanClient) DeleteOne(ucb *UserCoffeeBean) *UserCoffeeBeanDeleteOne {
 	return c.DeleteOneID(ucb.ID)
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *UsersCoffeeBeanClient) DeleteOneID(id int32) *UsersCoffeeBeanDeleteOne {
-	builder := c.Delete().Where(userscoffeebean.ID(id))
+func (c *UserCoffeeBeanClient) DeleteOneID(id int32) *UserCoffeeBeanDeleteOne {
+	builder := c.Delete().Where(usercoffeebean.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &UsersCoffeeBeanDeleteOne{builder}
+	return &UserCoffeeBeanDeleteOne{builder}
 }
 
-// Query returns a query builder for UsersCoffeeBean.
-func (c *UsersCoffeeBeanClient) Query() *UsersCoffeeBeanQuery {
-	return &UsersCoffeeBeanQuery{
+// Query returns a query builder for UserCoffeeBean.
+func (c *UserCoffeeBeanClient) Query() *UserCoffeeBeanQuery {
+	return &UserCoffeeBeanQuery{
 		config: c.config,
 	}
 }
 
-// Get returns a UsersCoffeeBean entity by its id.
-func (c *UsersCoffeeBeanClient) Get(ctx context.Context, id int32) (*UsersCoffeeBean, error) {
-	return c.Query().Where(userscoffeebean.ID(id)).Only(ctx)
+// Get returns a UserCoffeeBean entity by its id.
+func (c *UserCoffeeBeanClient) Get(ctx context.Context, id int32) (*UserCoffeeBean, error) {
+	return c.Query().Where(usercoffeebean.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *UsersCoffeeBeanClient) GetX(ctx context.Context, id int32) *UsersCoffeeBean {
+func (c *UserCoffeeBeanClient) GetX(ctx context.Context, id int32) *UserCoffeeBean {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -725,31 +418,15 @@ func (c *UsersCoffeeBeanClient) GetX(ctx context.Context, id int32) *UsersCoffee
 	return obj
 }
 
-// QueryCoffeeBean queries the coffee_bean edge of a UsersCoffeeBean.
-func (c *UsersCoffeeBeanClient) QueryCoffeeBean(ucb *UsersCoffeeBean) *CoffeeBeanQuery {
-	query := &CoffeeBeanQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := ucb.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(userscoffeebean.Table, userscoffeebean.FieldID, id),
-			sqlgraph.To(coffeebean.Table, coffeebean.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, userscoffeebean.CoffeeBeanTable, userscoffeebean.CoffeeBeanColumn),
-		)
-		fromV = sqlgraph.Neighbors(ucb.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryUser queries the user edge of a UsersCoffeeBean.
-func (c *UsersCoffeeBeanClient) QueryUser(ucb *UsersCoffeeBean) *UserQuery {
+// QueryUser queries the user edge of a UserCoffeeBean.
+func (c *UserCoffeeBeanClient) QueryUser(ucb *UserCoffeeBean) *UserQuery {
 	query := &UserQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := ucb.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(userscoffeebean.Table, userscoffeebean.FieldID, id),
+			sqlgraph.From(usercoffeebean.Table, usercoffeebean.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, userscoffeebean.UserTable, userscoffeebean.UserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, usercoffeebean.UserTable, usercoffeebean.UserColumn),
 		)
 		fromV = sqlgraph.Neighbors(ucb.driver.Dialect(), step)
 		return fromV, nil
@@ -758,6 +435,6 @@ func (c *UsersCoffeeBeanClient) QueryUser(ucb *UsersCoffeeBean) *UserQuery {
 }
 
 // Hooks returns the client hooks.
-func (c *UsersCoffeeBeanClient) Hooks() []Hook {
-	return c.hooks.UsersCoffeeBean
+func (c *UserCoffeeBeanClient) Hooks() []Hook {
+	return c.hooks.UserCoffeeBean
 }

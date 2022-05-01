@@ -793,25 +793,25 @@ func DeletedAtNotNil() predicate.User {
 	})
 }
 
-// HasUsersCoffeeBeans applies the HasEdge predicate on the "users_coffee_beans" edge.
-func HasUsersCoffeeBeans() predicate.User {
+// HasUserCoffeeBeans applies the HasEdge predicate on the "user_coffee_beans" edge.
+func HasUserCoffeeBeans() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UsersCoffeeBeansTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, UsersCoffeeBeansTable, UsersCoffeeBeansColumn),
+			sqlgraph.To(UserCoffeeBeansTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, UserCoffeeBeansTable, UserCoffeeBeansColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasUsersCoffeeBeansWith applies the HasEdge predicate on the "users_coffee_beans" edge with a given conditions (other predicates).
-func HasUsersCoffeeBeansWith(preds ...predicate.UsersCoffeeBean) predicate.User {
+// HasUserCoffeeBeansWith applies the HasEdge predicate on the "user_coffee_beans" edge with a given conditions (other predicates).
+func HasUserCoffeeBeansWith(preds ...predicate.UserCoffeeBean) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UsersCoffeeBeansInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, UsersCoffeeBeansTable, UsersCoffeeBeansColumn),
+			sqlgraph.To(UserCoffeeBeansInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, UserCoffeeBeansTable, UserCoffeeBeansColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

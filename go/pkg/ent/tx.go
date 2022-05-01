@@ -12,18 +12,12 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
-	// CoffeeBean is the client for interacting with the CoffeeBean builders.
-	CoffeeBean *CoffeeBeanClient
-	// CoffeeShop is the client for interacting with the CoffeeShop builders.
-	CoffeeShop *CoffeeShopClient
-	// DripRecipe is the client for interacting with the DripRecipe builders.
-	DripRecipe *DripRecipeClient
 	// GooseDbVersion is the client for interacting with the GooseDbVersion builders.
 	GooseDbVersion *GooseDbVersionClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
-	// UsersCoffeeBean is the client for interacting with the UsersCoffeeBean builders.
-	UsersCoffeeBean *UsersCoffeeBeanClient
+	// UserCoffeeBean is the client for interacting with the UserCoffeeBean builders.
+	UserCoffeeBean *UserCoffeeBeanClient
 
 	// lazily loaded.
 	client     *Client
@@ -159,12 +153,9 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
-	tx.CoffeeBean = NewCoffeeBeanClient(tx.config)
-	tx.CoffeeShop = NewCoffeeShopClient(tx.config)
-	tx.DripRecipe = NewDripRecipeClient(tx.config)
 	tx.GooseDbVersion = NewGooseDbVersionClient(tx.config)
 	tx.User = NewUserClient(tx.config)
-	tx.UsersCoffeeBean = NewUsersCoffeeBeanClient(tx.config)
+	tx.UserCoffeeBean = NewUserCoffeeBeanClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
@@ -174,7 +165,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: CoffeeBean.QueryXXX(), the query will be executed
+// applies a query, for example: GooseDbVersion.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

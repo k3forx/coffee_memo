@@ -13,7 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/k3forx/coffee_memo/pkg/ent/predicate"
 	"github.com/k3forx/coffee_memo/pkg/ent/user"
-	"github.com/k3forx/coffee_memo/pkg/ent/userscoffeebean"
+	"github.com/k3forx/coffee_memo/pkg/ent/usercoffeebean"
 )
 
 // UserQuery is the builder for querying User entities.
@@ -26,7 +26,7 @@ type UserQuery struct {
 	fields     []string
 	predicates []predicate.User
 	// eager-loading edges.
-	withUsersCoffeeBeans *UsersCoffeeBeanQuery
+	withUserCoffeeBeans *UserCoffeeBeanQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -63,9 +63,9 @@ func (uq *UserQuery) Order(o ...OrderFunc) *UserQuery {
 	return uq
 }
 
-// QueryUsersCoffeeBeans chains the current query on the "users_coffee_beans" edge.
-func (uq *UserQuery) QueryUsersCoffeeBeans() *UsersCoffeeBeanQuery {
-	query := &UsersCoffeeBeanQuery{config: uq.config}
+// QueryUserCoffeeBeans chains the current query on the "user_coffee_beans" edge.
+func (uq *UserQuery) QueryUserCoffeeBeans() *UserCoffeeBeanQuery {
+	query := &UserCoffeeBeanQuery{config: uq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -76,8 +76,8 @@ func (uq *UserQuery) QueryUsersCoffeeBeans() *UsersCoffeeBeanQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(userscoffeebean.Table, userscoffeebean.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.UsersCoffeeBeansTable, user.UsersCoffeeBeansColumn),
+			sqlgraph.To(usercoffeebean.Table, usercoffeebean.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.UserCoffeeBeansTable, user.UserCoffeeBeansColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -261,12 +261,12 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:               uq.config,
-		limit:                uq.limit,
-		offset:               uq.offset,
-		order:                append([]OrderFunc{}, uq.order...),
-		predicates:           append([]predicate.User{}, uq.predicates...),
-		withUsersCoffeeBeans: uq.withUsersCoffeeBeans.Clone(),
+		config:              uq.config,
+		limit:               uq.limit,
+		offset:              uq.offset,
+		order:               append([]OrderFunc{}, uq.order...),
+		predicates:          append([]predicate.User{}, uq.predicates...),
+		withUserCoffeeBeans: uq.withUserCoffeeBeans.Clone(),
 		// clone intermediate query.
 		sql:    uq.sql.Clone(),
 		path:   uq.path,
@@ -274,14 +274,14 @@ func (uq *UserQuery) Clone() *UserQuery {
 	}
 }
 
-// WithUsersCoffeeBeans tells the query-builder to eager-load the nodes that are connected to
-// the "users_coffee_beans" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithUsersCoffeeBeans(opts ...func(*UsersCoffeeBeanQuery)) *UserQuery {
-	query := &UsersCoffeeBeanQuery{config: uq.config}
+// WithUserCoffeeBeans tells the query-builder to eager-load the nodes that are connected to
+// the "user_coffee_beans" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithUserCoffeeBeans(opts ...func(*UserCoffeeBeanQuery)) *UserQuery {
+	query := &UserCoffeeBeanQuery{config: uq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withUsersCoffeeBeans = query
+	uq.withUserCoffeeBeans = query
 	return uq
 }
 
@@ -356,7 +356,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
 		loadedTypes = [1]bool{
-			uq.withUsersCoffeeBeans != nil,
+			uq.withUserCoffeeBeans != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -378,16 +378,16 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		return nodes, nil
 	}
 
-	if query := uq.withUsersCoffeeBeans; query != nil {
+	if query := uq.withUserCoffeeBeans; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[int32]*User)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.UsersCoffeeBeans = []*UsersCoffeeBean{}
+			nodes[i].Edges.UserCoffeeBeans = []*UserCoffeeBean{}
 		}
-		query.Where(predicate.UsersCoffeeBean(func(s *sql.Selector) {
-			s.Where(sql.InValues(user.UsersCoffeeBeansColumn, fks...))
+		query.Where(predicate.UserCoffeeBean(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.UserCoffeeBeansColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
@@ -399,7 +399,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			if !ok {
 				return nil, fmt.Errorf(`unexpected foreign-key "user_id" returned %v for node %v`, fk, n.ID)
 			}
-			node.Edges.UsersCoffeeBeans = append(node.Edges.UsersCoffeeBeans, n)
+			node.Edges.UserCoffeeBeans = append(node.Edges.UserCoffeeBeans, n)
 		}
 	}
 

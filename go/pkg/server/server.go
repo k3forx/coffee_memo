@@ -5,8 +5,8 @@ import (
 
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/k3forx/coffee_memo/pkg/api/v1/auth"
-	"github.com/k3forx/coffee_memo/pkg/api/v1/coffee_bean"
 	"github.com/k3forx/coffee_memo/pkg/api/v1/user"
+	"github.com/k3forx/coffee_memo/pkg/api/v1/user_coffee_bean"
 	"github.com/k3forx/coffee_memo/pkg/config"
 	"github.com/k3forx/coffee_memo/pkg/inject"
 	"github.com/labstack/echo-contrib/session"
@@ -50,7 +50,7 @@ func registerRoute(e *echo.Echo, injector inject.Injector) {
 		user.Route(v1APIUser, injector)
 	}
 	{
-		v1APICoffeeBean := v1API.Group("/coffee-beans")
-		coffee_bean.Route(v1APICoffeeBean, injector)
+		v1APIUserCoffeeBean := v1API.Group("/coffee-beans")
+		user_coffee_bean.Route(v1APIUserCoffeeBean, injector)
 	}
 }
