@@ -22,11 +22,12 @@ type Handler struct {
 
 func Route(r *echo.Group, injector inject.Injector) {
 	h := NewHandler(injector)
-	r.GET("", h.GetAll)
+	r.GET("", h.GetAllByUserID)
 	r.POST("", h.Create)
+	r.DELETE("/:id", h.DeleteByID)
 }
 
-func (h Handler) GetAll(c echo.Context) error {
+func (h Handler) GetAllByUserID(c echo.Context) error {
 	s, err := session.GetSession(c)
 	if err != nil {
 		return presenter.Error(c, result.Error())
@@ -67,5 +68,9 @@ func (h Handler) Create(c echo.Context) error {
 		return presenter.Error(c, res)
 	}
 
+	return presenter.Success(c)
+}
+
+func (h Handler) DeleteByID(c echo.Context) error {
 	return presenter.Success(c)
 }

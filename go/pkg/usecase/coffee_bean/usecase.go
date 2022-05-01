@@ -72,3 +72,16 @@ func (u *CoffeeBeanUsecase) Create(ctx context.Context, in CreateInput) *result.
 
 	return result.OK()
 }
+
+func (u *CoffeeBeanUsecase) DeleteByID(ctx context.Context, in DeleteByIDInput) *result.Result {
+	user, err := u.injector.Reader.User.GetByID(ctx, in.UserID)
+	if err != nil {
+		logger.Error(ctx, err)
+		return result.Error()
+	}
+	if !user.Exists() {
+		return result.New(result.CodeNotFound, "アカウントが見つかりません")
+	}
+
+	return result.OK()
+}
