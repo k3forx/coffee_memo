@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/k3forx/coffee_memo/pkg/ent/predicate"
 )
 
@@ -113,17 +114,10 @@ func Country(v string) predicate.CoffeeBean {
 	})
 }
 
-// ShopID applies equality check predicate on the "shop_id" field. It's identical to ShopIDEQ.
-func ShopID(v int32) predicate.CoffeeBean {
+// RoastDegree applies equality check predicate on the "roast_degree" field. It's identical to RoastDegreeEQ.
+func RoastDegree(v string) predicate.CoffeeBean {
 	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldShopID), v))
-	})
-}
-
-// RoastedDegree applies equality check predicate on the "roasted_degree" field. It's identical to RoastedDegreeEQ.
-func RoastedDegree(v string) predicate.CoffeeBean {
-	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldRoastedDegree), v))
+		s.Where(sql.EQ(s.C(FieldRoastDegree), v))
 	})
 }
 
@@ -509,22 +503,22 @@ func CountryContainsFold(v string) predicate.CoffeeBean {
 	})
 }
 
-// ShopIDEQ applies the EQ predicate on the "shop_id" field.
-func ShopIDEQ(v int32) predicate.CoffeeBean {
+// RoastDegreeEQ applies the EQ predicate on the "roast_degree" field.
+func RoastDegreeEQ(v string) predicate.CoffeeBean {
 	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldShopID), v))
+		s.Where(sql.EQ(s.C(FieldRoastDegree), v))
 	})
 }
 
-// ShopIDNEQ applies the NEQ predicate on the "shop_id" field.
-func ShopIDNEQ(v int32) predicate.CoffeeBean {
+// RoastDegreeNEQ applies the NEQ predicate on the "roast_degree" field.
+func RoastDegreeNEQ(v string) predicate.CoffeeBean {
 	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldShopID), v))
+		s.Where(sql.NEQ(s.C(FieldRoastDegree), v))
 	})
 }
 
-// ShopIDIn applies the In predicate on the "shop_id" field.
-func ShopIDIn(vs ...int32) predicate.CoffeeBean {
+// RoastDegreeIn applies the In predicate on the "roast_degree" field.
+func RoastDegreeIn(vs ...string) predicate.CoffeeBean {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -536,12 +530,12 @@ func ShopIDIn(vs ...int32) predicate.CoffeeBean {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldShopID), v...))
+		s.Where(sql.In(s.C(FieldRoastDegree), v...))
 	})
 }
 
-// ShopIDNotIn applies the NotIn predicate on the "shop_id" field.
-func ShopIDNotIn(vs ...int32) predicate.CoffeeBean {
+// RoastDegreeNotIn applies the NotIn predicate on the "roast_degree" field.
+func RoastDegreeNotIn(vs ...string) predicate.CoffeeBean {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -553,146 +547,70 @@ func ShopIDNotIn(vs ...int32) predicate.CoffeeBean {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldShopID), v...))
+		s.Where(sql.NotIn(s.C(FieldRoastDegree), v...))
 	})
 }
 
-// ShopIDGT applies the GT predicate on the "shop_id" field.
-func ShopIDGT(v int32) predicate.CoffeeBean {
+// RoastDegreeGT applies the GT predicate on the "roast_degree" field.
+func RoastDegreeGT(v string) predicate.CoffeeBean {
 	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldShopID), v))
+		s.Where(sql.GT(s.C(FieldRoastDegree), v))
 	})
 }
 
-// ShopIDGTE applies the GTE predicate on the "shop_id" field.
-func ShopIDGTE(v int32) predicate.CoffeeBean {
+// RoastDegreeGTE applies the GTE predicate on the "roast_degree" field.
+func RoastDegreeGTE(v string) predicate.CoffeeBean {
 	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldShopID), v))
+		s.Where(sql.GTE(s.C(FieldRoastDegree), v))
 	})
 }
 
-// ShopIDLT applies the LT predicate on the "shop_id" field.
-func ShopIDLT(v int32) predicate.CoffeeBean {
+// RoastDegreeLT applies the LT predicate on the "roast_degree" field.
+func RoastDegreeLT(v string) predicate.CoffeeBean {
 	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldShopID), v))
+		s.Where(sql.LT(s.C(FieldRoastDegree), v))
 	})
 }
 
-// ShopIDLTE applies the LTE predicate on the "shop_id" field.
-func ShopIDLTE(v int32) predicate.CoffeeBean {
+// RoastDegreeLTE applies the LTE predicate on the "roast_degree" field.
+func RoastDegreeLTE(v string) predicate.CoffeeBean {
 	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldShopID), v))
+		s.Where(sql.LTE(s.C(FieldRoastDegree), v))
 	})
 }
 
-// RoastedDegreeEQ applies the EQ predicate on the "roasted_degree" field.
-func RoastedDegreeEQ(v string) predicate.CoffeeBean {
+// RoastDegreeContains applies the Contains predicate on the "roast_degree" field.
+func RoastDegreeContains(v string) predicate.CoffeeBean {
 	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldRoastedDegree), v))
+		s.Where(sql.Contains(s.C(FieldRoastDegree), v))
 	})
 }
 
-// RoastedDegreeNEQ applies the NEQ predicate on the "roasted_degree" field.
-func RoastedDegreeNEQ(v string) predicate.CoffeeBean {
+// RoastDegreeHasPrefix applies the HasPrefix predicate on the "roast_degree" field.
+func RoastDegreeHasPrefix(v string) predicate.CoffeeBean {
 	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldRoastedDegree), v))
+		s.Where(sql.HasPrefix(s.C(FieldRoastDegree), v))
 	})
 }
 
-// RoastedDegreeIn applies the In predicate on the "roasted_degree" field.
-func RoastedDegreeIn(vs ...string) predicate.CoffeeBean {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
+// RoastDegreeHasSuffix applies the HasSuffix predicate on the "roast_degree" field.
+func RoastDegreeHasSuffix(v string) predicate.CoffeeBean {
 	return predicate.CoffeeBean(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldRoastedDegree), v...))
+		s.Where(sql.HasSuffix(s.C(FieldRoastDegree), v))
 	})
 }
 
-// RoastedDegreeNotIn applies the NotIn predicate on the "roasted_degree" field.
-func RoastedDegreeNotIn(vs ...string) predicate.CoffeeBean {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
+// RoastDegreeEqualFold applies the EqualFold predicate on the "roast_degree" field.
+func RoastDegreeEqualFold(v string) predicate.CoffeeBean {
 	return predicate.CoffeeBean(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldRoastedDegree), v...))
+		s.Where(sql.EqualFold(s.C(FieldRoastDegree), v))
 	})
 }
 
-// RoastedDegreeGT applies the GT predicate on the "roasted_degree" field.
-func RoastedDegreeGT(v string) predicate.CoffeeBean {
+// RoastDegreeContainsFold applies the ContainsFold predicate on the "roast_degree" field.
+func RoastDegreeContainsFold(v string) predicate.CoffeeBean {
 	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldRoastedDegree), v))
-	})
-}
-
-// RoastedDegreeGTE applies the GTE predicate on the "roasted_degree" field.
-func RoastedDegreeGTE(v string) predicate.CoffeeBean {
-	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldRoastedDegree), v))
-	})
-}
-
-// RoastedDegreeLT applies the LT predicate on the "roasted_degree" field.
-func RoastedDegreeLT(v string) predicate.CoffeeBean {
-	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldRoastedDegree), v))
-	})
-}
-
-// RoastedDegreeLTE applies the LTE predicate on the "roasted_degree" field.
-func RoastedDegreeLTE(v string) predicate.CoffeeBean {
-	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldRoastedDegree), v))
-	})
-}
-
-// RoastedDegreeContains applies the Contains predicate on the "roasted_degree" field.
-func RoastedDegreeContains(v string) predicate.CoffeeBean {
-	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldRoastedDegree), v))
-	})
-}
-
-// RoastedDegreeHasPrefix applies the HasPrefix predicate on the "roasted_degree" field.
-func RoastedDegreeHasPrefix(v string) predicate.CoffeeBean {
-	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldRoastedDegree), v))
-	})
-}
-
-// RoastedDegreeHasSuffix applies the HasSuffix predicate on the "roasted_degree" field.
-func RoastedDegreeHasSuffix(v string) predicate.CoffeeBean {
-	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldRoastedDegree), v))
-	})
-}
-
-// RoastedDegreeEqualFold applies the EqualFold predicate on the "roasted_degree" field.
-func RoastedDegreeEqualFold(v string) predicate.CoffeeBean {
-	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldRoastedDegree), v))
-	})
-}
-
-// RoastedDegreeContainsFold applies the ContainsFold predicate on the "roasted_degree" field.
-func RoastedDegreeContainsFold(v string) predicate.CoffeeBean {
-	return predicate.CoffeeBean(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldRoastedDegree), v))
+		s.Where(sql.ContainsFold(s.C(FieldRoastDegree), v))
 	})
 }
 
@@ -935,6 +853,34 @@ func UpdatedAtLT(v time.Time) predicate.CoffeeBean {
 func UpdatedAtLTE(v time.Time) predicate.CoffeeBean {
 	return predicate.CoffeeBean(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// HasUsersCoffeeBeans applies the HasEdge predicate on the "users_coffee_beans" edge.
+func HasUsersCoffeeBeans() predicate.CoffeeBean {
+	return predicate.CoffeeBean(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(UsersCoffeeBeansTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, UsersCoffeeBeansTable, UsersCoffeeBeansColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasUsersCoffeeBeansWith applies the HasEdge predicate on the "users_coffee_beans" edge with a given conditions (other predicates).
+func HasUsersCoffeeBeansWith(preds ...predicate.UsersCoffeeBean) predicate.CoffeeBean {
+	return predicate.CoffeeBean(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(UsersCoffeeBeansInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, UsersCoffeeBeansTable, UsersCoffeeBeansColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
 	})
 }
 

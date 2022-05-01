@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/k3forx/coffee_memo/pkg/ent/coffeebean"
+	"github.com/k3forx/coffee_memo/pkg/ent/userscoffeebean"
 )
 
 // CoffeeBeanCreate is the builder for creating a CoffeeBean entity.
@@ -54,15 +55,9 @@ func (cbc *CoffeeBeanCreate) SetNillableCountry(s *string) *CoffeeBeanCreate {
 	return cbc
 }
 
-// SetShopID sets the "shop_id" field.
-func (cbc *CoffeeBeanCreate) SetShopID(i int32) *CoffeeBeanCreate {
-	cbc.mutation.SetShopID(i)
-	return cbc
-}
-
-// SetRoastedDegree sets the "roasted_degree" field.
-func (cbc *CoffeeBeanCreate) SetRoastedDegree(s string) *CoffeeBeanCreate {
-	cbc.mutation.SetRoastedDegree(s)
+// SetRoastDegree sets the "roast_degree" field.
+func (cbc *CoffeeBeanCreate) SetRoastDegree(s string) *CoffeeBeanCreate {
+	cbc.mutation.SetRoastDegree(s)
 	return cbc
 }
 
@@ -96,6 +91,21 @@ func (cbc *CoffeeBeanCreate) SetUpdatedAt(t time.Time) *CoffeeBeanCreate {
 func (cbc *CoffeeBeanCreate) SetID(i int32) *CoffeeBeanCreate {
 	cbc.mutation.SetID(i)
 	return cbc
+}
+
+// AddUsersCoffeeBeanIDs adds the "users_coffee_beans" edge to the UsersCoffeeBean entity by IDs.
+func (cbc *CoffeeBeanCreate) AddUsersCoffeeBeanIDs(ids ...int32) *CoffeeBeanCreate {
+	cbc.mutation.AddUsersCoffeeBeanIDs(ids...)
+	return cbc
+}
+
+// AddUsersCoffeeBeans adds the "users_coffee_beans" edges to the UsersCoffeeBean entity.
+func (cbc *CoffeeBeanCreate) AddUsersCoffeeBeans(u ...*UsersCoffeeBean) *CoffeeBeanCreate {
+	ids := make([]int32, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return cbc.AddUsersCoffeeBeanIDs(ids...)
 }
 
 // Mutation returns the CoffeeBeanMutation object of the builder.
@@ -171,11 +181,8 @@ func (cbc *CoffeeBeanCreate) check() error {
 	if _, ok := cbc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "CoffeeBean.name"`)}
 	}
-	if _, ok := cbc.mutation.ShopID(); !ok {
-		return &ValidationError{Name: "shop_id", err: errors.New(`ent: missing required field "CoffeeBean.shop_id"`)}
-	}
-	if _, ok := cbc.mutation.RoastedDegree(); !ok {
-		return &ValidationError{Name: "roasted_degree", err: errors.New(`ent: missing required field "CoffeeBean.roasted_degree"`)}
+	if _, ok := cbc.mutation.RoastDegree(); !ok {
+		return &ValidationError{Name: "roast_degree", err: errors.New(`ent: missing required field "CoffeeBean.roast_degree"`)}
 	}
 	if _, ok := cbc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "CoffeeBean.created_at"`)}
@@ -240,21 +247,13 @@ func (cbc *CoffeeBeanCreate) createSpec() (*CoffeeBean, *sqlgraph.CreateSpec) {
 		})
 		_node.Country = value
 	}
-	if value, ok := cbc.mutation.ShopID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
-			Value:  value,
-			Column: coffeebean.FieldShopID,
-		})
-		_node.ShopID = value
-	}
-	if value, ok := cbc.mutation.RoastedDegree(); ok {
+	if value, ok := cbc.mutation.RoastDegree(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: coffeebean.FieldRoastedDegree,
+			Column: coffeebean.FieldRoastDegree,
 		})
-		_node.RoastedDegree = value
+		_node.RoastDegree = value
 	}
 	if value, ok := cbc.mutation.RoastedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -279,6 +278,25 @@ func (cbc *CoffeeBeanCreate) createSpec() (*CoffeeBean, *sqlgraph.CreateSpec) {
 			Column: coffeebean.FieldUpdatedAt,
 		})
 		_node.UpdatedAt = value
+	}
+	if nodes := cbc.mutation.UsersCoffeeBeansIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   coffeebean.UsersCoffeeBeansTable,
+			Columns: []string{coffeebean.UsersCoffeeBeansColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: userscoffeebean.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

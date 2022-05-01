@@ -137,6 +137,26 @@ func (dru *DripRecipeUpdate) SetUpdatedAt(t time.Time) *DripRecipeUpdate {
 	return dru
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (dru *DripRecipeUpdate) SetDeletedAt(t time.Time) *DripRecipeUpdate {
+	dru.mutation.SetDeletedAt(t)
+	return dru
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (dru *DripRecipeUpdate) SetNillableDeletedAt(t *time.Time) *DripRecipeUpdate {
+	if t != nil {
+		dru.SetDeletedAt(*t)
+	}
+	return dru
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (dru *DripRecipeUpdate) ClearDeletedAt() *DripRecipeUpdate {
+	dru.mutation.ClearDeletedAt()
+	return dru
+}
+
 // Mutation returns the DripRecipeMutation object of the builder.
 func (dru *DripRecipeUpdate) Mutation() *DripRecipeMutation {
 	return dru.mutation
@@ -333,6 +353,19 @@ func (dru *DripRecipeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: driprecipe.FieldUpdatedAt,
 		})
 	}
+	if value, ok := dru.mutation.DeletedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: driprecipe.FieldDeletedAt,
+		})
+	}
+	if dru.mutation.DeletedAtCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: driprecipe.FieldDeletedAt,
+		})
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, dru.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{driprecipe.Label}
@@ -458,6 +491,26 @@ func (druo *DripRecipeUpdateOne) SetCreatedAt(t time.Time) *DripRecipeUpdateOne 
 // SetUpdatedAt sets the "updated_at" field.
 func (druo *DripRecipeUpdateOne) SetUpdatedAt(t time.Time) *DripRecipeUpdateOne {
 	druo.mutation.SetUpdatedAt(t)
+	return druo
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (druo *DripRecipeUpdateOne) SetDeletedAt(t time.Time) *DripRecipeUpdateOne {
+	druo.mutation.SetDeletedAt(t)
+	return druo
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (druo *DripRecipeUpdateOne) SetNillableDeletedAt(t *time.Time) *DripRecipeUpdateOne {
+	if t != nil {
+		druo.SetDeletedAt(*t)
+	}
+	return druo
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (druo *DripRecipeUpdateOne) ClearDeletedAt() *DripRecipeUpdateOne {
+	druo.mutation.ClearDeletedAt()
 	return druo
 }
 
@@ -679,6 +732,19 @@ func (druo *DripRecipeUpdateOne) sqlSave(ctx context.Context) (_node *DripRecipe
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: driprecipe.FieldUpdatedAt,
+		})
+	}
+	if value, ok := druo.mutation.DeletedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: driprecipe.FieldDeletedAt,
+		})
+	}
+	if druo.mutation.DeletedAtCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: driprecipe.FieldDeletedAt,
 		})
 	}
 	_node = &DripRecipe{config: druo.config}

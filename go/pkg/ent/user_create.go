@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/k3forx/coffee_memo/pkg/ent/user"
+	"github.com/k3forx/coffee_memo/pkg/ent/userscoffeebean"
 )
 
 // UserCreate is the builder for creating a User entity.
@@ -74,6 +75,21 @@ func (uc *UserCreate) SetNillableDeletedAt(t *time.Time) *UserCreate {
 func (uc *UserCreate) SetID(i int32) *UserCreate {
 	uc.mutation.SetID(i)
 	return uc
+}
+
+// AddUsersCoffeeBeanIDs adds the "users_coffee_beans" edge to the UsersCoffeeBean entity by IDs.
+func (uc *UserCreate) AddUsersCoffeeBeanIDs(ids ...int32) *UserCreate {
+	uc.mutation.AddUsersCoffeeBeanIDs(ids...)
+	return uc
+}
+
+// AddUsersCoffeeBeans adds the "users_coffee_beans" edges to the UsersCoffeeBean entity.
+func (uc *UserCreate) AddUsersCoffeeBeans(u ...*UsersCoffeeBean) *UserCreate {
+	ids := make([]int32, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uc.AddUsersCoffeeBeanIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -252,6 +268,25 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldDeletedAt,
 		})
 		_node.DeletedAt = value
+	}
+	if nodes := uc.mutation.UsersCoffeeBeansIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.UsersCoffeeBeansTable,
+			Columns: []string{user.UsersCoffeeBeansColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: userscoffeebean.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

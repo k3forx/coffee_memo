@@ -17,8 +17,26 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
+	// EdgeCoffeeBean holds the string denoting the coffee_bean edge name in mutations.
+	EdgeCoffeeBean = "coffee_bean"
+	// EdgeUser holds the string denoting the user edge name in mutations.
+	EdgeUser = "user"
 	// Table holds the table name of the userscoffeebean in the database.
 	Table = "users_coffee_beans"
+	// CoffeeBeanTable is the table that holds the coffee_bean relation/edge.
+	CoffeeBeanTable = "users_coffee_beans"
+	// CoffeeBeanInverseTable is the table name for the CoffeeBean entity.
+	// It exists in this package in order to avoid circular dependency with the "coffeebean" package.
+	CoffeeBeanInverseTable = "coffee_beans"
+	// CoffeeBeanColumn is the table column denoting the coffee_bean relation/edge.
+	CoffeeBeanColumn = "coffee_bean_id"
+	// UserTable is the table that holds the user relation/edge.
+	UserTable = "users_coffee_beans"
+	// UserInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	UserInverseTable = "users"
+	// UserColumn is the table column denoting the user relation/edge.
+	UserColumn = "user_id"
 )
 
 // Columns holds all SQL columns for userscoffeebean fields.

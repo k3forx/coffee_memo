@@ -15,4 +15,6 @@ comment:
 ignore:
   - "go/pkg/ent"
   - "**/*_mock.go"
-
+  - "go/test"
+  - "go/pkg/writer/mock"
+  - "go/pkg/reader/mock"

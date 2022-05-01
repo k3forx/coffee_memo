@@ -75,6 +75,7 @@ type CoffeeBean struct {
 	Name        string
 	FarmName    string
 	Country     string
+	User        User
 	RoastDegree RoastDegree
 	RoastedAt   time.Time
 	CreatedAt   time.Time
@@ -91,9 +92,41 @@ func NewCoffeeBean(e *ent.CoffeeBean) CoffeeBean {
 		Name:        e.Name,
 		FarmName:    e.FarmName,
 		Country:     e.Country,
-		RoastDegree: NewRoastDegree(e.RoastedDegree),
+		User:        User{},
+		RoastDegree: NewRoastDegree(e.RoastDegree),
 		RoastedAt:   e.RoastedAt,
 		CreatedAt:   e.CreatedAt,
 		UpdatedAt:   e.UpdatedAt,
 	}
+}
+
+func NewCoffeeBeanWithUser(e *ent.UsersCoffeeBean) CoffeeBean {
+	cb := e.Edges.CoffeeBean
+	u := e.Edges.User
+
+	flags := make([]UserFlag, len(userFlagsList))
+	for i, f := range userFlagsList {
+		if u.Flags&f.Num() == f.Num() {
+			flags[i] = f
+		}
+	}
+	return CoffeeBean{
+		ID:       int(e.ID),
+		Name:     cb.Name,
+		FarmName: cb.FarmName,
+		Country:  cb.Country,
+		User: User{
+			ID:        int(u.ID),
+			Username:  u.Username,
+			Email:     u.Email,
+			Flags:     flags,
+			CreatedAt: u.CreatedAt,
+			UpdatedAt: u.UpdatedAt,
+		},
+		RoastDegree: NewRoastDegree(cb.RoastDegree),
+		RoastedAt:   cb.RoastedAt,
+		CreatedAt:   cb.CreatedAt,
+		UpdatedAt:   cb.UpdatedAt,
+	}
+
 }

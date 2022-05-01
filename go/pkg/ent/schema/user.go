@@ -4,6 +4,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
@@ -14,13 +15,13 @@ type User struct {
 
 // Fields of the User.
 func (User) Fields() []ent.Field {
-	return []ent.Field{field.Int32("id"), field.String("username"), field.String("email").Unique(), field.String("password"), field.Int("flags"), field.
+	return []ent.Field{field.Int32("id"), field.String("username"), field.String("email").Unique(), field.String("password"), field.Int("flags"), field.Time("created_at"), field.Time("updated_at"),
 
 		// Edges of the User.
-		Time("created_at"), field.Time("updated_at"), field.Time("deleted_at").Optional()}
+		field.Time("deleted_at").Optional()}
 
 }
 
 func (User) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{edge.To("users_coffee_beans", UsersCoffeeBean.Type)}
 }

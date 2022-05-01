@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/k3forx/coffee_memo/pkg/ent/coffeebean"
 	"github.com/k3forx/coffee_memo/pkg/ent/predicate"
+	"github.com/k3forx/coffee_memo/pkg/ent/userscoffeebean"
 )
 
 // CoffeeBeanUpdate is the builder for updating CoffeeBean entities.
@@ -74,22 +75,9 @@ func (cbu *CoffeeBeanUpdate) ClearCountry() *CoffeeBeanUpdate {
 	return cbu
 }
 
-// SetShopID sets the "shop_id" field.
-func (cbu *CoffeeBeanUpdate) SetShopID(i int32) *CoffeeBeanUpdate {
-	cbu.mutation.ResetShopID()
-	cbu.mutation.SetShopID(i)
-	return cbu
-}
-
-// AddShopID adds i to the "shop_id" field.
-func (cbu *CoffeeBeanUpdate) AddShopID(i int32) *CoffeeBeanUpdate {
-	cbu.mutation.AddShopID(i)
-	return cbu
-}
-
-// SetRoastedDegree sets the "roasted_degree" field.
-func (cbu *CoffeeBeanUpdate) SetRoastedDegree(s string) *CoffeeBeanUpdate {
-	cbu.mutation.SetRoastedDegree(s)
+// SetRoastDegree sets the "roast_degree" field.
+func (cbu *CoffeeBeanUpdate) SetRoastDegree(s string) *CoffeeBeanUpdate {
+	cbu.mutation.SetRoastDegree(s)
 	return cbu
 }
 
@@ -125,9 +113,45 @@ func (cbu *CoffeeBeanUpdate) SetUpdatedAt(t time.Time) *CoffeeBeanUpdate {
 	return cbu
 }
 
+// AddUsersCoffeeBeanIDs adds the "users_coffee_beans" edge to the UsersCoffeeBean entity by IDs.
+func (cbu *CoffeeBeanUpdate) AddUsersCoffeeBeanIDs(ids ...int32) *CoffeeBeanUpdate {
+	cbu.mutation.AddUsersCoffeeBeanIDs(ids...)
+	return cbu
+}
+
+// AddUsersCoffeeBeans adds the "users_coffee_beans" edges to the UsersCoffeeBean entity.
+func (cbu *CoffeeBeanUpdate) AddUsersCoffeeBeans(u ...*UsersCoffeeBean) *CoffeeBeanUpdate {
+	ids := make([]int32, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return cbu.AddUsersCoffeeBeanIDs(ids...)
+}
+
 // Mutation returns the CoffeeBeanMutation object of the builder.
 func (cbu *CoffeeBeanUpdate) Mutation() *CoffeeBeanMutation {
 	return cbu.mutation
+}
+
+// ClearUsersCoffeeBeans clears all "users_coffee_beans" edges to the UsersCoffeeBean entity.
+func (cbu *CoffeeBeanUpdate) ClearUsersCoffeeBeans() *CoffeeBeanUpdate {
+	cbu.mutation.ClearUsersCoffeeBeans()
+	return cbu
+}
+
+// RemoveUsersCoffeeBeanIDs removes the "users_coffee_beans" edge to UsersCoffeeBean entities by IDs.
+func (cbu *CoffeeBeanUpdate) RemoveUsersCoffeeBeanIDs(ids ...int32) *CoffeeBeanUpdate {
+	cbu.mutation.RemoveUsersCoffeeBeanIDs(ids...)
+	return cbu
+}
+
+// RemoveUsersCoffeeBeans removes "users_coffee_beans" edges to UsersCoffeeBean entities.
+func (cbu *CoffeeBeanUpdate) RemoveUsersCoffeeBeans(u ...*UsersCoffeeBean) *CoffeeBeanUpdate {
+	ids := make([]int32, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return cbu.RemoveUsersCoffeeBeanIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -235,25 +259,11 @@ func (cbu *CoffeeBeanUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: coffeebean.FieldCountry,
 		})
 	}
-	if value, ok := cbu.mutation.ShopID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
-			Value:  value,
-			Column: coffeebean.FieldShopID,
-		})
-	}
-	if value, ok := cbu.mutation.AddedShopID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
-			Value:  value,
-			Column: coffeebean.FieldShopID,
-		})
-	}
-	if value, ok := cbu.mutation.RoastedDegree(); ok {
+	if value, ok := cbu.mutation.RoastDegree(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: coffeebean.FieldRoastedDegree,
+			Column: coffeebean.FieldRoastDegree,
 		})
 	}
 	if value, ok := cbu.mutation.RoastedAt(); ok {
@@ -282,6 +292,60 @@ func (cbu *CoffeeBeanUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Value:  value,
 			Column: coffeebean.FieldUpdatedAt,
 		})
+	}
+	if cbu.mutation.UsersCoffeeBeansCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   coffeebean.UsersCoffeeBeansTable,
+			Columns: []string{coffeebean.UsersCoffeeBeansColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: userscoffeebean.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cbu.mutation.RemovedUsersCoffeeBeansIDs(); len(nodes) > 0 && !cbu.mutation.UsersCoffeeBeansCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   coffeebean.UsersCoffeeBeansTable,
+			Columns: []string{coffeebean.UsersCoffeeBeansColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: userscoffeebean.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cbu.mutation.UsersCoffeeBeansIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   coffeebean.UsersCoffeeBeansTable,
+			Columns: []string{coffeebean.UsersCoffeeBeansColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: userscoffeebean.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, cbu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -348,22 +412,9 @@ func (cbuo *CoffeeBeanUpdateOne) ClearCountry() *CoffeeBeanUpdateOne {
 	return cbuo
 }
 
-// SetShopID sets the "shop_id" field.
-func (cbuo *CoffeeBeanUpdateOne) SetShopID(i int32) *CoffeeBeanUpdateOne {
-	cbuo.mutation.ResetShopID()
-	cbuo.mutation.SetShopID(i)
-	return cbuo
-}
-
-// AddShopID adds i to the "shop_id" field.
-func (cbuo *CoffeeBeanUpdateOne) AddShopID(i int32) *CoffeeBeanUpdateOne {
-	cbuo.mutation.AddShopID(i)
-	return cbuo
-}
-
-// SetRoastedDegree sets the "roasted_degree" field.
-func (cbuo *CoffeeBeanUpdateOne) SetRoastedDegree(s string) *CoffeeBeanUpdateOne {
-	cbuo.mutation.SetRoastedDegree(s)
+// SetRoastDegree sets the "roast_degree" field.
+func (cbuo *CoffeeBeanUpdateOne) SetRoastDegree(s string) *CoffeeBeanUpdateOne {
+	cbuo.mutation.SetRoastDegree(s)
 	return cbuo
 }
 
@@ -399,9 +450,45 @@ func (cbuo *CoffeeBeanUpdateOne) SetUpdatedAt(t time.Time) *CoffeeBeanUpdateOne 
 	return cbuo
 }
 
+// AddUsersCoffeeBeanIDs adds the "users_coffee_beans" edge to the UsersCoffeeBean entity by IDs.
+func (cbuo *CoffeeBeanUpdateOne) AddUsersCoffeeBeanIDs(ids ...int32) *CoffeeBeanUpdateOne {
+	cbuo.mutation.AddUsersCoffeeBeanIDs(ids...)
+	return cbuo
+}
+
+// AddUsersCoffeeBeans adds the "users_coffee_beans" edges to the UsersCoffeeBean entity.
+func (cbuo *CoffeeBeanUpdateOne) AddUsersCoffeeBeans(u ...*UsersCoffeeBean) *CoffeeBeanUpdateOne {
+	ids := make([]int32, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return cbuo.AddUsersCoffeeBeanIDs(ids...)
+}
+
 // Mutation returns the CoffeeBeanMutation object of the builder.
 func (cbuo *CoffeeBeanUpdateOne) Mutation() *CoffeeBeanMutation {
 	return cbuo.mutation
+}
+
+// ClearUsersCoffeeBeans clears all "users_coffee_beans" edges to the UsersCoffeeBean entity.
+func (cbuo *CoffeeBeanUpdateOne) ClearUsersCoffeeBeans() *CoffeeBeanUpdateOne {
+	cbuo.mutation.ClearUsersCoffeeBeans()
+	return cbuo
+}
+
+// RemoveUsersCoffeeBeanIDs removes the "users_coffee_beans" edge to UsersCoffeeBean entities by IDs.
+func (cbuo *CoffeeBeanUpdateOne) RemoveUsersCoffeeBeanIDs(ids ...int32) *CoffeeBeanUpdateOne {
+	cbuo.mutation.RemoveUsersCoffeeBeanIDs(ids...)
+	return cbuo
+}
+
+// RemoveUsersCoffeeBeans removes "users_coffee_beans" edges to UsersCoffeeBean entities.
+func (cbuo *CoffeeBeanUpdateOne) RemoveUsersCoffeeBeans(u ...*UsersCoffeeBean) *CoffeeBeanUpdateOne {
+	ids := make([]int32, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return cbuo.RemoveUsersCoffeeBeanIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -533,25 +620,11 @@ func (cbuo *CoffeeBeanUpdateOne) sqlSave(ctx context.Context) (_node *CoffeeBean
 			Column: coffeebean.FieldCountry,
 		})
 	}
-	if value, ok := cbuo.mutation.ShopID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
-			Value:  value,
-			Column: coffeebean.FieldShopID,
-		})
-	}
-	if value, ok := cbuo.mutation.AddedShopID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
-			Value:  value,
-			Column: coffeebean.FieldShopID,
-		})
-	}
-	if value, ok := cbuo.mutation.RoastedDegree(); ok {
+	if value, ok := cbuo.mutation.RoastDegree(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: coffeebean.FieldRoastedDegree,
+			Column: coffeebean.FieldRoastDegree,
 		})
 	}
 	if value, ok := cbuo.mutation.RoastedAt(); ok {
@@ -580,6 +653,60 @@ func (cbuo *CoffeeBeanUpdateOne) sqlSave(ctx context.Context) (_node *CoffeeBean
 			Value:  value,
 			Column: coffeebean.FieldUpdatedAt,
 		})
+	}
+	if cbuo.mutation.UsersCoffeeBeansCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   coffeebean.UsersCoffeeBeansTable,
+			Columns: []string{coffeebean.UsersCoffeeBeansColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: userscoffeebean.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cbuo.mutation.RemovedUsersCoffeeBeansIDs(); len(nodes) > 0 && !cbuo.mutation.UsersCoffeeBeansCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   coffeebean.UsersCoffeeBeansTable,
+			Columns: []string{coffeebean.UsersCoffeeBeansColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: userscoffeebean.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cbuo.mutation.UsersCoffeeBeansIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   coffeebean.UsersCoffeeBeansTable,
+			Columns: []string{coffeebean.UsersCoffeeBeansColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: userscoffeebean.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &CoffeeBean{config: cbuo.config}
 	_spec.Assign = _node.assignValues

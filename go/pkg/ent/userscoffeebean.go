@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/k3forx/coffee_memo/pkg/ent/coffeebean"
+	"github.com/k3forx/coffee_memo/pkg/ent/user"
 	"github.com/k3forx/coffee_memo/pkg/ent/userscoffeebean"
 )
 
@@ -26,6 +28,48 @@ type UsersCoffeeBean struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// DeletedAt holds the value of the "deleted_at" field.
 	DeletedAt time.Time `json:"deleted_at,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the UsersCoffeeBeanQuery when eager-loading is set.
+	Edges UsersCoffeeBeanEdges `json:"edges"`
+}
+
+// UsersCoffeeBeanEdges holds the relations/edges for other nodes in the graph.
+type UsersCoffeeBeanEdges struct {
+	// CoffeeBean holds the value of the coffee_bean edge.
+	CoffeeBean *CoffeeBean `json:"coffee_bean,omitempty"`
+	// User holds the value of the user edge.
+	User *User `json:"user,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [2]bool
+}
+
+// CoffeeBeanOrErr returns the CoffeeBean value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UsersCoffeeBeanEdges) CoffeeBeanOrErr() (*CoffeeBean, error) {
+	if e.loadedTypes[0] {
+		if e.CoffeeBean == nil {
+			// The edge coffee_bean was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: coffeebean.Label}
+		}
+		return e.CoffeeBean, nil
+	}
+	return nil, &NotLoadedError{edge: "coffee_bean"}
+}
+
+// UserOrErr returns the User value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UsersCoffeeBeanEdges) UserOrErr() (*User, error) {
+	if e.loadedTypes[1] {
+		if e.User == nil {
+			// The edge user was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: user.Label}
+		}
+		return e.User, nil
+	}
+	return nil, &NotLoadedError{edge: "user"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -91,6 +135,16 @@ func (ucb *UsersCoffeeBean) assignValues(columns []string, values []interface{})
 		}
 	}
 	return nil
+}
+
+// QueryCoffeeBean queries the "coffee_bean" edge of the UsersCoffeeBean entity.
+func (ucb *UsersCoffeeBean) QueryCoffeeBean() *CoffeeBeanQuery {
+	return (&UsersCoffeeBeanClient{config: ucb.config}).QueryCoffeeBean(ucb)
+}
+
+// QueryUser queries the "user" edge of the UsersCoffeeBean entity.
+func (ucb *UsersCoffeeBean) QueryUser() *UserQuery {
+	return (&UsersCoffeeBeanClient{config: ucb.config}).QueryUser(ucb)
 }
 
 // Update returns a builder for updating this UsersCoffeeBean.

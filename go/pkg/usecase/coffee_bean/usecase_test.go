@@ -15,6 +15,127 @@ import (
 	writerMock "github.com/k3forx/coffee_memo/pkg/writer/mock"
 )
 
+func TestUsecase_GetAllByUserID(t *testing.T) {
+	t.Parallel()
+
+	err := errors.New("server error")
+	const (
+		userId = 1
+	)
+	returnedUser := model.User{
+		ID: userId,
+	}
+	returnedCoffeeBeans := []model.CoffeeBean{
+		{
+			ID: 11,
+		},
+		{
+			ID: 22,
+		},
+	}
+
+	cases := map[string]struct {
+		setup func(ctrl *gomock.Controller) inject.Injector
+		in    coffee_bean.GetAllByUserIDInput
+		out   *coffee_bean.GetAllByUserIDOutput
+		res   *result.Result
+	}{
+		"success": {
+			setup: func(ctrl *gomock.Controller) inject.Injector {
+				injector := inject.NewMockInjector(ctrl)
+
+				userReader := injector.Reader.User.(*readerMock.MockUser)
+				userReader.EXPECT().GetByID(gomock.Any(), userId).
+					Return(returnedUser, nil)
+
+				coffeeBeanReader := injector.Reader.CoffeeBean.(*readerMock.MockCoffeeBean)
+				coffeeBeanReader.EXPECT().GetAllByUserID(gomock.Any(), userId).
+					Return(returnedCoffeeBeans, nil)
+
+				return injector
+			},
+			in: coffee_bean.GetAllByUserIDInput{
+				UserID: userId,
+			},
+			out: &coffee_bean.GetAllByUserIDOutput{
+				CoffeeBeans: returnedCoffeeBeans,
+			},
+			res: result.OK(),
+		},
+		"error_in_getting_user": {
+			setup: func(ctrl *gomock.Controller) inject.Injector {
+				injector := inject.NewMockInjector(ctrl)
+
+				userReader := injector.Reader.User.(*readerMock.MockUser)
+				userReader.EXPECT().GetByID(gomock.Any(), userId).
+					Return(model.User{}, err)
+
+				return injector
+			},
+			in: coffee_bean.GetAllByUserIDInput{
+				UserID: userId,
+			},
+			out: nil,
+			res: result.Error(),
+		},
+		"user_does_not_exist": {
+			setup: func(ctrl *gomock.Controller) inject.Injector {
+				injector := inject.NewMockInjector(ctrl)
+
+				userReader := injector.Reader.User.(*readerMock.MockUser)
+				userReader.EXPECT().GetByID(gomock.Any(), userId).
+					Return(model.User{}, nil)
+
+				return injector
+			},
+			in: coffee_bean.GetAllByUserIDInput{
+				UserID: userId,
+			},
+			out: nil,
+			res: result.New(result.CodeNotFound, "アカウントが存在しません。"),
+		},
+		"error_in_getting_coffee_beans": {
+			setup: func(ctrl *gomock.Controller) inject.Injector {
+				injector := inject.NewMockInjector(ctrl)
+
+				userReader := injector.Reader.User.(*readerMock.MockUser)
+				userReader.EXPECT().GetByID(gomock.Any(), userId).
+					Return(returnedUser, nil)
+
+				coffeeBeanReader := injector.Reader.CoffeeBean.(*readerMock.MockCoffeeBean)
+				coffeeBeanReader.EXPECT().GetAllByUserID(gomock.Any(), userId).
+					Return(nil, err)
+
+				return injector
+			},
+			in: coffee_bean.GetAllByUserIDInput{
+				UserID: userId,
+			},
+			out: nil,
+			res: result.Error(),
+		},
+	}
+
+	for name, c := range cases {
+		c := c
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			injector := c.setup(ctrl)
+			u := coffee_bean.NewUsecase(injector)
+
+			out, res := u.GetAllByUserID(context.Background(), c.in)
+			if diff := cmp.Diff(c.res, res); diff != "" {
+				t.Errorf("GetAllByUserID result mismatch (-want +got):\n%s", diff)
+			}
+			if diff := cmp.Diff(c.out, out); diff != "" {
+				t.Errorf("GetAllByUserID output mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
 func TestUsecase_Create(t *testing.T) {
 	t.Parallel()
 

@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -12,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/k3forx/coffee_memo/pkg/ent/coffeebean"
 	"github.com/k3forx/coffee_memo/pkg/ent/predicate"
+	"github.com/k3forx/coffee_memo/pkg/ent/userscoffeebean"
 )
 
 // CoffeeBeanQuery is the builder for querying CoffeeBean entities.
@@ -23,6 +25,8 @@ type CoffeeBeanQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.CoffeeBean
+	// eager-loading edges.
+	withUsersCoffeeBeans *UsersCoffeeBeanQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -57,6 +61,28 @@ func (cbq *CoffeeBeanQuery) Unique(unique bool) *CoffeeBeanQuery {
 func (cbq *CoffeeBeanQuery) Order(o ...OrderFunc) *CoffeeBeanQuery {
 	cbq.order = append(cbq.order, o...)
 	return cbq
+}
+
+// QueryUsersCoffeeBeans chains the current query on the "users_coffee_beans" edge.
+func (cbq *CoffeeBeanQuery) QueryUsersCoffeeBeans() *UsersCoffeeBeanQuery {
+	query := &UsersCoffeeBeanQuery{config: cbq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cbq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cbq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(coffeebean.Table, coffeebean.FieldID, selector),
+			sqlgraph.To(userscoffeebean.Table, userscoffeebean.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, coffeebean.UsersCoffeeBeansTable, coffeebean.UsersCoffeeBeansColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(cbq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first CoffeeBean entity from the query.
@@ -235,16 +261,28 @@ func (cbq *CoffeeBeanQuery) Clone() *CoffeeBeanQuery {
 		return nil
 	}
 	return &CoffeeBeanQuery{
-		config:     cbq.config,
-		limit:      cbq.limit,
-		offset:     cbq.offset,
-		order:      append([]OrderFunc{}, cbq.order...),
-		predicates: append([]predicate.CoffeeBean{}, cbq.predicates...),
+		config:               cbq.config,
+		limit:                cbq.limit,
+		offset:               cbq.offset,
+		order:                append([]OrderFunc{}, cbq.order...),
+		predicates:           append([]predicate.CoffeeBean{}, cbq.predicates...),
+		withUsersCoffeeBeans: cbq.withUsersCoffeeBeans.Clone(),
 		// clone intermediate query.
 		sql:    cbq.sql.Clone(),
 		path:   cbq.path,
 		unique: cbq.unique,
 	}
+}
+
+// WithUsersCoffeeBeans tells the query-builder to eager-load the nodes that are connected to
+// the "users_coffee_beans" edge. The optional arguments are used to configure the query builder of the edge.
+func (cbq *CoffeeBeanQuery) WithUsersCoffeeBeans(opts ...func(*UsersCoffeeBeanQuery)) *CoffeeBeanQuery {
+	query := &UsersCoffeeBeanQuery{config: cbq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	cbq.withUsersCoffeeBeans = query
+	return cbq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -315,8 +353,11 @@ func (cbq *CoffeeBeanQuery) prepareQuery(ctx context.Context) error {
 
 func (cbq *CoffeeBeanQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*CoffeeBean, error) {
 	var (
-		nodes = []*CoffeeBean{}
-		_spec = cbq.querySpec()
+		nodes       = []*CoffeeBean{}
+		_spec       = cbq.querySpec()
+		loadedTypes = [1]bool{
+			cbq.withUsersCoffeeBeans != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		return (*CoffeeBean).scanValues(nil, columns)
@@ -324,6 +365,7 @@ func (cbq *CoffeeBeanQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 	_spec.Assign = func(columns []string, values []interface{}) error {
 		node := &CoffeeBean{config: cbq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -335,6 +377,32 @@ func (cbq *CoffeeBeanQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+
+	if query := cbq.withUsersCoffeeBeans; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int32]*CoffeeBean)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.UsersCoffeeBeans = []*UsersCoffeeBean{}
+		}
+		query.Where(predicate.UsersCoffeeBean(func(s *sql.Selector) {
+			s.Where(sql.InValues(coffeebean.UsersCoffeeBeansColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.CoffeeBeanID
+			node, ok := nodeids[fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "coffee_bean_id" returned %v for node %v`, fk, n.ID)
+			}
+			node.Edges.UsersCoffeeBeans = append(node.Edges.UsersCoffeeBeans, n)
+		}
+	}
+
 	return nodes, nil
 }
 

@@ -17,11 +17,31 @@ func NewUsecase(injector inject.Injector) *CoffeeBeanUsecase {
 
 //go:generate mockgen -source=./usecase.go -destination=./usecase_mock.go -package=coffee_bean
 type Usecase interface {
+	GetAllByUserID(ctx context.Context, in GetAllByUserIDInput) (*GetAllByUserIDOutput, *result.Result)
 	Create(ctx context.Context, in CreateInput) *result.Result
 }
 
 type CoffeeBeanUsecase struct {
 	injector inject.Injector
+}
+
+func (u *CoffeeBeanUsecase) GetAllByUserID(ctx context.Context, in GetAllByUserIDInput) (*GetAllByUserIDOutput, *result.Result) {
+	user, err := u.injector.Reader.User.GetByID(ctx, in.UserID)
+	if err != nil {
+		logger.Error(ctx, err)
+		return nil, result.Error()
+	}
+	if !user.Exists() {
+		return nil, result.New(result.CodeNotFound, "アカウントが存在しません。")
+	}
+
+	coffeeBeans, err := u.injector.Reader.CoffeeBean.GetAllByUserID(ctx, user.ID)
+	if err != nil {
+		logger.Error(ctx, err)
+		return nil, result.Error()
+	}
+
+	return &GetAllByUserIDOutput{CoffeeBeans: coffeeBeans}, result.OK()
 }
 
 func (u *CoffeeBeanUsecase) Create(ctx context.Context, in CreateInput) *result.Result {

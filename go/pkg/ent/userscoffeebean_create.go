@@ -10,6 +10,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/k3forx/coffee_memo/pkg/ent/coffeebean"
+	"github.com/k3forx/coffee_memo/pkg/ent/user"
 	"github.com/k3forx/coffee_memo/pkg/ent/userscoffeebean"
 )
 
@@ -26,9 +28,25 @@ func (ucbc *UsersCoffeeBeanCreate) SetUserID(i int32) *UsersCoffeeBeanCreate {
 	return ucbc
 }
 
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (ucbc *UsersCoffeeBeanCreate) SetNillableUserID(i *int32) *UsersCoffeeBeanCreate {
+	if i != nil {
+		ucbc.SetUserID(*i)
+	}
+	return ucbc
+}
+
 // SetCoffeeBeanID sets the "coffee_bean_id" field.
 func (ucbc *UsersCoffeeBeanCreate) SetCoffeeBeanID(i int32) *UsersCoffeeBeanCreate {
 	ucbc.mutation.SetCoffeeBeanID(i)
+	return ucbc
+}
+
+// SetNillableCoffeeBeanID sets the "coffee_bean_id" field if the given value is not nil.
+func (ucbc *UsersCoffeeBeanCreate) SetNillableCoffeeBeanID(i *int32) *UsersCoffeeBeanCreate {
+	if i != nil {
+		ucbc.SetCoffeeBeanID(*i)
+	}
 	return ucbc
 }
 
@@ -62,6 +80,16 @@ func (ucbc *UsersCoffeeBeanCreate) SetNillableDeletedAt(t *time.Time) *UsersCoff
 func (ucbc *UsersCoffeeBeanCreate) SetID(i int32) *UsersCoffeeBeanCreate {
 	ucbc.mutation.SetID(i)
 	return ucbc
+}
+
+// SetCoffeeBean sets the "coffee_bean" edge to the CoffeeBean entity.
+func (ucbc *UsersCoffeeBeanCreate) SetCoffeeBean(c *CoffeeBean) *UsersCoffeeBeanCreate {
+	return ucbc.SetCoffeeBeanID(c.ID)
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (ucbc *UsersCoffeeBeanCreate) SetUser(u *User) *UsersCoffeeBeanCreate {
+	return ucbc.SetUserID(u.ID)
 }
 
 // Mutation returns the UsersCoffeeBeanMutation object of the builder.
@@ -134,12 +162,6 @@ func (ucbc *UsersCoffeeBeanCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (ucbc *UsersCoffeeBeanCreate) check() error {
-	if _, ok := ucbc.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "UsersCoffeeBean.user_id"`)}
-	}
-	if _, ok := ucbc.mutation.CoffeeBeanID(); !ok {
-		return &ValidationError{Name: "coffee_bean_id", err: errors.New(`ent: missing required field "UsersCoffeeBean.coffee_bean_id"`)}
-	}
 	if _, ok := ucbc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "UsersCoffeeBean.created_at"`)}
 	}
@@ -179,22 +201,6 @@ func (ucbc *UsersCoffeeBeanCreate) createSpec() (*UsersCoffeeBean, *sqlgraph.Cre
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := ucbc.mutation.UserID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
-			Value:  value,
-			Column: userscoffeebean.FieldUserID,
-		})
-		_node.UserID = value
-	}
-	if value, ok := ucbc.mutation.CoffeeBeanID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
-			Value:  value,
-			Column: userscoffeebean.FieldCoffeeBeanID,
-		})
-		_node.CoffeeBeanID = value
-	}
 	if value, ok := ucbc.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -218,6 +224,46 @@ func (ucbc *UsersCoffeeBeanCreate) createSpec() (*UsersCoffeeBean, *sqlgraph.Cre
 			Column: userscoffeebean.FieldDeletedAt,
 		})
 		_node.DeletedAt = value
+	}
+	if nodes := ucbc.mutation.CoffeeBeanIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   userscoffeebean.CoffeeBeanTable,
+			Columns: []string{userscoffeebean.CoffeeBeanColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: coffeebean.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.CoffeeBeanID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ucbc.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   userscoffeebean.UserTable,
+			Columns: []string{userscoffeebean.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.UserID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

@@ -30,6 +30,27 @@ type User struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// DeletedAt holds the value of the "deleted_at" field.
 	DeletedAt time.Time `json:"deleted_at,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the UserQuery when eager-loading is set.
+	Edges UserEdges `json:"edges"`
+}
+
+// UserEdges holds the relations/edges for other nodes in the graph.
+type UserEdges struct {
+	// UsersCoffeeBeans holds the value of the users_coffee_beans edge.
+	UsersCoffeeBeans []*UsersCoffeeBean `json:"users_coffee_beans,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// UsersCoffeeBeansOrErr returns the UsersCoffeeBeans value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) UsersCoffeeBeansOrErr() ([]*UsersCoffeeBean, error) {
+	if e.loadedTypes[0] {
+		return e.UsersCoffeeBeans, nil
+	}
+	return nil, &NotLoadedError{edge: "users_coffee_beans"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -109,6 +130,11 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 		}
 	}
 	return nil
+}
+
+// QueryUsersCoffeeBeans queries the "users_coffee_beans" edge of the User entity.
+func (u *User) QueryUsersCoffeeBeans() *UsersCoffeeBeanQuery {
+	return (&UserClient{config: u.config}).QueryUsersCoffeeBeans(u)
 }
 
 // Update returns a builder for updating this User.
