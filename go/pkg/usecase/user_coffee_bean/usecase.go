@@ -74,6 +74,10 @@ func (u *UserCoffeeBeanUsecase) Create(ctx context.Context, in CreateInput) *res
 	return result.OK()
 }
 
+func (u *UserCoffeeBeanUsecase) EditByID(ctx context.Context, in EditByIDInput) *result.Result {
+	return result.OK()
+}
+
 func (u *UserCoffeeBeanUsecase) DeleteByID(ctx context.Context, in DeleteByIDInput) *result.Result {
 	user, err := u.injector.Reader.User.GetByID(ctx, in.UserID)
 	if err != nil {
