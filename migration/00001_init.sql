@@ -43,6 +43,7 @@ CREATE TABLE `coffee_beans` (
 -- +goose StatementBegin
 CREATE TABLE `users_coffee_beans` (
   `id` INT NOT NULL AUTO_INCREMENT,
+  `status` INT NOT NULL,
   `user_id` INT NOT NULL,
   `coffee_bean_id` INT NOT NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

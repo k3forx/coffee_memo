@@ -7,11 +7,13 @@ import (
 
 	"github.com/k3forx/coffee_memo/pkg/ent"
 	"github.com/k3forx/coffee_memo/pkg/ent/userscoffeebean"
+	"github.com/k3forx/coffee_memo/pkg/model"
 )
 
 func InsertUsersCoffeeBeans(tb testing.TB, client *ent.Client, user *ent.User, coffeeBean *ent.CoffeeBean) (*ent.UsersCoffeeBean, error) {
 	ucb, err := client.UsersCoffeeBean.
 		Create().
+		SetStatus(int32(model.CoffeeBeanStatusActive.Num())).
 		SetCoffeeBean(coffeeBean).
 		SetUser(user).
 		SetCreatedAt(time.Date(2022, time.April, 29, 0, 0, 0, 0, time.UTC)).

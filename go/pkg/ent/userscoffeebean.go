@@ -18,6 +18,8 @@ type UsersCoffeeBean struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int32 `json:"id,omitempty"`
+	// Status holds the value of the "status" field.
+	Status int32 `json:"status,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID int32 `json:"user_id,omitempty"`
 	// CoffeeBeanID holds the value of the "coffee_bean_id" field.
@@ -77,7 +79,7 @@ func (*UsersCoffeeBean) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case userscoffeebean.FieldID, userscoffeebean.FieldUserID, userscoffeebean.FieldCoffeeBeanID:
+		case userscoffeebean.FieldID, userscoffeebean.FieldStatus, userscoffeebean.FieldUserID, userscoffeebean.FieldCoffeeBeanID:
 			values[i] = new(sql.NullInt64)
 		case userscoffeebean.FieldCreatedAt, userscoffeebean.FieldUpdatedAt, userscoffeebean.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -102,6 +104,12 @@ func (ucb *UsersCoffeeBean) assignValues(columns []string, values []interface{})
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			ucb.ID = int32(value.Int64)
+		case userscoffeebean.FieldStatus:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field status", values[i])
+			} else if value.Valid {
+				ucb.Status = int32(value.Int64)
+			}
 		case userscoffeebean.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
@@ -170,6 +178,8 @@ func (ucb *UsersCoffeeBean) String() string {
 	var builder strings.Builder
 	builder.WriteString("UsersCoffeeBean(")
 	builder.WriteString(fmt.Sprintf("id=%v", ucb.ID))
+	builder.WriteString(", status=")
+	builder.WriteString(fmt.Sprintf("%v", ucb.Status))
 	builder.WriteString(", user_id=")
 	builder.WriteString(fmt.Sprintf("%v", ucb.UserID))
 	builder.WriteString(", coffee_bean_id=")

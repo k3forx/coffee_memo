@@ -22,6 +22,12 @@ type UsersCoffeeBeanCreate struct {
 	hooks    []Hook
 }
 
+// SetStatus sets the "status" field.
+func (ucbc *UsersCoffeeBeanCreate) SetStatus(i int32) *UsersCoffeeBeanCreate {
+	ucbc.mutation.SetStatus(i)
+	return ucbc
+}
+
 // SetUserID sets the "user_id" field.
 func (ucbc *UsersCoffeeBeanCreate) SetUserID(i int32) *UsersCoffeeBeanCreate {
 	ucbc.mutation.SetUserID(i)
@@ -162,6 +168,9 @@ func (ucbc *UsersCoffeeBeanCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (ucbc *UsersCoffeeBeanCreate) check() error {
+	if _, ok := ucbc.mutation.Status(); !ok {
+		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "UsersCoffeeBean.status"`)}
+	}
 	if _, ok := ucbc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "UsersCoffeeBean.created_at"`)}
 	}
@@ -200,6 +209,14 @@ func (ucbc *UsersCoffeeBeanCreate) createSpec() (*UsersCoffeeBean, *sqlgraph.Cre
 	if id, ok := ucbc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
+	}
+	if value, ok := ucbc.mutation.Status(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  value,
+			Column: userscoffeebean.FieldStatus,
+		})
+		_node.Status = value
 	}
 	if value, ok := ucbc.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

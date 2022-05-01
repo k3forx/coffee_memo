@@ -30,6 +30,19 @@ func (ucbu *UsersCoffeeBeanUpdate) Where(ps ...predicate.UsersCoffeeBean) *Users
 	return ucbu
 }
 
+// SetStatus sets the "status" field.
+func (ucbu *UsersCoffeeBeanUpdate) SetStatus(i int32) *UsersCoffeeBeanUpdate {
+	ucbu.mutation.ResetStatus()
+	ucbu.mutation.SetStatus(i)
+	return ucbu
+}
+
+// AddStatus adds i to the "status" field.
+func (ucbu *UsersCoffeeBeanUpdate) AddStatus(i int32) *UsersCoffeeBeanUpdate {
+	ucbu.mutation.AddStatus(i)
+	return ucbu
+}
+
 // SetUserID sets the "user_id" field.
 func (ucbu *UsersCoffeeBeanUpdate) SetUserID(i int32) *UsersCoffeeBeanUpdate {
 	ucbu.mutation.SetUserID(i)
@@ -201,6 +214,20 @@ func (ucbu *UsersCoffeeBeanUpdate) sqlSave(ctx context.Context) (n int, err erro
 			}
 		}
 	}
+	if value, ok := ucbu.mutation.Status(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  value,
+			Column: userscoffeebean.FieldStatus,
+		})
+	}
+	if value, ok := ucbu.mutation.AddedStatus(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  value,
+			Column: userscoffeebean.FieldStatus,
+		})
+	}
 	if value, ok := ucbu.mutation.CreatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -315,6 +342,19 @@ type UsersCoffeeBeanUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *UsersCoffeeBeanMutation
+}
+
+// SetStatus sets the "status" field.
+func (ucbuo *UsersCoffeeBeanUpdateOne) SetStatus(i int32) *UsersCoffeeBeanUpdateOne {
+	ucbuo.mutation.ResetStatus()
+	ucbuo.mutation.SetStatus(i)
+	return ucbuo
+}
+
+// AddStatus adds i to the "status" field.
+func (ucbuo *UsersCoffeeBeanUpdateOne) AddStatus(i int32) *UsersCoffeeBeanUpdateOne {
+	ucbuo.mutation.AddStatus(i)
+	return ucbuo
 }
 
 // SetUserID sets the "user_id" field.
@@ -511,6 +551,20 @@ func (ucbuo *UsersCoffeeBeanUpdateOne) sqlSave(ctx context.Context) (_node *User
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := ucbuo.mutation.Status(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  value,
+			Column: userscoffeebean.FieldStatus,
+		})
+	}
+	if value, ok := ucbuo.mutation.AddedStatus(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  value,
+			Column: userscoffeebean.FieldStatus,
+		})
 	}
 	if value, ok := ucbuo.mutation.CreatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{

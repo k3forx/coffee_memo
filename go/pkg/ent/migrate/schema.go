@@ -97,6 +97,7 @@ var (
 	// UsersCoffeeBeansColumns holds the columns for the "users_coffee_beans" table.
 	UsersCoffeeBeansColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt32, Increment: true},
+		{Name: "status", Type: field.TypeInt32},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
@@ -111,13 +112,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "users_coffee_beans_coffee_beans_users_coffee_beans",
-				Columns:    []*schema.Column{UsersCoffeeBeansColumns[4]},
+				Columns:    []*schema.Column{UsersCoffeeBeansColumns[5]},
 				RefColumns: []*schema.Column{CoffeeBeansColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "users_coffee_beans_users_users_coffee_beans",
-				Columns:    []*schema.Column{UsersCoffeeBeansColumns[5]},
+				Columns:    []*schema.Column{UsersCoffeeBeansColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
