@@ -1,6 +1,8 @@
 package coffee_bean
 
 import (
+	"strconv"
+
 	"github.com/k3forx/coffee_memo/pkg/inject"
 	"github.com/k3forx/coffee_memo/pkg/model"
 	"github.com/k3forx/coffee_memo/pkg/presenter"
@@ -47,7 +49,6 @@ func (h Handler) GetAllByUserID(c echo.Context) error {
 
 func (h Handler) Create(c echo.Context) error {
 	var req CreateRequest
-
 	_ = c.Bind(&req)
 
 	s, err := session.GetSession(c)
@@ -72,5 +73,24 @@ func (h Handler) Create(c echo.Context) error {
 }
 
 func (h Handler) DeleteByID(c echo.Context) error {
+	coffeeBeanID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return presenter.BadRequest(c, result.CodeBadRequest.String())
+	}
+
+	s, err := session.GetSession(c)
+	if err != nil {
+		return presenter.Error(c, result.Error())
+	}
+	sessionUser := s.GetSessionUser()
+
+	in := coffee_bean.DeleteByIDInput{
+		UserID:       sessionUser.ID,
+		CoffeeBeanID: coffeeBeanID,
+	}
+	if res := h.usecase.DeleteByID(c.Request().Context(), in); !res.IsOK() {
+		return presenter.Error(c, res)
+	}
+
 	return presenter.Success(c)
 }
