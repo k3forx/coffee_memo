@@ -9,45 +9,6 @@ import (
 	"github.com/k3forx/coffee_memo/pkg/ent"
 )
 
-// The CoffeeBeanFunc type is an adapter to allow the use of ordinary
-// function as CoffeeBean mutator.
-type CoffeeBeanFunc func(context.Context, *ent.CoffeeBeanMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f CoffeeBeanFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.CoffeeBeanMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CoffeeBeanMutation", m)
-	}
-	return f(ctx, mv)
-}
-
-// The CoffeeShopFunc type is an adapter to allow the use of ordinary
-// function as CoffeeShop mutator.
-type CoffeeShopFunc func(context.Context, *ent.CoffeeShopMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f CoffeeShopFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.CoffeeShopMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CoffeeShopMutation", m)
-	}
-	return f(ctx, mv)
-}
-
-// The DripRecipeFunc type is an adapter to allow the use of ordinary
-// function as DripRecipe mutator.
-type DripRecipeFunc func(context.Context, *ent.DripRecipeMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f DripRecipeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.DripRecipeMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DripRecipeMutation", m)
-	}
-	return f(ctx, mv)
-}
-
 // The GooseDbVersionFunc type is an adapter to allow the use of ordinary
 // function as GooseDbVersion mutator.
 type GooseDbVersionFunc func(context.Context, *ent.GooseDbVersionMutation) (ent.Value, error)
@@ -74,15 +35,15 @@ func (f UserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 	return f(ctx, mv)
 }
 
-// The UsersCoffeeBeanFunc type is an adapter to allow the use of ordinary
-// function as UsersCoffeeBean mutator.
-type UsersCoffeeBeanFunc func(context.Context, *ent.UsersCoffeeBeanMutation) (ent.Value, error)
+// The UserCoffeeBeanFunc type is an adapter to allow the use of ordinary
+// function as UserCoffeeBean mutator.
+type UserCoffeeBeanFunc func(context.Context, *ent.UserCoffeeBeanMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f UsersCoffeeBeanFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.UsersCoffeeBeanMutation)
+func (f UserCoffeeBeanFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.UserCoffeeBeanMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UsersCoffeeBeanMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserCoffeeBeanMutation", m)
 	}
 	return f(ctx, mv)
 }

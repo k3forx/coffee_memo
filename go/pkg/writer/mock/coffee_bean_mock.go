@@ -36,7 +36,7 @@ func (m *MockCoffeeBean) EXPECT() *MockCoffeeBeanMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockCoffeeBean) Create(ctx context.Context, coffeeBean *model.CoffeeBean, user *model.User) error {
+func (m *MockCoffeeBean) Create(ctx context.Context, coffeeBean *model.UserCoffeeBean, user *model.User) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", ctx, coffeeBean, user)
 	ret0, _ := ret[0].(error)
@@ -50,7 +50,7 @@ func (mr *MockCoffeeBeanMockRecorder) Create(ctx, coffeeBean, user interface{}) 
 }
 
 // DeleteByID mocks base method.
-func (m *MockCoffeeBean) DeleteByID(ctx context.Context, coffeeBean *model.CoffeeBean) error {
+func (m *MockCoffeeBean) DeleteByID(ctx context.Context, coffeeBean *model.UserCoffeeBean) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteByID", ctx, coffeeBean)
 	ret0, _ := ret[0].(error)

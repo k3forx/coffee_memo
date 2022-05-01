@@ -6,20 +6,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// CoffeeBean is the predicate function for coffeebean builders.
-type CoffeeBean func(*sql.Selector)
-
-// CoffeeShop is the predicate function for coffeeshop builders.
-type CoffeeShop func(*sql.Selector)
-
-// DripRecipe is the predicate function for driprecipe builders.
-type DripRecipe func(*sql.Selector)
-
 // GooseDbVersion is the predicate function for goosedbversion builders.
 type GooseDbVersion func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
 
-// UsersCoffeeBean is the predicate function for userscoffeebean builders.
-type UsersCoffeeBean func(*sql.Selector)
+// UserCoffeeBean is the predicate function for usercoffeebean builders.
+type UserCoffeeBean func(*sql.Selector)

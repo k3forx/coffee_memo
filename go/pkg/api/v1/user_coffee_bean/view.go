@@ -1,0 +1,30 @@
+package user_coffee_bean
+
+import (
+	"github.com/k3forx/coffee_memo/pkg/usecase/user_coffee_bean"
+)
+
+type UserCoffeeBean struct {
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
+	FarmName    string `json:"farmName"`
+	RoastDegree string `json:"roastDegree"`
+	RoastedAt   string `json:"roastedAt"`
+}
+
+type UserCoffeeBeans struct {
+	UserCoffeeBeans []UserCoffeeBean `json:"coffeeBeans"`
+}
+
+func newGetAllView(out *user_coffee_bean.GetAllByUserIDOutput) UserCoffeeBeans {
+	userCoffeeBeans := make([]UserCoffeeBean, len(out.CoffeeBeans))
+	for i, cb := range out.CoffeeBeans {
+		userCoffeeBeans[i] = UserCoffeeBean{
+			ID:          cb.ID,
+			Name:        cb.Name,
+			FarmName:    cb.FarmName,
+			RoastDegree: cb.RoastDegree.LocalizedString(),
+		}
+	}
+	return UserCoffeeBeans{UserCoffeeBeans: userCoffeeBeans}
+}

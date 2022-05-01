@@ -22,5 +22,5 @@ func (User) Fields() []ent.Field {
 }
 
 func (User) Edges() []ent.Edge {
-	return []ent.Edge{edge.To("users_coffee_beans", UsersCoffeeBean.Type)}
+	return []ent.Edge{edge.To("user_coffee_beans", UserCoffeeBean.Type)}
 }

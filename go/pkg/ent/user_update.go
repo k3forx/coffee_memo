@@ -13,7 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/k3forx/coffee_memo/pkg/ent/predicate"
 	"github.com/k3forx/coffee_memo/pkg/ent/user"
-	"github.com/k3forx/coffee_memo/pkg/ent/userscoffeebean"
+	"github.com/k3forx/coffee_memo/pkg/ent/usercoffeebean"
 )
 
 // UserUpdate is the builder for updating User entities.
@@ -92,19 +92,19 @@ func (uu *UserUpdate) ClearDeletedAt() *UserUpdate {
 	return uu
 }
 
-// AddUsersCoffeeBeanIDs adds the "users_coffee_beans" edge to the UsersCoffeeBean entity by IDs.
-func (uu *UserUpdate) AddUsersCoffeeBeanIDs(ids ...int32) *UserUpdate {
-	uu.mutation.AddUsersCoffeeBeanIDs(ids...)
+// AddUserCoffeeBeanIDs adds the "user_coffee_beans" edge to the UserCoffeeBean entity by IDs.
+func (uu *UserUpdate) AddUserCoffeeBeanIDs(ids ...int32) *UserUpdate {
+	uu.mutation.AddUserCoffeeBeanIDs(ids...)
 	return uu
 }
 
-// AddUsersCoffeeBeans adds the "users_coffee_beans" edges to the UsersCoffeeBean entity.
-func (uu *UserUpdate) AddUsersCoffeeBeans(u ...*UsersCoffeeBean) *UserUpdate {
+// AddUserCoffeeBeans adds the "user_coffee_beans" edges to the UserCoffeeBean entity.
+func (uu *UserUpdate) AddUserCoffeeBeans(u ...*UserCoffeeBean) *UserUpdate {
 	ids := make([]int32, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uu.AddUsersCoffeeBeanIDs(ids...)
+	return uu.AddUserCoffeeBeanIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -112,25 +112,25 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
 }
 
-// ClearUsersCoffeeBeans clears all "users_coffee_beans" edges to the UsersCoffeeBean entity.
-func (uu *UserUpdate) ClearUsersCoffeeBeans() *UserUpdate {
-	uu.mutation.ClearUsersCoffeeBeans()
+// ClearUserCoffeeBeans clears all "user_coffee_beans" edges to the UserCoffeeBean entity.
+func (uu *UserUpdate) ClearUserCoffeeBeans() *UserUpdate {
+	uu.mutation.ClearUserCoffeeBeans()
 	return uu
 }
 
-// RemoveUsersCoffeeBeanIDs removes the "users_coffee_beans" edge to UsersCoffeeBean entities by IDs.
-func (uu *UserUpdate) RemoveUsersCoffeeBeanIDs(ids ...int32) *UserUpdate {
-	uu.mutation.RemoveUsersCoffeeBeanIDs(ids...)
+// RemoveUserCoffeeBeanIDs removes the "user_coffee_beans" edge to UserCoffeeBean entities by IDs.
+func (uu *UserUpdate) RemoveUserCoffeeBeanIDs(ids ...int32) *UserUpdate {
+	uu.mutation.RemoveUserCoffeeBeanIDs(ids...)
 	return uu
 }
 
-// RemoveUsersCoffeeBeans removes "users_coffee_beans" edges to UsersCoffeeBean entities.
-func (uu *UserUpdate) RemoveUsersCoffeeBeans(u ...*UsersCoffeeBean) *UserUpdate {
+// RemoveUserCoffeeBeans removes "user_coffee_beans" edges to UserCoffeeBean entities.
+func (uu *UserUpdate) RemoveUserCoffeeBeans(u ...*UserCoffeeBean) *UserUpdate {
 	ids := make([]int32, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uu.RemoveUsersCoffeeBeanIDs(ids...)
+	return uu.RemoveUserCoffeeBeanIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -267,33 +267,33 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldDeletedAt,
 		})
 	}
-	if uu.mutation.UsersCoffeeBeansCleared() {
+	if uu.mutation.UserCoffeeBeansCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.UsersCoffeeBeansTable,
-			Columns: []string{user.UsersCoffeeBeansColumn},
+			Table:   user.UserCoffeeBeansTable,
+			Columns: []string{user.UserCoffeeBeansColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt32,
-					Column: userscoffeebean.FieldID,
+					Column: usercoffeebean.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedUsersCoffeeBeansIDs(); len(nodes) > 0 && !uu.mutation.UsersCoffeeBeansCleared() {
+	if nodes := uu.mutation.RemovedUserCoffeeBeansIDs(); len(nodes) > 0 && !uu.mutation.UserCoffeeBeansCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.UsersCoffeeBeansTable,
-			Columns: []string{user.UsersCoffeeBeansColumn},
+			Table:   user.UserCoffeeBeansTable,
+			Columns: []string{user.UserCoffeeBeansColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt32,
-					Column: userscoffeebean.FieldID,
+					Column: usercoffeebean.FieldID,
 				},
 			},
 		}
@@ -302,17 +302,17 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.UsersCoffeeBeansIDs(); len(nodes) > 0 {
+	if nodes := uu.mutation.UserCoffeeBeansIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.UsersCoffeeBeansTable,
-			Columns: []string{user.UsersCoffeeBeansColumn},
+			Table:   user.UserCoffeeBeansTable,
+			Columns: []string{user.UserCoffeeBeansColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt32,
-					Column: userscoffeebean.FieldID,
+					Column: usercoffeebean.FieldID,
 				},
 			},
 		}
@@ -403,19 +403,19 @@ func (uuo *UserUpdateOne) ClearDeletedAt() *UserUpdateOne {
 	return uuo
 }
 
-// AddUsersCoffeeBeanIDs adds the "users_coffee_beans" edge to the UsersCoffeeBean entity by IDs.
-func (uuo *UserUpdateOne) AddUsersCoffeeBeanIDs(ids ...int32) *UserUpdateOne {
-	uuo.mutation.AddUsersCoffeeBeanIDs(ids...)
+// AddUserCoffeeBeanIDs adds the "user_coffee_beans" edge to the UserCoffeeBean entity by IDs.
+func (uuo *UserUpdateOne) AddUserCoffeeBeanIDs(ids ...int32) *UserUpdateOne {
+	uuo.mutation.AddUserCoffeeBeanIDs(ids...)
 	return uuo
 }
 
-// AddUsersCoffeeBeans adds the "users_coffee_beans" edges to the UsersCoffeeBean entity.
-func (uuo *UserUpdateOne) AddUsersCoffeeBeans(u ...*UsersCoffeeBean) *UserUpdateOne {
+// AddUserCoffeeBeans adds the "user_coffee_beans" edges to the UserCoffeeBean entity.
+func (uuo *UserUpdateOne) AddUserCoffeeBeans(u ...*UserCoffeeBean) *UserUpdateOne {
 	ids := make([]int32, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uuo.AddUsersCoffeeBeanIDs(ids...)
+	return uuo.AddUserCoffeeBeanIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -423,25 +423,25 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
-// ClearUsersCoffeeBeans clears all "users_coffee_beans" edges to the UsersCoffeeBean entity.
-func (uuo *UserUpdateOne) ClearUsersCoffeeBeans() *UserUpdateOne {
-	uuo.mutation.ClearUsersCoffeeBeans()
+// ClearUserCoffeeBeans clears all "user_coffee_beans" edges to the UserCoffeeBean entity.
+func (uuo *UserUpdateOne) ClearUserCoffeeBeans() *UserUpdateOne {
+	uuo.mutation.ClearUserCoffeeBeans()
 	return uuo
 }
 
-// RemoveUsersCoffeeBeanIDs removes the "users_coffee_beans" edge to UsersCoffeeBean entities by IDs.
-func (uuo *UserUpdateOne) RemoveUsersCoffeeBeanIDs(ids ...int32) *UserUpdateOne {
-	uuo.mutation.RemoveUsersCoffeeBeanIDs(ids...)
+// RemoveUserCoffeeBeanIDs removes the "user_coffee_beans" edge to UserCoffeeBean entities by IDs.
+func (uuo *UserUpdateOne) RemoveUserCoffeeBeanIDs(ids ...int32) *UserUpdateOne {
+	uuo.mutation.RemoveUserCoffeeBeanIDs(ids...)
 	return uuo
 }
 
-// RemoveUsersCoffeeBeans removes "users_coffee_beans" edges to UsersCoffeeBean entities.
-func (uuo *UserUpdateOne) RemoveUsersCoffeeBeans(u ...*UsersCoffeeBean) *UserUpdateOne {
+// RemoveUserCoffeeBeans removes "user_coffee_beans" edges to UserCoffeeBean entities.
+func (uuo *UserUpdateOne) RemoveUserCoffeeBeans(u ...*UserCoffeeBean) *UserUpdateOne {
 	ids := make([]int32, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uuo.RemoveUsersCoffeeBeanIDs(ids...)
+	return uuo.RemoveUserCoffeeBeanIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -602,33 +602,33 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Column: user.FieldDeletedAt,
 		})
 	}
-	if uuo.mutation.UsersCoffeeBeansCleared() {
+	if uuo.mutation.UserCoffeeBeansCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.UsersCoffeeBeansTable,
-			Columns: []string{user.UsersCoffeeBeansColumn},
+			Table:   user.UserCoffeeBeansTable,
+			Columns: []string{user.UserCoffeeBeansColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt32,
-					Column: userscoffeebean.FieldID,
+					Column: usercoffeebean.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedUsersCoffeeBeansIDs(); len(nodes) > 0 && !uuo.mutation.UsersCoffeeBeansCleared() {
+	if nodes := uuo.mutation.RemovedUserCoffeeBeansIDs(); len(nodes) > 0 && !uuo.mutation.UserCoffeeBeansCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.UsersCoffeeBeansTable,
-			Columns: []string{user.UsersCoffeeBeansColumn},
+			Table:   user.UserCoffeeBeansTable,
+			Columns: []string{user.UserCoffeeBeansColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt32,
-					Column: userscoffeebean.FieldID,
+					Column: usercoffeebean.FieldID,
 				},
 			},
 		}
@@ -637,17 +637,17 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.UsersCoffeeBeansIDs(); len(nodes) > 0 {
+	if nodes := uuo.mutation.UserCoffeeBeansIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.UsersCoffeeBeansTable,
-			Columns: []string{user.UsersCoffeeBeansColumn},
+			Table:   user.UserCoffeeBeansTable,
+			Columns: []string{user.UserCoffeeBeansColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt32,
-					Column: userscoffeebean.FieldID,
+					Column: usercoffeebean.FieldID,
 				},
 			},
 		}

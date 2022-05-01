@@ -9,61 +9,6 @@ import (
 )
 
 var (
-	// CoffeeBeansColumns holds the columns for the "coffee_beans" table.
-	CoffeeBeansColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt32, Increment: true},
-		{Name: "name", Type: field.TypeString},
-		{Name: "farm_name", Type: field.TypeString, Nullable: true},
-		{Name: "country", Type: field.TypeString, Nullable: true},
-		{Name: "roast_degree", Type: field.TypeString},
-		{Name: "roasted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-	}
-	// CoffeeBeansTable holds the schema information for the "coffee_beans" table.
-	CoffeeBeansTable = &schema.Table{
-		Name:       "coffee_beans",
-		Columns:    CoffeeBeansColumns,
-		PrimaryKey: []*schema.Column{CoffeeBeansColumns[0]},
-	}
-	// CoffeeShopsColumns holds the columns for the "coffee_shops" table.
-	CoffeeShopsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt32, Increment: true},
-		{Name: "name", Type: field.TypeString},
-		{Name: "shop_url", Type: field.TypeString, Nullable: true},
-		{Name: "open_time", Type: field.TypeTime, Nullable: true},
-		{Name: "close_time", Type: field.TypeTime, Nullable: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "closed_at", Type: field.TypeTime, Nullable: true},
-	}
-	// CoffeeShopsTable holds the schema information for the "coffee_shops" table.
-	CoffeeShopsTable = &schema.Table{
-		Name:       "coffee_shops",
-		Columns:    CoffeeShopsColumns,
-		PrimaryKey: []*schema.Column{CoffeeShopsColumns[0]},
-	}
-	// DripRecipesColumns holds the columns for the "drip_recipes" table.
-	DripRecipesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt32, Increment: true},
-		{Name: "user_id", Type: field.TypeInt32},
-		{Name: "coffee_bean_id", Type: field.TypeInt32},
-		{Name: "coffee_bean_weight", Type: field.TypeFloat64},
-		{Name: "liquid_weight", Type: field.TypeFloat64},
-		{Name: "temperature", Type: field.TypeFloat64},
-		{Name: "steam_time", Type: field.TypeInt32},
-		{Name: "drip_time", Type: field.TypeInt32},
-		{Name: "memo", Type: field.TypeString},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-	}
-	// DripRecipesTable holds the schema information for the "drip_recipes" table.
-	DripRecipesTable = &schema.Table{
-		Name:       "drip_recipes",
-		Columns:    DripRecipesColumns,
-		PrimaryKey: []*schema.Column{DripRecipesColumns[0]},
-	}
 	// GooseDbVersionColumns holds the columns for the "goose_db_version" table.
 	GooseDbVersionColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint64, Increment: true},
@@ -94,31 +39,28 @@ var (
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
-	// UsersCoffeeBeansColumns holds the columns for the "users_coffee_beans" table.
-	UsersCoffeeBeansColumns = []*schema.Column{
+	// UserCoffeeBeansColumns holds the columns for the "user_coffee_beans" table.
+	UserCoffeeBeansColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt32, Increment: true},
 		{Name: "status", Type: field.TypeInt32},
+		{Name: "name", Type: field.TypeString},
+		{Name: "farm_name", Type: field.TypeString, Nullable: true},
+		{Name: "country", Type: field.TypeString, Nullable: true},
+		{Name: "roast_degree", Type: field.TypeString},
+		{Name: "roasted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "coffee_bean_id", Type: field.TypeInt32, Nullable: true},
 		{Name: "user_id", Type: field.TypeInt32, Nullable: true},
 	}
-	// UsersCoffeeBeansTable holds the schema information for the "users_coffee_beans" table.
-	UsersCoffeeBeansTable = &schema.Table{
-		Name:       "users_coffee_beans",
-		Columns:    UsersCoffeeBeansColumns,
-		PrimaryKey: []*schema.Column{UsersCoffeeBeansColumns[0]},
+	// UserCoffeeBeansTable holds the schema information for the "user_coffee_beans" table.
+	UserCoffeeBeansTable = &schema.Table{
+		Name:       "user_coffee_beans",
+		Columns:    UserCoffeeBeansColumns,
+		PrimaryKey: []*schema.Column{UserCoffeeBeansColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "users_coffee_beans_coffee_beans_users_coffee_beans",
-				Columns:    []*schema.Column{UsersCoffeeBeansColumns[5]},
-				RefColumns: []*schema.Column{CoffeeBeansColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:     "users_coffee_beans_users_users_coffee_beans",
-				Columns:    []*schema.Column{UsersCoffeeBeansColumns[6]},
+				Symbol:     "user_coffee_beans_users_user_coffee_beans",
+				Columns:    []*schema.Column{UserCoffeeBeansColumns[9]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -126,12 +68,9 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		CoffeeBeansTable,
-		CoffeeShopsTable,
-		DripRecipesTable,
 		GooseDbVersionTable,
 		UsersTable,
-		UsersCoffeeBeansTable,
+		UserCoffeeBeansTable,
 	}
 )
 
@@ -139,6 +78,5 @@ func init() {
 	GooseDbVersionTable.Annotation = &entsql.Annotation{
 		Table: "goose_db_version",
 	}
-	UsersCoffeeBeansTable.ForeignKeys[0].RefTable = CoffeeBeansTable
-	UsersCoffeeBeansTable.ForeignKeys[1].RefTable = UsersTable
+	UserCoffeeBeansTable.ForeignKeys[0].RefTable = UsersTable
 }

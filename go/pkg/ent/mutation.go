@@ -9,13 +9,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/k3forx/coffee_memo/pkg/ent/coffeebean"
-	"github.com/k3forx/coffee_memo/pkg/ent/coffeeshop"
-	"github.com/k3forx/coffee_memo/pkg/ent/driprecipe"
 	"github.com/k3forx/coffee_memo/pkg/ent/goosedbversion"
 	"github.com/k3forx/coffee_memo/pkg/ent/predicate"
 	"github.com/k3forx/coffee_memo/pkg/ent/user"
-	"github.com/k3forx/coffee_memo/pkg/ent/userscoffeebean"
+	"github.com/k3forx/coffee_memo/pkg/ent/usercoffeebean"
 
 	"entgo.io/ent"
 )
@@ -29,2640 +26,10 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeCoffeeBean      = "CoffeeBean"
-	TypeCoffeeShop      = "CoffeeShop"
-	TypeDripRecipe      = "DripRecipe"
-	TypeGooseDbVersion  = "GooseDbVersion"
-	TypeUser            = "User"
-	TypeUsersCoffeeBean = "UsersCoffeeBean"
+	TypeGooseDbVersion = "GooseDbVersion"
+	TypeUser           = "User"
+	TypeUserCoffeeBean = "UserCoffeeBean"
 )
-
-// CoffeeBeanMutation represents an operation that mutates the CoffeeBean nodes in the graph.
-type CoffeeBeanMutation struct {
-	config
-	op                        Op
-	typ                       string
-	id                        *int32
-	name                      *string
-	farm_name                 *string
-	country                   *string
-	roast_degree              *string
-	roasted_at                *time.Time
-	created_at                *time.Time
-	updated_at                *time.Time
-	clearedFields             map[string]struct{}
-	users_coffee_beans        map[int32]struct{}
-	removedusers_coffee_beans map[int32]struct{}
-	clearedusers_coffee_beans bool
-	done                      bool
-	oldValue                  func(context.Context) (*CoffeeBean, error)
-	predicates                []predicate.CoffeeBean
-}
-
-var _ ent.Mutation = (*CoffeeBeanMutation)(nil)
-
-// coffeebeanOption allows management of the mutation configuration using functional options.
-type coffeebeanOption func(*CoffeeBeanMutation)
-
-// newCoffeeBeanMutation creates new mutation for the CoffeeBean entity.
-func newCoffeeBeanMutation(c config, op Op, opts ...coffeebeanOption) *CoffeeBeanMutation {
-	m := &CoffeeBeanMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeCoffeeBean,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withCoffeeBeanID sets the ID field of the mutation.
-func withCoffeeBeanID(id int32) coffeebeanOption {
-	return func(m *CoffeeBeanMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *CoffeeBean
-		)
-		m.oldValue = func(ctx context.Context) (*CoffeeBean, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().CoffeeBean.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withCoffeeBean sets the old CoffeeBean of the mutation.
-func withCoffeeBean(node *CoffeeBean) coffeebeanOption {
-	return func(m *CoffeeBeanMutation) {
-		m.oldValue = func(context.Context) (*CoffeeBean, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m CoffeeBeanMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m CoffeeBeanMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of CoffeeBean entities.
-func (m *CoffeeBeanMutation) SetID(id int32) {
-	m.id = &id
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *CoffeeBeanMutation) ID() (id int32, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *CoffeeBeanMutation) IDs(ctx context.Context) ([]int32, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []int32{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().CoffeeBean.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetName sets the "name" field.
-func (m *CoffeeBeanMutation) SetName(s string) {
-	m.name = &s
-}
-
-// Name returns the value of the "name" field in the mutation.
-func (m *CoffeeBeanMutation) Name() (r string, exists bool) {
-	v := m.name
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldName returns the old "name" field's value of the CoffeeBean entity.
-// If the CoffeeBean object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CoffeeBeanMutation) OldName(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldName is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldName requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldName: %w", err)
-	}
-	return oldValue.Name, nil
-}
-
-// ResetName resets all changes to the "name" field.
-func (m *CoffeeBeanMutation) ResetName() {
-	m.name = nil
-}
-
-// SetFarmName sets the "farm_name" field.
-func (m *CoffeeBeanMutation) SetFarmName(s string) {
-	m.farm_name = &s
-}
-
-// FarmName returns the value of the "farm_name" field in the mutation.
-func (m *CoffeeBeanMutation) FarmName() (r string, exists bool) {
-	v := m.farm_name
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldFarmName returns the old "farm_name" field's value of the CoffeeBean entity.
-// If the CoffeeBean object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CoffeeBeanMutation) OldFarmName(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldFarmName is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldFarmName requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldFarmName: %w", err)
-	}
-	return oldValue.FarmName, nil
-}
-
-// ClearFarmName clears the value of the "farm_name" field.
-func (m *CoffeeBeanMutation) ClearFarmName() {
-	m.farm_name = nil
-	m.clearedFields[coffeebean.FieldFarmName] = struct{}{}
-}
-
-// FarmNameCleared returns if the "farm_name" field was cleared in this mutation.
-func (m *CoffeeBeanMutation) FarmNameCleared() bool {
-	_, ok := m.clearedFields[coffeebean.FieldFarmName]
-	return ok
-}
-
-// ResetFarmName resets all changes to the "farm_name" field.
-func (m *CoffeeBeanMutation) ResetFarmName() {
-	m.farm_name = nil
-	delete(m.clearedFields, coffeebean.FieldFarmName)
-}
-
-// SetCountry sets the "country" field.
-func (m *CoffeeBeanMutation) SetCountry(s string) {
-	m.country = &s
-}
-
-// Country returns the value of the "country" field in the mutation.
-func (m *CoffeeBeanMutation) Country() (r string, exists bool) {
-	v := m.country
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCountry returns the old "country" field's value of the CoffeeBean entity.
-// If the CoffeeBean object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CoffeeBeanMutation) OldCountry(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCountry is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCountry requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCountry: %w", err)
-	}
-	return oldValue.Country, nil
-}
-
-// ClearCountry clears the value of the "country" field.
-func (m *CoffeeBeanMutation) ClearCountry() {
-	m.country = nil
-	m.clearedFields[coffeebean.FieldCountry] = struct{}{}
-}
-
-// CountryCleared returns if the "country" field was cleared in this mutation.
-func (m *CoffeeBeanMutation) CountryCleared() bool {
-	_, ok := m.clearedFields[coffeebean.FieldCountry]
-	return ok
-}
-
-// ResetCountry resets all changes to the "country" field.
-func (m *CoffeeBeanMutation) ResetCountry() {
-	m.country = nil
-	delete(m.clearedFields, coffeebean.FieldCountry)
-}
-
-// SetRoastDegree sets the "roast_degree" field.
-func (m *CoffeeBeanMutation) SetRoastDegree(s string) {
-	m.roast_degree = &s
-}
-
-// RoastDegree returns the value of the "roast_degree" field in the mutation.
-func (m *CoffeeBeanMutation) RoastDegree() (r string, exists bool) {
-	v := m.roast_degree
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldRoastDegree returns the old "roast_degree" field's value of the CoffeeBean entity.
-// If the CoffeeBean object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CoffeeBeanMutation) OldRoastDegree(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldRoastDegree is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldRoastDegree requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldRoastDegree: %w", err)
-	}
-	return oldValue.RoastDegree, nil
-}
-
-// ResetRoastDegree resets all changes to the "roast_degree" field.
-func (m *CoffeeBeanMutation) ResetRoastDegree() {
-	m.roast_degree = nil
-}
-
-// SetRoastedAt sets the "roasted_at" field.
-func (m *CoffeeBeanMutation) SetRoastedAt(t time.Time) {
-	m.roasted_at = &t
-}
-
-// RoastedAt returns the value of the "roasted_at" field in the mutation.
-func (m *CoffeeBeanMutation) RoastedAt() (r time.Time, exists bool) {
-	v := m.roasted_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldRoastedAt returns the old "roasted_at" field's value of the CoffeeBean entity.
-// If the CoffeeBean object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CoffeeBeanMutation) OldRoastedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldRoastedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldRoastedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldRoastedAt: %w", err)
-	}
-	return oldValue.RoastedAt, nil
-}
-
-// ClearRoastedAt clears the value of the "roasted_at" field.
-func (m *CoffeeBeanMutation) ClearRoastedAt() {
-	m.roasted_at = nil
-	m.clearedFields[coffeebean.FieldRoastedAt] = struct{}{}
-}
-
-// RoastedAtCleared returns if the "roasted_at" field was cleared in this mutation.
-func (m *CoffeeBeanMutation) RoastedAtCleared() bool {
-	_, ok := m.clearedFields[coffeebean.FieldRoastedAt]
-	return ok
-}
-
-// ResetRoastedAt resets all changes to the "roasted_at" field.
-func (m *CoffeeBeanMutation) ResetRoastedAt() {
-	m.roasted_at = nil
-	delete(m.clearedFields, coffeebean.FieldRoastedAt)
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *CoffeeBeanMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *CoffeeBeanMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the CoffeeBean entity.
-// If the CoffeeBean object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CoffeeBeanMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *CoffeeBeanMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *CoffeeBeanMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *CoffeeBeanMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the CoffeeBean entity.
-// If the CoffeeBean object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CoffeeBeanMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *CoffeeBeanMutation) ResetUpdatedAt() {
-	m.updated_at = nil
-}
-
-// AddUsersCoffeeBeanIDs adds the "users_coffee_beans" edge to the UsersCoffeeBean entity by ids.
-func (m *CoffeeBeanMutation) AddUsersCoffeeBeanIDs(ids ...int32) {
-	if m.users_coffee_beans == nil {
-		m.users_coffee_beans = make(map[int32]struct{})
-	}
-	for i := range ids {
-		m.users_coffee_beans[ids[i]] = struct{}{}
-	}
-}
-
-// ClearUsersCoffeeBeans clears the "users_coffee_beans" edge to the UsersCoffeeBean entity.
-func (m *CoffeeBeanMutation) ClearUsersCoffeeBeans() {
-	m.clearedusers_coffee_beans = true
-}
-
-// UsersCoffeeBeansCleared reports if the "users_coffee_beans" edge to the UsersCoffeeBean entity was cleared.
-func (m *CoffeeBeanMutation) UsersCoffeeBeansCleared() bool {
-	return m.clearedusers_coffee_beans
-}
-
-// RemoveUsersCoffeeBeanIDs removes the "users_coffee_beans" edge to the UsersCoffeeBean entity by IDs.
-func (m *CoffeeBeanMutation) RemoveUsersCoffeeBeanIDs(ids ...int32) {
-	if m.removedusers_coffee_beans == nil {
-		m.removedusers_coffee_beans = make(map[int32]struct{})
-	}
-	for i := range ids {
-		delete(m.users_coffee_beans, ids[i])
-		m.removedusers_coffee_beans[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedUsersCoffeeBeans returns the removed IDs of the "users_coffee_beans" edge to the UsersCoffeeBean entity.
-func (m *CoffeeBeanMutation) RemovedUsersCoffeeBeansIDs() (ids []int32) {
-	for id := range m.removedusers_coffee_beans {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// UsersCoffeeBeansIDs returns the "users_coffee_beans" edge IDs in the mutation.
-func (m *CoffeeBeanMutation) UsersCoffeeBeansIDs() (ids []int32) {
-	for id := range m.users_coffee_beans {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetUsersCoffeeBeans resets all changes to the "users_coffee_beans" edge.
-func (m *CoffeeBeanMutation) ResetUsersCoffeeBeans() {
-	m.users_coffee_beans = nil
-	m.clearedusers_coffee_beans = false
-	m.removedusers_coffee_beans = nil
-}
-
-// Where appends a list predicates to the CoffeeBeanMutation builder.
-func (m *CoffeeBeanMutation) Where(ps ...predicate.CoffeeBean) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// Op returns the operation name.
-func (m *CoffeeBeanMutation) Op() Op {
-	return m.op
-}
-
-// Type returns the node type of this mutation (CoffeeBean).
-func (m *CoffeeBeanMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *CoffeeBeanMutation) Fields() []string {
-	fields := make([]string, 0, 7)
-	if m.name != nil {
-		fields = append(fields, coffeebean.FieldName)
-	}
-	if m.farm_name != nil {
-		fields = append(fields, coffeebean.FieldFarmName)
-	}
-	if m.country != nil {
-		fields = append(fields, coffeebean.FieldCountry)
-	}
-	if m.roast_degree != nil {
-		fields = append(fields, coffeebean.FieldRoastDegree)
-	}
-	if m.roasted_at != nil {
-		fields = append(fields, coffeebean.FieldRoastedAt)
-	}
-	if m.created_at != nil {
-		fields = append(fields, coffeebean.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, coffeebean.FieldUpdatedAt)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *CoffeeBeanMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case coffeebean.FieldName:
-		return m.Name()
-	case coffeebean.FieldFarmName:
-		return m.FarmName()
-	case coffeebean.FieldCountry:
-		return m.Country()
-	case coffeebean.FieldRoastDegree:
-		return m.RoastDegree()
-	case coffeebean.FieldRoastedAt:
-		return m.RoastedAt()
-	case coffeebean.FieldCreatedAt:
-		return m.CreatedAt()
-	case coffeebean.FieldUpdatedAt:
-		return m.UpdatedAt()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *CoffeeBeanMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case coffeebean.FieldName:
-		return m.OldName(ctx)
-	case coffeebean.FieldFarmName:
-		return m.OldFarmName(ctx)
-	case coffeebean.FieldCountry:
-		return m.OldCountry(ctx)
-	case coffeebean.FieldRoastDegree:
-		return m.OldRoastDegree(ctx)
-	case coffeebean.FieldRoastedAt:
-		return m.OldRoastedAt(ctx)
-	case coffeebean.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case coffeebean.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
-	}
-	return nil, fmt.Errorf("unknown CoffeeBean field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *CoffeeBeanMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case coffeebean.FieldName:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetName(v)
-		return nil
-	case coffeebean.FieldFarmName:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetFarmName(v)
-		return nil
-	case coffeebean.FieldCountry:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCountry(v)
-		return nil
-	case coffeebean.FieldRoastDegree:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetRoastDegree(v)
-		return nil
-	case coffeebean.FieldRoastedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetRoastedAt(v)
-		return nil
-	case coffeebean.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case coffeebean.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
-	}
-	return fmt.Errorf("unknown CoffeeBean field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *CoffeeBeanMutation) AddedFields() []string {
-	return nil
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *CoffeeBeanMutation) AddedField(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *CoffeeBeanMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown CoffeeBean numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *CoffeeBeanMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(coffeebean.FieldFarmName) {
-		fields = append(fields, coffeebean.FieldFarmName)
-	}
-	if m.FieldCleared(coffeebean.FieldCountry) {
-		fields = append(fields, coffeebean.FieldCountry)
-	}
-	if m.FieldCleared(coffeebean.FieldRoastedAt) {
-		fields = append(fields, coffeebean.FieldRoastedAt)
-	}
-	return fields
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *CoffeeBeanMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *CoffeeBeanMutation) ClearField(name string) error {
-	switch name {
-	case coffeebean.FieldFarmName:
-		m.ClearFarmName()
-		return nil
-	case coffeebean.FieldCountry:
-		m.ClearCountry()
-		return nil
-	case coffeebean.FieldRoastedAt:
-		m.ClearRoastedAt()
-		return nil
-	}
-	return fmt.Errorf("unknown CoffeeBean nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *CoffeeBeanMutation) ResetField(name string) error {
-	switch name {
-	case coffeebean.FieldName:
-		m.ResetName()
-		return nil
-	case coffeebean.FieldFarmName:
-		m.ResetFarmName()
-		return nil
-	case coffeebean.FieldCountry:
-		m.ResetCountry()
-		return nil
-	case coffeebean.FieldRoastDegree:
-		m.ResetRoastDegree()
-		return nil
-	case coffeebean.FieldRoastedAt:
-		m.ResetRoastedAt()
-		return nil
-	case coffeebean.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case coffeebean.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
-	}
-	return fmt.Errorf("unknown CoffeeBean field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *CoffeeBeanMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.users_coffee_beans != nil {
-		edges = append(edges, coffeebean.EdgeUsersCoffeeBeans)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *CoffeeBeanMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case coffeebean.EdgeUsersCoffeeBeans:
-		ids := make([]ent.Value, 0, len(m.users_coffee_beans))
-		for id := range m.users_coffee_beans {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *CoffeeBeanMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.removedusers_coffee_beans != nil {
-		edges = append(edges, coffeebean.EdgeUsersCoffeeBeans)
-	}
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *CoffeeBeanMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case coffeebean.EdgeUsersCoffeeBeans:
-		ids := make([]ent.Value, 0, len(m.removedusers_coffee_beans))
-		for id := range m.removedusers_coffee_beans {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *CoffeeBeanMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.clearedusers_coffee_beans {
-		edges = append(edges, coffeebean.EdgeUsersCoffeeBeans)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *CoffeeBeanMutation) EdgeCleared(name string) bool {
-	switch name {
-	case coffeebean.EdgeUsersCoffeeBeans:
-		return m.clearedusers_coffee_beans
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *CoffeeBeanMutation) ClearEdge(name string) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown CoffeeBean unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *CoffeeBeanMutation) ResetEdge(name string) error {
-	switch name {
-	case coffeebean.EdgeUsersCoffeeBeans:
-		m.ResetUsersCoffeeBeans()
-		return nil
-	}
-	return fmt.Errorf("unknown CoffeeBean edge %s", name)
-}
-
-// CoffeeShopMutation represents an operation that mutates the CoffeeShop nodes in the graph.
-type CoffeeShopMutation struct {
-	config
-	op            Op
-	typ           string
-	id            *int32
-	name          *string
-	shop_url      *string
-	open_time     *time.Time
-	close_time    *time.Time
-	created_at    *time.Time
-	updated_at    *time.Time
-	closed_at     *time.Time
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*CoffeeShop, error)
-	predicates    []predicate.CoffeeShop
-}
-
-var _ ent.Mutation = (*CoffeeShopMutation)(nil)
-
-// coffeeshopOption allows management of the mutation configuration using functional options.
-type coffeeshopOption func(*CoffeeShopMutation)
-
-// newCoffeeShopMutation creates new mutation for the CoffeeShop entity.
-func newCoffeeShopMutation(c config, op Op, opts ...coffeeshopOption) *CoffeeShopMutation {
-	m := &CoffeeShopMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeCoffeeShop,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withCoffeeShopID sets the ID field of the mutation.
-func withCoffeeShopID(id int32) coffeeshopOption {
-	return func(m *CoffeeShopMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *CoffeeShop
-		)
-		m.oldValue = func(ctx context.Context) (*CoffeeShop, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().CoffeeShop.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withCoffeeShop sets the old CoffeeShop of the mutation.
-func withCoffeeShop(node *CoffeeShop) coffeeshopOption {
-	return func(m *CoffeeShopMutation) {
-		m.oldValue = func(context.Context) (*CoffeeShop, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m CoffeeShopMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m CoffeeShopMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of CoffeeShop entities.
-func (m *CoffeeShopMutation) SetID(id int32) {
-	m.id = &id
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *CoffeeShopMutation) ID() (id int32, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *CoffeeShopMutation) IDs(ctx context.Context) ([]int32, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []int32{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().CoffeeShop.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetName sets the "name" field.
-func (m *CoffeeShopMutation) SetName(s string) {
-	m.name = &s
-}
-
-// Name returns the value of the "name" field in the mutation.
-func (m *CoffeeShopMutation) Name() (r string, exists bool) {
-	v := m.name
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldName returns the old "name" field's value of the CoffeeShop entity.
-// If the CoffeeShop object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CoffeeShopMutation) OldName(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldName is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldName requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldName: %w", err)
-	}
-	return oldValue.Name, nil
-}
-
-// ResetName resets all changes to the "name" field.
-func (m *CoffeeShopMutation) ResetName() {
-	m.name = nil
-}
-
-// SetShopURL sets the "shop_url" field.
-func (m *CoffeeShopMutation) SetShopURL(s string) {
-	m.shop_url = &s
-}
-
-// ShopURL returns the value of the "shop_url" field in the mutation.
-func (m *CoffeeShopMutation) ShopURL() (r string, exists bool) {
-	v := m.shop_url
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldShopURL returns the old "shop_url" field's value of the CoffeeShop entity.
-// If the CoffeeShop object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CoffeeShopMutation) OldShopURL(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldShopURL is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldShopURL requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldShopURL: %w", err)
-	}
-	return oldValue.ShopURL, nil
-}
-
-// ClearShopURL clears the value of the "shop_url" field.
-func (m *CoffeeShopMutation) ClearShopURL() {
-	m.shop_url = nil
-	m.clearedFields[coffeeshop.FieldShopURL] = struct{}{}
-}
-
-// ShopURLCleared returns if the "shop_url" field was cleared in this mutation.
-func (m *CoffeeShopMutation) ShopURLCleared() bool {
-	_, ok := m.clearedFields[coffeeshop.FieldShopURL]
-	return ok
-}
-
-// ResetShopURL resets all changes to the "shop_url" field.
-func (m *CoffeeShopMutation) ResetShopURL() {
-	m.shop_url = nil
-	delete(m.clearedFields, coffeeshop.FieldShopURL)
-}
-
-// SetOpenTime sets the "open_time" field.
-func (m *CoffeeShopMutation) SetOpenTime(t time.Time) {
-	m.open_time = &t
-}
-
-// OpenTime returns the value of the "open_time" field in the mutation.
-func (m *CoffeeShopMutation) OpenTime() (r time.Time, exists bool) {
-	v := m.open_time
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldOpenTime returns the old "open_time" field's value of the CoffeeShop entity.
-// If the CoffeeShop object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CoffeeShopMutation) OldOpenTime(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldOpenTime is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldOpenTime requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldOpenTime: %w", err)
-	}
-	return oldValue.OpenTime, nil
-}
-
-// ClearOpenTime clears the value of the "open_time" field.
-func (m *CoffeeShopMutation) ClearOpenTime() {
-	m.open_time = nil
-	m.clearedFields[coffeeshop.FieldOpenTime] = struct{}{}
-}
-
-// OpenTimeCleared returns if the "open_time" field was cleared in this mutation.
-func (m *CoffeeShopMutation) OpenTimeCleared() bool {
-	_, ok := m.clearedFields[coffeeshop.FieldOpenTime]
-	return ok
-}
-
-// ResetOpenTime resets all changes to the "open_time" field.
-func (m *CoffeeShopMutation) ResetOpenTime() {
-	m.open_time = nil
-	delete(m.clearedFields, coffeeshop.FieldOpenTime)
-}
-
-// SetCloseTime sets the "close_time" field.
-func (m *CoffeeShopMutation) SetCloseTime(t time.Time) {
-	m.close_time = &t
-}
-
-// CloseTime returns the value of the "close_time" field in the mutation.
-func (m *CoffeeShopMutation) CloseTime() (r time.Time, exists bool) {
-	v := m.close_time
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCloseTime returns the old "close_time" field's value of the CoffeeShop entity.
-// If the CoffeeShop object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CoffeeShopMutation) OldCloseTime(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCloseTime is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCloseTime requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCloseTime: %w", err)
-	}
-	return oldValue.CloseTime, nil
-}
-
-// ClearCloseTime clears the value of the "close_time" field.
-func (m *CoffeeShopMutation) ClearCloseTime() {
-	m.close_time = nil
-	m.clearedFields[coffeeshop.FieldCloseTime] = struct{}{}
-}
-
-// CloseTimeCleared returns if the "close_time" field was cleared in this mutation.
-func (m *CoffeeShopMutation) CloseTimeCleared() bool {
-	_, ok := m.clearedFields[coffeeshop.FieldCloseTime]
-	return ok
-}
-
-// ResetCloseTime resets all changes to the "close_time" field.
-func (m *CoffeeShopMutation) ResetCloseTime() {
-	m.close_time = nil
-	delete(m.clearedFields, coffeeshop.FieldCloseTime)
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *CoffeeShopMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *CoffeeShopMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the CoffeeShop entity.
-// If the CoffeeShop object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CoffeeShopMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *CoffeeShopMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *CoffeeShopMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *CoffeeShopMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the CoffeeShop entity.
-// If the CoffeeShop object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CoffeeShopMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *CoffeeShopMutation) ResetUpdatedAt() {
-	m.updated_at = nil
-}
-
-// SetClosedAt sets the "closed_at" field.
-func (m *CoffeeShopMutation) SetClosedAt(t time.Time) {
-	m.closed_at = &t
-}
-
-// ClosedAt returns the value of the "closed_at" field in the mutation.
-func (m *CoffeeShopMutation) ClosedAt() (r time.Time, exists bool) {
-	v := m.closed_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldClosedAt returns the old "closed_at" field's value of the CoffeeShop entity.
-// If the CoffeeShop object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CoffeeShopMutation) OldClosedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldClosedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldClosedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldClosedAt: %w", err)
-	}
-	return oldValue.ClosedAt, nil
-}
-
-// ClearClosedAt clears the value of the "closed_at" field.
-func (m *CoffeeShopMutation) ClearClosedAt() {
-	m.closed_at = nil
-	m.clearedFields[coffeeshop.FieldClosedAt] = struct{}{}
-}
-
-// ClosedAtCleared returns if the "closed_at" field was cleared in this mutation.
-func (m *CoffeeShopMutation) ClosedAtCleared() bool {
-	_, ok := m.clearedFields[coffeeshop.FieldClosedAt]
-	return ok
-}
-
-// ResetClosedAt resets all changes to the "closed_at" field.
-func (m *CoffeeShopMutation) ResetClosedAt() {
-	m.closed_at = nil
-	delete(m.clearedFields, coffeeshop.FieldClosedAt)
-}
-
-// Where appends a list predicates to the CoffeeShopMutation builder.
-func (m *CoffeeShopMutation) Where(ps ...predicate.CoffeeShop) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// Op returns the operation name.
-func (m *CoffeeShopMutation) Op() Op {
-	return m.op
-}
-
-// Type returns the node type of this mutation (CoffeeShop).
-func (m *CoffeeShopMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *CoffeeShopMutation) Fields() []string {
-	fields := make([]string, 0, 7)
-	if m.name != nil {
-		fields = append(fields, coffeeshop.FieldName)
-	}
-	if m.shop_url != nil {
-		fields = append(fields, coffeeshop.FieldShopURL)
-	}
-	if m.open_time != nil {
-		fields = append(fields, coffeeshop.FieldOpenTime)
-	}
-	if m.close_time != nil {
-		fields = append(fields, coffeeshop.FieldCloseTime)
-	}
-	if m.created_at != nil {
-		fields = append(fields, coffeeshop.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, coffeeshop.FieldUpdatedAt)
-	}
-	if m.closed_at != nil {
-		fields = append(fields, coffeeshop.FieldClosedAt)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *CoffeeShopMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case coffeeshop.FieldName:
-		return m.Name()
-	case coffeeshop.FieldShopURL:
-		return m.ShopURL()
-	case coffeeshop.FieldOpenTime:
-		return m.OpenTime()
-	case coffeeshop.FieldCloseTime:
-		return m.CloseTime()
-	case coffeeshop.FieldCreatedAt:
-		return m.CreatedAt()
-	case coffeeshop.FieldUpdatedAt:
-		return m.UpdatedAt()
-	case coffeeshop.FieldClosedAt:
-		return m.ClosedAt()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *CoffeeShopMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case coffeeshop.FieldName:
-		return m.OldName(ctx)
-	case coffeeshop.FieldShopURL:
-		return m.OldShopURL(ctx)
-	case coffeeshop.FieldOpenTime:
-		return m.OldOpenTime(ctx)
-	case coffeeshop.FieldCloseTime:
-		return m.OldCloseTime(ctx)
-	case coffeeshop.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case coffeeshop.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
-	case coffeeshop.FieldClosedAt:
-		return m.OldClosedAt(ctx)
-	}
-	return nil, fmt.Errorf("unknown CoffeeShop field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *CoffeeShopMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case coffeeshop.FieldName:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetName(v)
-		return nil
-	case coffeeshop.FieldShopURL:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetShopURL(v)
-		return nil
-	case coffeeshop.FieldOpenTime:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetOpenTime(v)
-		return nil
-	case coffeeshop.FieldCloseTime:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCloseTime(v)
-		return nil
-	case coffeeshop.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case coffeeshop.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
-	case coffeeshop.FieldClosedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetClosedAt(v)
-		return nil
-	}
-	return fmt.Errorf("unknown CoffeeShop field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *CoffeeShopMutation) AddedFields() []string {
-	return nil
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *CoffeeShopMutation) AddedField(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *CoffeeShopMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown CoffeeShop numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *CoffeeShopMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(coffeeshop.FieldShopURL) {
-		fields = append(fields, coffeeshop.FieldShopURL)
-	}
-	if m.FieldCleared(coffeeshop.FieldOpenTime) {
-		fields = append(fields, coffeeshop.FieldOpenTime)
-	}
-	if m.FieldCleared(coffeeshop.FieldCloseTime) {
-		fields = append(fields, coffeeshop.FieldCloseTime)
-	}
-	if m.FieldCleared(coffeeshop.FieldClosedAt) {
-		fields = append(fields, coffeeshop.FieldClosedAt)
-	}
-	return fields
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *CoffeeShopMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *CoffeeShopMutation) ClearField(name string) error {
-	switch name {
-	case coffeeshop.FieldShopURL:
-		m.ClearShopURL()
-		return nil
-	case coffeeshop.FieldOpenTime:
-		m.ClearOpenTime()
-		return nil
-	case coffeeshop.FieldCloseTime:
-		m.ClearCloseTime()
-		return nil
-	case coffeeshop.FieldClosedAt:
-		m.ClearClosedAt()
-		return nil
-	}
-	return fmt.Errorf("unknown CoffeeShop nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *CoffeeShopMutation) ResetField(name string) error {
-	switch name {
-	case coffeeshop.FieldName:
-		m.ResetName()
-		return nil
-	case coffeeshop.FieldShopURL:
-		m.ResetShopURL()
-		return nil
-	case coffeeshop.FieldOpenTime:
-		m.ResetOpenTime()
-		return nil
-	case coffeeshop.FieldCloseTime:
-		m.ResetCloseTime()
-		return nil
-	case coffeeshop.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case coffeeshop.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
-	case coffeeshop.FieldClosedAt:
-		m.ResetClosedAt()
-		return nil
-	}
-	return fmt.Errorf("unknown CoffeeShop field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *CoffeeShopMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *CoffeeShopMutation) AddedIDs(name string) []ent.Value {
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *CoffeeShopMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *CoffeeShopMutation) RemovedIDs(name string) []ent.Value {
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *CoffeeShopMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *CoffeeShopMutation) EdgeCleared(name string) bool {
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *CoffeeShopMutation) ClearEdge(name string) error {
-	return fmt.Errorf("unknown CoffeeShop unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *CoffeeShopMutation) ResetEdge(name string) error {
-	return fmt.Errorf("unknown CoffeeShop edge %s", name)
-}
-
-// DripRecipeMutation represents an operation that mutates the DripRecipe nodes in the graph.
-type DripRecipeMutation struct {
-	config
-	op                    Op
-	typ                   string
-	id                    *int32
-	user_id               *int32
-	adduser_id            *int32
-	coffee_bean_id        *int32
-	addcoffee_bean_id     *int32
-	coffee_bean_weight    *float64
-	addcoffee_bean_weight *float64
-	liquid_weight         *float64
-	addliquid_weight      *float64
-	temperature           *float64
-	addtemperature        *float64
-	steam_time            *int32
-	addsteam_time         *int32
-	drip_time             *int32
-	adddrip_time          *int32
-	memo                  *string
-	created_at            *time.Time
-	updated_at            *time.Time
-	deleted_at            *time.Time
-	clearedFields         map[string]struct{}
-	done                  bool
-	oldValue              func(context.Context) (*DripRecipe, error)
-	predicates            []predicate.DripRecipe
-}
-
-var _ ent.Mutation = (*DripRecipeMutation)(nil)
-
-// driprecipeOption allows management of the mutation configuration using functional options.
-type driprecipeOption func(*DripRecipeMutation)
-
-// newDripRecipeMutation creates new mutation for the DripRecipe entity.
-func newDripRecipeMutation(c config, op Op, opts ...driprecipeOption) *DripRecipeMutation {
-	m := &DripRecipeMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeDripRecipe,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withDripRecipeID sets the ID field of the mutation.
-func withDripRecipeID(id int32) driprecipeOption {
-	return func(m *DripRecipeMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *DripRecipe
-		)
-		m.oldValue = func(ctx context.Context) (*DripRecipe, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().DripRecipe.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withDripRecipe sets the old DripRecipe of the mutation.
-func withDripRecipe(node *DripRecipe) driprecipeOption {
-	return func(m *DripRecipeMutation) {
-		m.oldValue = func(context.Context) (*DripRecipe, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m DripRecipeMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m DripRecipeMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of DripRecipe entities.
-func (m *DripRecipeMutation) SetID(id int32) {
-	m.id = &id
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *DripRecipeMutation) ID() (id int32, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *DripRecipeMutation) IDs(ctx context.Context) ([]int32, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []int32{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().DripRecipe.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetUserID sets the "user_id" field.
-func (m *DripRecipeMutation) SetUserID(i int32) {
-	m.user_id = &i
-	m.adduser_id = nil
-}
-
-// UserID returns the value of the "user_id" field in the mutation.
-func (m *DripRecipeMutation) UserID() (r int32, exists bool) {
-	v := m.user_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUserID returns the old "user_id" field's value of the DripRecipe entity.
-// If the DripRecipe object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DripRecipeMutation) OldUserID(ctx context.Context) (v int32, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
-	}
-	return oldValue.UserID, nil
-}
-
-// AddUserID adds i to the "user_id" field.
-func (m *DripRecipeMutation) AddUserID(i int32) {
-	if m.adduser_id != nil {
-		*m.adduser_id += i
-	} else {
-		m.adduser_id = &i
-	}
-}
-
-// AddedUserID returns the value that was added to the "user_id" field in this mutation.
-func (m *DripRecipeMutation) AddedUserID() (r int32, exists bool) {
-	v := m.adduser_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetUserID resets all changes to the "user_id" field.
-func (m *DripRecipeMutation) ResetUserID() {
-	m.user_id = nil
-	m.adduser_id = nil
-}
-
-// SetCoffeeBeanID sets the "coffee_bean_id" field.
-func (m *DripRecipeMutation) SetCoffeeBeanID(i int32) {
-	m.coffee_bean_id = &i
-	m.addcoffee_bean_id = nil
-}
-
-// CoffeeBeanID returns the value of the "coffee_bean_id" field in the mutation.
-func (m *DripRecipeMutation) CoffeeBeanID() (r int32, exists bool) {
-	v := m.coffee_bean_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCoffeeBeanID returns the old "coffee_bean_id" field's value of the DripRecipe entity.
-// If the DripRecipe object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DripRecipeMutation) OldCoffeeBeanID(ctx context.Context) (v int32, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCoffeeBeanID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCoffeeBeanID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCoffeeBeanID: %w", err)
-	}
-	return oldValue.CoffeeBeanID, nil
-}
-
-// AddCoffeeBeanID adds i to the "coffee_bean_id" field.
-func (m *DripRecipeMutation) AddCoffeeBeanID(i int32) {
-	if m.addcoffee_bean_id != nil {
-		*m.addcoffee_bean_id += i
-	} else {
-		m.addcoffee_bean_id = &i
-	}
-}
-
-// AddedCoffeeBeanID returns the value that was added to the "coffee_bean_id" field in this mutation.
-func (m *DripRecipeMutation) AddedCoffeeBeanID() (r int32, exists bool) {
-	v := m.addcoffee_bean_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetCoffeeBeanID resets all changes to the "coffee_bean_id" field.
-func (m *DripRecipeMutation) ResetCoffeeBeanID() {
-	m.coffee_bean_id = nil
-	m.addcoffee_bean_id = nil
-}
-
-// SetCoffeeBeanWeight sets the "coffee_bean_weight" field.
-func (m *DripRecipeMutation) SetCoffeeBeanWeight(f float64) {
-	m.coffee_bean_weight = &f
-	m.addcoffee_bean_weight = nil
-}
-
-// CoffeeBeanWeight returns the value of the "coffee_bean_weight" field in the mutation.
-func (m *DripRecipeMutation) CoffeeBeanWeight() (r float64, exists bool) {
-	v := m.coffee_bean_weight
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCoffeeBeanWeight returns the old "coffee_bean_weight" field's value of the DripRecipe entity.
-// If the DripRecipe object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DripRecipeMutation) OldCoffeeBeanWeight(ctx context.Context) (v float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCoffeeBeanWeight is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCoffeeBeanWeight requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCoffeeBeanWeight: %w", err)
-	}
-	return oldValue.CoffeeBeanWeight, nil
-}
-
-// AddCoffeeBeanWeight adds f to the "coffee_bean_weight" field.
-func (m *DripRecipeMutation) AddCoffeeBeanWeight(f float64) {
-	if m.addcoffee_bean_weight != nil {
-		*m.addcoffee_bean_weight += f
-	} else {
-		m.addcoffee_bean_weight = &f
-	}
-}
-
-// AddedCoffeeBeanWeight returns the value that was added to the "coffee_bean_weight" field in this mutation.
-func (m *DripRecipeMutation) AddedCoffeeBeanWeight() (r float64, exists bool) {
-	v := m.addcoffee_bean_weight
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetCoffeeBeanWeight resets all changes to the "coffee_bean_weight" field.
-func (m *DripRecipeMutation) ResetCoffeeBeanWeight() {
-	m.coffee_bean_weight = nil
-	m.addcoffee_bean_weight = nil
-}
-
-// SetLiquidWeight sets the "liquid_weight" field.
-func (m *DripRecipeMutation) SetLiquidWeight(f float64) {
-	m.liquid_weight = &f
-	m.addliquid_weight = nil
-}
-
-// LiquidWeight returns the value of the "liquid_weight" field in the mutation.
-func (m *DripRecipeMutation) LiquidWeight() (r float64, exists bool) {
-	v := m.liquid_weight
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldLiquidWeight returns the old "liquid_weight" field's value of the DripRecipe entity.
-// If the DripRecipe object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DripRecipeMutation) OldLiquidWeight(ctx context.Context) (v float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLiquidWeight is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLiquidWeight requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLiquidWeight: %w", err)
-	}
-	return oldValue.LiquidWeight, nil
-}
-
-// AddLiquidWeight adds f to the "liquid_weight" field.
-func (m *DripRecipeMutation) AddLiquidWeight(f float64) {
-	if m.addliquid_weight != nil {
-		*m.addliquid_weight += f
-	} else {
-		m.addliquid_weight = &f
-	}
-}
-
-// AddedLiquidWeight returns the value that was added to the "liquid_weight" field in this mutation.
-func (m *DripRecipeMutation) AddedLiquidWeight() (r float64, exists bool) {
-	v := m.addliquid_weight
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetLiquidWeight resets all changes to the "liquid_weight" field.
-func (m *DripRecipeMutation) ResetLiquidWeight() {
-	m.liquid_weight = nil
-	m.addliquid_weight = nil
-}
-
-// SetTemperature sets the "temperature" field.
-func (m *DripRecipeMutation) SetTemperature(f float64) {
-	m.temperature = &f
-	m.addtemperature = nil
-}
-
-// Temperature returns the value of the "temperature" field in the mutation.
-func (m *DripRecipeMutation) Temperature() (r float64, exists bool) {
-	v := m.temperature
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldTemperature returns the old "temperature" field's value of the DripRecipe entity.
-// If the DripRecipe object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DripRecipeMutation) OldTemperature(ctx context.Context) (v float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldTemperature is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldTemperature requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTemperature: %w", err)
-	}
-	return oldValue.Temperature, nil
-}
-
-// AddTemperature adds f to the "temperature" field.
-func (m *DripRecipeMutation) AddTemperature(f float64) {
-	if m.addtemperature != nil {
-		*m.addtemperature += f
-	} else {
-		m.addtemperature = &f
-	}
-}
-
-// AddedTemperature returns the value that was added to the "temperature" field in this mutation.
-func (m *DripRecipeMutation) AddedTemperature() (r float64, exists bool) {
-	v := m.addtemperature
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetTemperature resets all changes to the "temperature" field.
-func (m *DripRecipeMutation) ResetTemperature() {
-	m.temperature = nil
-	m.addtemperature = nil
-}
-
-// SetSteamTime sets the "steam_time" field.
-func (m *DripRecipeMutation) SetSteamTime(i int32) {
-	m.steam_time = &i
-	m.addsteam_time = nil
-}
-
-// SteamTime returns the value of the "steam_time" field in the mutation.
-func (m *DripRecipeMutation) SteamTime() (r int32, exists bool) {
-	v := m.steam_time
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldSteamTime returns the old "steam_time" field's value of the DripRecipe entity.
-// If the DripRecipe object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DripRecipeMutation) OldSteamTime(ctx context.Context) (v int32, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSteamTime is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSteamTime requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSteamTime: %w", err)
-	}
-	return oldValue.SteamTime, nil
-}
-
-// AddSteamTime adds i to the "steam_time" field.
-func (m *DripRecipeMutation) AddSteamTime(i int32) {
-	if m.addsteam_time != nil {
-		*m.addsteam_time += i
-	} else {
-		m.addsteam_time = &i
-	}
-}
-
-// AddedSteamTime returns the value that was added to the "steam_time" field in this mutation.
-func (m *DripRecipeMutation) AddedSteamTime() (r int32, exists bool) {
-	v := m.addsteam_time
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetSteamTime resets all changes to the "steam_time" field.
-func (m *DripRecipeMutation) ResetSteamTime() {
-	m.steam_time = nil
-	m.addsteam_time = nil
-}
-
-// SetDripTime sets the "drip_time" field.
-func (m *DripRecipeMutation) SetDripTime(i int32) {
-	m.drip_time = &i
-	m.adddrip_time = nil
-}
-
-// DripTime returns the value of the "drip_time" field in the mutation.
-func (m *DripRecipeMutation) DripTime() (r int32, exists bool) {
-	v := m.drip_time
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDripTime returns the old "drip_time" field's value of the DripRecipe entity.
-// If the DripRecipe object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DripRecipeMutation) OldDripTime(ctx context.Context) (v int32, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDripTime is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDripTime requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDripTime: %w", err)
-	}
-	return oldValue.DripTime, nil
-}
-
-// AddDripTime adds i to the "drip_time" field.
-func (m *DripRecipeMutation) AddDripTime(i int32) {
-	if m.adddrip_time != nil {
-		*m.adddrip_time += i
-	} else {
-		m.adddrip_time = &i
-	}
-}
-
-// AddedDripTime returns the value that was added to the "drip_time" field in this mutation.
-func (m *DripRecipeMutation) AddedDripTime() (r int32, exists bool) {
-	v := m.adddrip_time
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetDripTime resets all changes to the "drip_time" field.
-func (m *DripRecipeMutation) ResetDripTime() {
-	m.drip_time = nil
-	m.adddrip_time = nil
-}
-
-// SetMemo sets the "memo" field.
-func (m *DripRecipeMutation) SetMemo(s string) {
-	m.memo = &s
-}
-
-// Memo returns the value of the "memo" field in the mutation.
-func (m *DripRecipeMutation) Memo() (r string, exists bool) {
-	v := m.memo
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldMemo returns the old "memo" field's value of the DripRecipe entity.
-// If the DripRecipe object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DripRecipeMutation) OldMemo(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldMemo is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldMemo requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldMemo: %w", err)
-	}
-	return oldValue.Memo, nil
-}
-
-// ResetMemo resets all changes to the "memo" field.
-func (m *DripRecipeMutation) ResetMemo() {
-	m.memo = nil
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *DripRecipeMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *DripRecipeMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the DripRecipe entity.
-// If the DripRecipe object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DripRecipeMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *DripRecipeMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *DripRecipeMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *DripRecipeMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the DripRecipe entity.
-// If the DripRecipe object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DripRecipeMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *DripRecipeMutation) ResetUpdatedAt() {
-	m.updated_at = nil
-}
-
-// SetDeletedAt sets the "deleted_at" field.
-func (m *DripRecipeMutation) SetDeletedAt(t time.Time) {
-	m.deleted_at = &t
-}
-
-// DeletedAt returns the value of the "deleted_at" field in the mutation.
-func (m *DripRecipeMutation) DeletedAt() (r time.Time, exists bool) {
-	v := m.deleted_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDeletedAt returns the old "deleted_at" field's value of the DripRecipe entity.
-// If the DripRecipe object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DripRecipeMutation) OldDeletedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
-	}
-	return oldValue.DeletedAt, nil
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (m *DripRecipeMutation) ClearDeletedAt() {
-	m.deleted_at = nil
-	m.clearedFields[driprecipe.FieldDeletedAt] = struct{}{}
-}
-
-// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
-func (m *DripRecipeMutation) DeletedAtCleared() bool {
-	_, ok := m.clearedFields[driprecipe.FieldDeletedAt]
-	return ok
-}
-
-// ResetDeletedAt resets all changes to the "deleted_at" field.
-func (m *DripRecipeMutation) ResetDeletedAt() {
-	m.deleted_at = nil
-	delete(m.clearedFields, driprecipe.FieldDeletedAt)
-}
-
-// Where appends a list predicates to the DripRecipeMutation builder.
-func (m *DripRecipeMutation) Where(ps ...predicate.DripRecipe) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// Op returns the operation name.
-func (m *DripRecipeMutation) Op() Op {
-	return m.op
-}
-
-// Type returns the node type of this mutation (DripRecipe).
-func (m *DripRecipeMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *DripRecipeMutation) Fields() []string {
-	fields := make([]string, 0, 11)
-	if m.user_id != nil {
-		fields = append(fields, driprecipe.FieldUserID)
-	}
-	if m.coffee_bean_id != nil {
-		fields = append(fields, driprecipe.FieldCoffeeBeanID)
-	}
-	if m.coffee_bean_weight != nil {
-		fields = append(fields, driprecipe.FieldCoffeeBeanWeight)
-	}
-	if m.liquid_weight != nil {
-		fields = append(fields, driprecipe.FieldLiquidWeight)
-	}
-	if m.temperature != nil {
-		fields = append(fields, driprecipe.FieldTemperature)
-	}
-	if m.steam_time != nil {
-		fields = append(fields, driprecipe.FieldSteamTime)
-	}
-	if m.drip_time != nil {
-		fields = append(fields, driprecipe.FieldDripTime)
-	}
-	if m.memo != nil {
-		fields = append(fields, driprecipe.FieldMemo)
-	}
-	if m.created_at != nil {
-		fields = append(fields, driprecipe.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, driprecipe.FieldUpdatedAt)
-	}
-	if m.deleted_at != nil {
-		fields = append(fields, driprecipe.FieldDeletedAt)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *DripRecipeMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case driprecipe.FieldUserID:
-		return m.UserID()
-	case driprecipe.FieldCoffeeBeanID:
-		return m.CoffeeBeanID()
-	case driprecipe.FieldCoffeeBeanWeight:
-		return m.CoffeeBeanWeight()
-	case driprecipe.FieldLiquidWeight:
-		return m.LiquidWeight()
-	case driprecipe.FieldTemperature:
-		return m.Temperature()
-	case driprecipe.FieldSteamTime:
-		return m.SteamTime()
-	case driprecipe.FieldDripTime:
-		return m.DripTime()
-	case driprecipe.FieldMemo:
-		return m.Memo()
-	case driprecipe.FieldCreatedAt:
-		return m.CreatedAt()
-	case driprecipe.FieldUpdatedAt:
-		return m.UpdatedAt()
-	case driprecipe.FieldDeletedAt:
-		return m.DeletedAt()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *DripRecipeMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case driprecipe.FieldUserID:
-		return m.OldUserID(ctx)
-	case driprecipe.FieldCoffeeBeanID:
-		return m.OldCoffeeBeanID(ctx)
-	case driprecipe.FieldCoffeeBeanWeight:
-		return m.OldCoffeeBeanWeight(ctx)
-	case driprecipe.FieldLiquidWeight:
-		return m.OldLiquidWeight(ctx)
-	case driprecipe.FieldTemperature:
-		return m.OldTemperature(ctx)
-	case driprecipe.FieldSteamTime:
-		return m.OldSteamTime(ctx)
-	case driprecipe.FieldDripTime:
-		return m.OldDripTime(ctx)
-	case driprecipe.FieldMemo:
-		return m.OldMemo(ctx)
-	case driprecipe.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case driprecipe.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
-	case driprecipe.FieldDeletedAt:
-		return m.OldDeletedAt(ctx)
-	}
-	return nil, fmt.Errorf("unknown DripRecipe field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *DripRecipeMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case driprecipe.FieldUserID:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUserID(v)
-		return nil
-	case driprecipe.FieldCoffeeBeanID:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCoffeeBeanID(v)
-		return nil
-	case driprecipe.FieldCoffeeBeanWeight:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCoffeeBeanWeight(v)
-		return nil
-	case driprecipe.FieldLiquidWeight:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetLiquidWeight(v)
-		return nil
-	case driprecipe.FieldTemperature:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetTemperature(v)
-		return nil
-	case driprecipe.FieldSteamTime:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetSteamTime(v)
-		return nil
-	case driprecipe.FieldDripTime:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDripTime(v)
-		return nil
-	case driprecipe.FieldMemo:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetMemo(v)
-		return nil
-	case driprecipe.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case driprecipe.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
-	case driprecipe.FieldDeletedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDeletedAt(v)
-		return nil
-	}
-	return fmt.Errorf("unknown DripRecipe field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *DripRecipeMutation) AddedFields() []string {
-	var fields []string
-	if m.adduser_id != nil {
-		fields = append(fields, driprecipe.FieldUserID)
-	}
-	if m.addcoffee_bean_id != nil {
-		fields = append(fields, driprecipe.FieldCoffeeBeanID)
-	}
-	if m.addcoffee_bean_weight != nil {
-		fields = append(fields, driprecipe.FieldCoffeeBeanWeight)
-	}
-	if m.addliquid_weight != nil {
-		fields = append(fields, driprecipe.FieldLiquidWeight)
-	}
-	if m.addtemperature != nil {
-		fields = append(fields, driprecipe.FieldTemperature)
-	}
-	if m.addsteam_time != nil {
-		fields = append(fields, driprecipe.FieldSteamTime)
-	}
-	if m.adddrip_time != nil {
-		fields = append(fields, driprecipe.FieldDripTime)
-	}
-	return fields
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *DripRecipeMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case driprecipe.FieldUserID:
-		return m.AddedUserID()
-	case driprecipe.FieldCoffeeBeanID:
-		return m.AddedCoffeeBeanID()
-	case driprecipe.FieldCoffeeBeanWeight:
-		return m.AddedCoffeeBeanWeight()
-	case driprecipe.FieldLiquidWeight:
-		return m.AddedLiquidWeight()
-	case driprecipe.FieldTemperature:
-		return m.AddedTemperature()
-	case driprecipe.FieldSteamTime:
-		return m.AddedSteamTime()
-	case driprecipe.FieldDripTime:
-		return m.AddedDripTime()
-	}
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *DripRecipeMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	case driprecipe.FieldUserID:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddUserID(v)
-		return nil
-	case driprecipe.FieldCoffeeBeanID:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddCoffeeBeanID(v)
-		return nil
-	case driprecipe.FieldCoffeeBeanWeight:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddCoffeeBeanWeight(v)
-		return nil
-	case driprecipe.FieldLiquidWeight:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddLiquidWeight(v)
-		return nil
-	case driprecipe.FieldTemperature:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddTemperature(v)
-		return nil
-	case driprecipe.FieldSteamTime:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddSteamTime(v)
-		return nil
-	case driprecipe.FieldDripTime:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddDripTime(v)
-		return nil
-	}
-	return fmt.Errorf("unknown DripRecipe numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *DripRecipeMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(driprecipe.FieldDeletedAt) {
-		fields = append(fields, driprecipe.FieldDeletedAt)
-	}
-	return fields
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *DripRecipeMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *DripRecipeMutation) ClearField(name string) error {
-	switch name {
-	case driprecipe.FieldDeletedAt:
-		m.ClearDeletedAt()
-		return nil
-	}
-	return fmt.Errorf("unknown DripRecipe nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *DripRecipeMutation) ResetField(name string) error {
-	switch name {
-	case driprecipe.FieldUserID:
-		m.ResetUserID()
-		return nil
-	case driprecipe.FieldCoffeeBeanID:
-		m.ResetCoffeeBeanID()
-		return nil
-	case driprecipe.FieldCoffeeBeanWeight:
-		m.ResetCoffeeBeanWeight()
-		return nil
-	case driprecipe.FieldLiquidWeight:
-		m.ResetLiquidWeight()
-		return nil
-	case driprecipe.FieldTemperature:
-		m.ResetTemperature()
-		return nil
-	case driprecipe.FieldSteamTime:
-		m.ResetSteamTime()
-		return nil
-	case driprecipe.FieldDripTime:
-		m.ResetDripTime()
-		return nil
-	case driprecipe.FieldMemo:
-		m.ResetMemo()
-		return nil
-	case driprecipe.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case driprecipe.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
-	case driprecipe.FieldDeletedAt:
-		m.ResetDeletedAt()
-		return nil
-	}
-	return fmt.Errorf("unknown DripRecipe field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *DripRecipeMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *DripRecipeMutation) AddedIDs(name string) []ent.Value {
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *DripRecipeMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *DripRecipeMutation) RemovedIDs(name string) []ent.Value {
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *DripRecipeMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *DripRecipeMutation) EdgeCleared(name string) bool {
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *DripRecipeMutation) ClearEdge(name string) error {
-	return fmt.Errorf("unknown DripRecipe unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *DripRecipeMutation) ResetEdge(name string) error {
-	return fmt.Errorf("unknown DripRecipe edge %s", name)
-}
 
 // GooseDbVersionMutation represents an operation that mutates the GooseDbVersion nodes in the graph.
 type GooseDbVersionMutation struct {
@@ -3150,24 +517,24 @@ func (m *GooseDbVersionMutation) ResetEdge(name string) error {
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
-	op                        Op
-	typ                       string
-	id                        *int32
-	username                  *string
-	email                     *string
-	password                  *string
-	flags                     *int
-	addflags                  *int
-	created_at                *time.Time
-	updated_at                *time.Time
-	deleted_at                *time.Time
-	clearedFields             map[string]struct{}
-	users_coffee_beans        map[int32]struct{}
-	removedusers_coffee_beans map[int32]struct{}
-	clearedusers_coffee_beans bool
-	done                      bool
-	oldValue                  func(context.Context) (*User, error)
-	predicates                []predicate.User
+	op                       Op
+	typ                      string
+	id                       *int32
+	username                 *string
+	email                    *string
+	password                 *string
+	flags                    *int
+	addflags                 *int
+	created_at               *time.Time
+	updated_at               *time.Time
+	deleted_at               *time.Time
+	clearedFields            map[string]struct{}
+	user_coffee_beans        map[int32]struct{}
+	removeduser_coffee_beans map[int32]struct{}
+	cleareduser_coffee_beans bool
+	done                     bool
+	oldValue                 func(context.Context) (*User, error)
+	predicates               []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -3559,58 +926,58 @@ func (m *UserMutation) ResetDeletedAt() {
 	delete(m.clearedFields, user.FieldDeletedAt)
 }
 
-// AddUsersCoffeeBeanIDs adds the "users_coffee_beans" edge to the UsersCoffeeBean entity by ids.
-func (m *UserMutation) AddUsersCoffeeBeanIDs(ids ...int32) {
-	if m.users_coffee_beans == nil {
-		m.users_coffee_beans = make(map[int32]struct{})
+// AddUserCoffeeBeanIDs adds the "user_coffee_beans" edge to the UserCoffeeBean entity by ids.
+func (m *UserMutation) AddUserCoffeeBeanIDs(ids ...int32) {
+	if m.user_coffee_beans == nil {
+		m.user_coffee_beans = make(map[int32]struct{})
 	}
 	for i := range ids {
-		m.users_coffee_beans[ids[i]] = struct{}{}
+		m.user_coffee_beans[ids[i]] = struct{}{}
 	}
 }
 
-// ClearUsersCoffeeBeans clears the "users_coffee_beans" edge to the UsersCoffeeBean entity.
-func (m *UserMutation) ClearUsersCoffeeBeans() {
-	m.clearedusers_coffee_beans = true
+// ClearUserCoffeeBeans clears the "user_coffee_beans" edge to the UserCoffeeBean entity.
+func (m *UserMutation) ClearUserCoffeeBeans() {
+	m.cleareduser_coffee_beans = true
 }
 
-// UsersCoffeeBeansCleared reports if the "users_coffee_beans" edge to the UsersCoffeeBean entity was cleared.
-func (m *UserMutation) UsersCoffeeBeansCleared() bool {
-	return m.clearedusers_coffee_beans
+// UserCoffeeBeansCleared reports if the "user_coffee_beans" edge to the UserCoffeeBean entity was cleared.
+func (m *UserMutation) UserCoffeeBeansCleared() bool {
+	return m.cleareduser_coffee_beans
 }
 
-// RemoveUsersCoffeeBeanIDs removes the "users_coffee_beans" edge to the UsersCoffeeBean entity by IDs.
-func (m *UserMutation) RemoveUsersCoffeeBeanIDs(ids ...int32) {
-	if m.removedusers_coffee_beans == nil {
-		m.removedusers_coffee_beans = make(map[int32]struct{})
+// RemoveUserCoffeeBeanIDs removes the "user_coffee_beans" edge to the UserCoffeeBean entity by IDs.
+func (m *UserMutation) RemoveUserCoffeeBeanIDs(ids ...int32) {
+	if m.removeduser_coffee_beans == nil {
+		m.removeduser_coffee_beans = make(map[int32]struct{})
 	}
 	for i := range ids {
-		delete(m.users_coffee_beans, ids[i])
-		m.removedusers_coffee_beans[ids[i]] = struct{}{}
+		delete(m.user_coffee_beans, ids[i])
+		m.removeduser_coffee_beans[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedUsersCoffeeBeans returns the removed IDs of the "users_coffee_beans" edge to the UsersCoffeeBean entity.
-func (m *UserMutation) RemovedUsersCoffeeBeansIDs() (ids []int32) {
-	for id := range m.removedusers_coffee_beans {
+// RemovedUserCoffeeBeans returns the removed IDs of the "user_coffee_beans" edge to the UserCoffeeBean entity.
+func (m *UserMutation) RemovedUserCoffeeBeansIDs() (ids []int32) {
+	for id := range m.removeduser_coffee_beans {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// UsersCoffeeBeansIDs returns the "users_coffee_beans" edge IDs in the mutation.
-func (m *UserMutation) UsersCoffeeBeansIDs() (ids []int32) {
-	for id := range m.users_coffee_beans {
+// UserCoffeeBeansIDs returns the "user_coffee_beans" edge IDs in the mutation.
+func (m *UserMutation) UserCoffeeBeansIDs() (ids []int32) {
+	for id := range m.user_coffee_beans {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetUsersCoffeeBeans resets all changes to the "users_coffee_beans" edge.
-func (m *UserMutation) ResetUsersCoffeeBeans() {
-	m.users_coffee_beans = nil
-	m.clearedusers_coffee_beans = false
-	m.removedusers_coffee_beans = nil
+// ResetUserCoffeeBeans resets all changes to the "user_coffee_beans" edge.
+func (m *UserMutation) ResetUserCoffeeBeans() {
+	m.user_coffee_beans = nil
+	m.cleareduser_coffee_beans = false
+	m.removeduser_coffee_beans = nil
 }
 
 // Where appends a list predicates to the UserMutation builder.
@@ -3858,8 +1225,8 @@ func (m *UserMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.users_coffee_beans != nil {
-		edges = append(edges, user.EdgeUsersCoffeeBeans)
+	if m.user_coffee_beans != nil {
+		edges = append(edges, user.EdgeUserCoffeeBeans)
 	}
 	return edges
 }
@@ -3868,9 +1235,9 @@ func (m *UserMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *UserMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case user.EdgeUsersCoffeeBeans:
-		ids := make([]ent.Value, 0, len(m.users_coffee_beans))
-		for id := range m.users_coffee_beans {
+	case user.EdgeUserCoffeeBeans:
+		ids := make([]ent.Value, 0, len(m.user_coffee_beans))
+		for id := range m.user_coffee_beans {
 			ids = append(ids, id)
 		}
 		return ids
@@ -3881,8 +1248,8 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.removedusers_coffee_beans != nil {
-		edges = append(edges, user.EdgeUsersCoffeeBeans)
+	if m.removeduser_coffee_beans != nil {
+		edges = append(edges, user.EdgeUserCoffeeBeans)
 	}
 	return edges
 }
@@ -3891,9 +1258,9 @@ func (m *UserMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case user.EdgeUsersCoffeeBeans:
-		ids := make([]ent.Value, 0, len(m.removedusers_coffee_beans))
-		for id := range m.removedusers_coffee_beans {
+	case user.EdgeUserCoffeeBeans:
+		ids := make([]ent.Value, 0, len(m.removeduser_coffee_beans))
+		for id := range m.removeduser_coffee_beans {
 			ids = append(ids, id)
 		}
 		return ids
@@ -3904,8 +1271,8 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.clearedusers_coffee_beans {
-		edges = append(edges, user.EdgeUsersCoffeeBeans)
+	if m.cleareduser_coffee_beans {
+		edges = append(edges, user.EdgeUserCoffeeBeans)
 	}
 	return edges
 }
@@ -3914,8 +1281,8 @@ func (m *UserMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *UserMutation) EdgeCleared(name string) bool {
 	switch name {
-	case user.EdgeUsersCoffeeBeans:
-		return m.clearedusers_coffee_beans
+	case user.EdgeUserCoffeeBeans:
+		return m.cleareduser_coffee_beans
 	}
 	return false
 }
@@ -3932,45 +1299,47 @@ func (m *UserMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *UserMutation) ResetEdge(name string) error {
 	switch name {
-	case user.EdgeUsersCoffeeBeans:
-		m.ResetUsersCoffeeBeans()
+	case user.EdgeUserCoffeeBeans:
+		m.ResetUserCoffeeBeans()
 		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)
 }
 
-// UsersCoffeeBeanMutation represents an operation that mutates the UsersCoffeeBean nodes in the graph.
-type UsersCoffeeBeanMutation struct {
+// UserCoffeeBeanMutation represents an operation that mutates the UserCoffeeBean nodes in the graph.
+type UserCoffeeBeanMutation struct {
 	config
-	op                 Op
-	typ                string
-	id                 *int32
-	status             *int32
-	addstatus          *int32
-	created_at         *time.Time
-	updated_at         *time.Time
-	deleted_at         *time.Time
-	clearedFields      map[string]struct{}
-	coffee_bean        *int32
-	clearedcoffee_bean bool
-	user               *int32
-	cleareduser        bool
-	done               bool
-	oldValue           func(context.Context) (*UsersCoffeeBean, error)
-	predicates         []predicate.UsersCoffeeBean
+	op            Op
+	typ           string
+	id            *int32
+	status        *int32
+	addstatus     *int32
+	name          *string
+	farm_name     *string
+	country       *string
+	roast_degree  *string
+	roasted_at    *time.Time
+	created_at    *time.Time
+	updated_at    *time.Time
+	clearedFields map[string]struct{}
+	user          *int32
+	cleareduser   bool
+	done          bool
+	oldValue      func(context.Context) (*UserCoffeeBean, error)
+	predicates    []predicate.UserCoffeeBean
 }
 
-var _ ent.Mutation = (*UsersCoffeeBeanMutation)(nil)
+var _ ent.Mutation = (*UserCoffeeBeanMutation)(nil)
 
-// userscoffeebeanOption allows management of the mutation configuration using functional options.
-type userscoffeebeanOption func(*UsersCoffeeBeanMutation)
+// usercoffeebeanOption allows management of the mutation configuration using functional options.
+type usercoffeebeanOption func(*UserCoffeeBeanMutation)
 
-// newUsersCoffeeBeanMutation creates new mutation for the UsersCoffeeBean entity.
-func newUsersCoffeeBeanMutation(c config, op Op, opts ...userscoffeebeanOption) *UsersCoffeeBeanMutation {
-	m := &UsersCoffeeBeanMutation{
+// newUserCoffeeBeanMutation creates new mutation for the UserCoffeeBean entity.
+func newUserCoffeeBeanMutation(c config, op Op, opts ...usercoffeebeanOption) *UserCoffeeBeanMutation {
+	m := &UserCoffeeBeanMutation{
 		config:        c,
 		op:            op,
-		typ:           TypeUsersCoffeeBean,
+		typ:           TypeUserCoffeeBean,
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -3979,20 +1348,20 @@ func newUsersCoffeeBeanMutation(c config, op Op, opts ...userscoffeebeanOption) 
 	return m
 }
 
-// withUsersCoffeeBeanID sets the ID field of the mutation.
-func withUsersCoffeeBeanID(id int32) userscoffeebeanOption {
-	return func(m *UsersCoffeeBeanMutation) {
+// withUserCoffeeBeanID sets the ID field of the mutation.
+func withUserCoffeeBeanID(id int32) usercoffeebeanOption {
+	return func(m *UserCoffeeBeanMutation) {
 		var (
 			err   error
 			once  sync.Once
-			value *UsersCoffeeBean
+			value *UserCoffeeBean
 		)
-		m.oldValue = func(ctx context.Context) (*UsersCoffeeBean, error) {
+		m.oldValue = func(ctx context.Context) (*UserCoffeeBean, error) {
 			once.Do(func() {
 				if m.done {
 					err = errors.New("querying old values post mutation is not allowed")
 				} else {
-					value, err = m.Client().UsersCoffeeBean.Get(ctx, id)
+					value, err = m.Client().UserCoffeeBean.Get(ctx, id)
 				}
 			})
 			return value, err
@@ -4001,10 +1370,10 @@ func withUsersCoffeeBeanID(id int32) userscoffeebeanOption {
 	}
 }
 
-// withUsersCoffeeBean sets the old UsersCoffeeBean of the mutation.
-func withUsersCoffeeBean(node *UsersCoffeeBean) userscoffeebeanOption {
-	return func(m *UsersCoffeeBeanMutation) {
-		m.oldValue = func(context.Context) (*UsersCoffeeBean, error) {
+// withUserCoffeeBean sets the old UserCoffeeBean of the mutation.
+func withUserCoffeeBean(node *UserCoffeeBean) usercoffeebeanOption {
+	return func(m *UserCoffeeBeanMutation) {
+		m.oldValue = func(context.Context) (*UserCoffeeBean, error) {
 			return node, nil
 		}
 		m.id = &node.ID
@@ -4013,7 +1382,7 @@ func withUsersCoffeeBean(node *UsersCoffeeBean) userscoffeebeanOption {
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
-func (m UsersCoffeeBeanMutation) Client() *Client {
+func (m UserCoffeeBeanMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
@@ -4021,7 +1390,7 @@ func (m UsersCoffeeBeanMutation) Client() *Client {
 
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
-func (m UsersCoffeeBeanMutation) Tx() (*Tx, error) {
+func (m UserCoffeeBeanMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
 		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
@@ -4031,14 +1400,14 @@ func (m UsersCoffeeBeanMutation) Tx() (*Tx, error) {
 }
 
 // SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of UsersCoffeeBean entities.
-func (m *UsersCoffeeBeanMutation) SetID(id int32) {
+// operation is only accepted on creation of UserCoffeeBean entities.
+func (m *UserCoffeeBeanMutation) SetID(id int32) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *UsersCoffeeBeanMutation) ID() (id int32, exists bool) {
+func (m *UserCoffeeBeanMutation) ID() (id int32, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -4049,7 +1418,7 @@ func (m *UsersCoffeeBeanMutation) ID() (id int32, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *UsersCoffeeBeanMutation) IDs(ctx context.Context) ([]int32, error) {
+func (m *UserCoffeeBeanMutation) IDs(ctx context.Context) ([]int32, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
@@ -4058,20 +1427,20 @@ func (m *UsersCoffeeBeanMutation) IDs(ctx context.Context) ([]int32, error) {
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().UsersCoffeeBean.Query().Where(m.predicates...).IDs(ctx)
+		return m.Client().UserCoffeeBean.Query().Where(m.predicates...).IDs(ctx)
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
 }
 
 // SetStatus sets the "status" field.
-func (m *UsersCoffeeBeanMutation) SetStatus(i int32) {
+func (m *UserCoffeeBeanMutation) SetStatus(i int32) {
 	m.status = &i
 	m.addstatus = nil
 }
 
 // Status returns the value of the "status" field in the mutation.
-func (m *UsersCoffeeBeanMutation) Status() (r int32, exists bool) {
+func (m *UserCoffeeBeanMutation) Status() (r int32, exists bool) {
 	v := m.status
 	if v == nil {
 		return
@@ -4079,10 +1448,10 @@ func (m *UsersCoffeeBeanMutation) Status() (r int32, exists bool) {
 	return *v, true
 }
 
-// OldStatus returns the old "status" field's value of the UsersCoffeeBean entity.
-// If the UsersCoffeeBean object wasn't provided to the builder, the object is fetched from the database.
+// OldStatus returns the old "status" field's value of the UserCoffeeBean entity.
+// If the UserCoffeeBean object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UsersCoffeeBeanMutation) OldStatus(ctx context.Context) (v int32, err error) {
+func (m *UserCoffeeBeanMutation) OldStatus(ctx context.Context) (v int32, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
 	}
@@ -4097,7 +1466,7 @@ func (m *UsersCoffeeBeanMutation) OldStatus(ctx context.Context) (v int32, err e
 }
 
 // AddStatus adds i to the "status" field.
-func (m *UsersCoffeeBeanMutation) AddStatus(i int32) {
+func (m *UserCoffeeBeanMutation) AddStatus(i int32) {
 	if m.addstatus != nil {
 		*m.addstatus += i
 	} else {
@@ -4106,7 +1475,7 @@ func (m *UsersCoffeeBeanMutation) AddStatus(i int32) {
 }
 
 // AddedStatus returns the value that was added to the "status" field in this mutation.
-func (m *UsersCoffeeBeanMutation) AddedStatus() (r int32, exists bool) {
+func (m *UserCoffeeBeanMutation) AddedStatus() (r int32, exists bool) {
 	v := m.addstatus
 	if v == nil {
 		return
@@ -4115,18 +1484,18 @@ func (m *UsersCoffeeBeanMutation) AddedStatus() (r int32, exists bool) {
 }
 
 // ResetStatus resets all changes to the "status" field.
-func (m *UsersCoffeeBeanMutation) ResetStatus() {
+func (m *UserCoffeeBeanMutation) ResetStatus() {
 	m.status = nil
 	m.addstatus = nil
 }
 
 // SetUserID sets the "user_id" field.
-func (m *UsersCoffeeBeanMutation) SetUserID(i int32) {
+func (m *UserCoffeeBeanMutation) SetUserID(i int32) {
 	m.user = &i
 }
 
 // UserID returns the value of the "user_id" field in the mutation.
-func (m *UsersCoffeeBeanMutation) UserID() (r int32, exists bool) {
+func (m *UserCoffeeBeanMutation) UserID() (r int32, exists bool) {
 	v := m.user
 	if v == nil {
 		return
@@ -4134,10 +1503,10 @@ func (m *UsersCoffeeBeanMutation) UserID() (r int32, exists bool) {
 	return *v, true
 }
 
-// OldUserID returns the old "user_id" field's value of the UsersCoffeeBean entity.
-// If the UsersCoffeeBean object wasn't provided to the builder, the object is fetched from the database.
+// OldUserID returns the old "user_id" field's value of the UserCoffeeBean entity.
+// If the UserCoffeeBean object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UsersCoffeeBeanMutation) OldUserID(ctx context.Context) (v int32, err error) {
+func (m *UserCoffeeBeanMutation) OldUserID(ctx context.Context) (v int32, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
 	}
@@ -4152,79 +1521,249 @@ func (m *UsersCoffeeBeanMutation) OldUserID(ctx context.Context) (v int32, err e
 }
 
 // ClearUserID clears the value of the "user_id" field.
-func (m *UsersCoffeeBeanMutation) ClearUserID() {
+func (m *UserCoffeeBeanMutation) ClearUserID() {
 	m.user = nil
-	m.clearedFields[userscoffeebean.FieldUserID] = struct{}{}
+	m.clearedFields[usercoffeebean.FieldUserID] = struct{}{}
 }
 
 // UserIDCleared returns if the "user_id" field was cleared in this mutation.
-func (m *UsersCoffeeBeanMutation) UserIDCleared() bool {
-	_, ok := m.clearedFields[userscoffeebean.FieldUserID]
+func (m *UserCoffeeBeanMutation) UserIDCleared() bool {
+	_, ok := m.clearedFields[usercoffeebean.FieldUserID]
 	return ok
 }
 
 // ResetUserID resets all changes to the "user_id" field.
-func (m *UsersCoffeeBeanMutation) ResetUserID() {
+func (m *UserCoffeeBeanMutation) ResetUserID() {
 	m.user = nil
-	delete(m.clearedFields, userscoffeebean.FieldUserID)
+	delete(m.clearedFields, usercoffeebean.FieldUserID)
 }
 
-// SetCoffeeBeanID sets the "coffee_bean_id" field.
-func (m *UsersCoffeeBeanMutation) SetCoffeeBeanID(i int32) {
-	m.coffee_bean = &i
+// SetName sets the "name" field.
+func (m *UserCoffeeBeanMutation) SetName(s string) {
+	m.name = &s
 }
 
-// CoffeeBeanID returns the value of the "coffee_bean_id" field in the mutation.
-func (m *UsersCoffeeBeanMutation) CoffeeBeanID() (r int32, exists bool) {
-	v := m.coffee_bean
+// Name returns the value of the "name" field in the mutation.
+func (m *UserCoffeeBeanMutation) Name() (r string, exists bool) {
+	v := m.name
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldCoffeeBeanID returns the old "coffee_bean_id" field's value of the UsersCoffeeBean entity.
-// If the UsersCoffeeBean object wasn't provided to the builder, the object is fetched from the database.
+// OldName returns the old "name" field's value of the UserCoffeeBean entity.
+// If the UserCoffeeBean object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UsersCoffeeBeanMutation) OldCoffeeBeanID(ctx context.Context) (v int32, err error) {
+func (m *UserCoffeeBeanMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCoffeeBeanID is only allowed on UpdateOne operations")
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCoffeeBeanID requires an ID field in the mutation")
+		return v, errors.New("OldName requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCoffeeBeanID: %w", err)
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
 	}
-	return oldValue.CoffeeBeanID, nil
+	return oldValue.Name, nil
 }
 
-// ClearCoffeeBeanID clears the value of the "coffee_bean_id" field.
-func (m *UsersCoffeeBeanMutation) ClearCoffeeBeanID() {
-	m.coffee_bean = nil
-	m.clearedFields[userscoffeebean.FieldCoffeeBeanID] = struct{}{}
+// ResetName resets all changes to the "name" field.
+func (m *UserCoffeeBeanMutation) ResetName() {
+	m.name = nil
 }
 
-// CoffeeBeanIDCleared returns if the "coffee_bean_id" field was cleared in this mutation.
-func (m *UsersCoffeeBeanMutation) CoffeeBeanIDCleared() bool {
-	_, ok := m.clearedFields[userscoffeebean.FieldCoffeeBeanID]
+// SetFarmName sets the "farm_name" field.
+func (m *UserCoffeeBeanMutation) SetFarmName(s string) {
+	m.farm_name = &s
+}
+
+// FarmName returns the value of the "farm_name" field in the mutation.
+func (m *UserCoffeeBeanMutation) FarmName() (r string, exists bool) {
+	v := m.farm_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFarmName returns the old "farm_name" field's value of the UserCoffeeBean entity.
+// If the UserCoffeeBean object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserCoffeeBeanMutation) OldFarmName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFarmName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFarmName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFarmName: %w", err)
+	}
+	return oldValue.FarmName, nil
+}
+
+// ClearFarmName clears the value of the "farm_name" field.
+func (m *UserCoffeeBeanMutation) ClearFarmName() {
+	m.farm_name = nil
+	m.clearedFields[usercoffeebean.FieldFarmName] = struct{}{}
+}
+
+// FarmNameCleared returns if the "farm_name" field was cleared in this mutation.
+func (m *UserCoffeeBeanMutation) FarmNameCleared() bool {
+	_, ok := m.clearedFields[usercoffeebean.FieldFarmName]
 	return ok
 }
 
-// ResetCoffeeBeanID resets all changes to the "coffee_bean_id" field.
-func (m *UsersCoffeeBeanMutation) ResetCoffeeBeanID() {
-	m.coffee_bean = nil
-	delete(m.clearedFields, userscoffeebean.FieldCoffeeBeanID)
+// ResetFarmName resets all changes to the "farm_name" field.
+func (m *UserCoffeeBeanMutation) ResetFarmName() {
+	m.farm_name = nil
+	delete(m.clearedFields, usercoffeebean.FieldFarmName)
+}
+
+// SetCountry sets the "country" field.
+func (m *UserCoffeeBeanMutation) SetCountry(s string) {
+	m.country = &s
+}
+
+// Country returns the value of the "country" field in the mutation.
+func (m *UserCoffeeBeanMutation) Country() (r string, exists bool) {
+	v := m.country
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCountry returns the old "country" field's value of the UserCoffeeBean entity.
+// If the UserCoffeeBean object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserCoffeeBeanMutation) OldCountry(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCountry is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCountry requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCountry: %w", err)
+	}
+	return oldValue.Country, nil
+}
+
+// ClearCountry clears the value of the "country" field.
+func (m *UserCoffeeBeanMutation) ClearCountry() {
+	m.country = nil
+	m.clearedFields[usercoffeebean.FieldCountry] = struct{}{}
+}
+
+// CountryCleared returns if the "country" field was cleared in this mutation.
+func (m *UserCoffeeBeanMutation) CountryCleared() bool {
+	_, ok := m.clearedFields[usercoffeebean.FieldCountry]
+	return ok
+}
+
+// ResetCountry resets all changes to the "country" field.
+func (m *UserCoffeeBeanMutation) ResetCountry() {
+	m.country = nil
+	delete(m.clearedFields, usercoffeebean.FieldCountry)
+}
+
+// SetRoastDegree sets the "roast_degree" field.
+func (m *UserCoffeeBeanMutation) SetRoastDegree(s string) {
+	m.roast_degree = &s
+}
+
+// RoastDegree returns the value of the "roast_degree" field in the mutation.
+func (m *UserCoffeeBeanMutation) RoastDegree() (r string, exists bool) {
+	v := m.roast_degree
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRoastDegree returns the old "roast_degree" field's value of the UserCoffeeBean entity.
+// If the UserCoffeeBean object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserCoffeeBeanMutation) OldRoastDegree(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRoastDegree is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRoastDegree requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRoastDegree: %w", err)
+	}
+	return oldValue.RoastDegree, nil
+}
+
+// ResetRoastDegree resets all changes to the "roast_degree" field.
+func (m *UserCoffeeBeanMutation) ResetRoastDegree() {
+	m.roast_degree = nil
+}
+
+// SetRoastedAt sets the "roasted_at" field.
+func (m *UserCoffeeBeanMutation) SetRoastedAt(t time.Time) {
+	m.roasted_at = &t
+}
+
+// RoastedAt returns the value of the "roasted_at" field in the mutation.
+func (m *UserCoffeeBeanMutation) RoastedAt() (r time.Time, exists bool) {
+	v := m.roasted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRoastedAt returns the old "roasted_at" field's value of the UserCoffeeBean entity.
+// If the UserCoffeeBean object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserCoffeeBeanMutation) OldRoastedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRoastedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRoastedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRoastedAt: %w", err)
+	}
+	return oldValue.RoastedAt, nil
+}
+
+// ClearRoastedAt clears the value of the "roasted_at" field.
+func (m *UserCoffeeBeanMutation) ClearRoastedAt() {
+	m.roasted_at = nil
+	m.clearedFields[usercoffeebean.FieldRoastedAt] = struct{}{}
+}
+
+// RoastedAtCleared returns if the "roasted_at" field was cleared in this mutation.
+func (m *UserCoffeeBeanMutation) RoastedAtCleared() bool {
+	_, ok := m.clearedFields[usercoffeebean.FieldRoastedAt]
+	return ok
+}
+
+// ResetRoastedAt resets all changes to the "roasted_at" field.
+func (m *UserCoffeeBeanMutation) ResetRoastedAt() {
+	m.roasted_at = nil
+	delete(m.clearedFields, usercoffeebean.FieldRoastedAt)
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (m *UsersCoffeeBeanMutation) SetCreatedAt(t time.Time) {
+func (m *UserCoffeeBeanMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
 }
 
 // CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *UsersCoffeeBeanMutation) CreatedAt() (r time.Time, exists bool) {
+func (m *UserCoffeeBeanMutation) CreatedAt() (r time.Time, exists bool) {
 	v := m.created_at
 	if v == nil {
 		return
@@ -4232,10 +1771,10 @@ func (m *UsersCoffeeBeanMutation) CreatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldCreatedAt returns the old "created_at" field's value of the UsersCoffeeBean entity.
-// If the UsersCoffeeBean object wasn't provided to the builder, the object is fetched from the database.
+// OldCreatedAt returns the old "created_at" field's value of the UserCoffeeBean entity.
+// If the UserCoffeeBean object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UsersCoffeeBeanMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+func (m *UserCoffeeBeanMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
 	}
@@ -4250,17 +1789,17 @@ func (m *UsersCoffeeBeanMutation) OldCreatedAt(ctx context.Context) (v time.Time
 }
 
 // ResetCreatedAt resets all changes to the "created_at" field.
-func (m *UsersCoffeeBeanMutation) ResetCreatedAt() {
+func (m *UserCoffeeBeanMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (m *UsersCoffeeBeanMutation) SetUpdatedAt(t time.Time) {
+func (m *UserCoffeeBeanMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
 }
 
 // UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *UsersCoffeeBeanMutation) UpdatedAt() (r time.Time, exists bool) {
+func (m *UserCoffeeBeanMutation) UpdatedAt() (r time.Time, exists bool) {
 	v := m.updated_at
 	if v == nil {
 		return
@@ -4268,10 +1807,10 @@ func (m *UsersCoffeeBeanMutation) UpdatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldUpdatedAt returns the old "updated_at" field's value of the UsersCoffeeBean entity.
-// If the UsersCoffeeBean object wasn't provided to the builder, the object is fetched from the database.
+// OldUpdatedAt returns the old "updated_at" field's value of the UserCoffeeBean entity.
+// If the UserCoffeeBean object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UsersCoffeeBeanMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+func (m *UserCoffeeBeanMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
 	}
@@ -4286,99 +1825,24 @@ func (m *UsersCoffeeBeanMutation) OldUpdatedAt(ctx context.Context) (v time.Time
 }
 
 // ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *UsersCoffeeBeanMutation) ResetUpdatedAt() {
+func (m *UserCoffeeBeanMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (m *UsersCoffeeBeanMutation) SetDeletedAt(t time.Time) {
-	m.deleted_at = &t
-}
-
-// DeletedAt returns the value of the "deleted_at" field in the mutation.
-func (m *UsersCoffeeBeanMutation) DeletedAt() (r time.Time, exists bool) {
-	v := m.deleted_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDeletedAt returns the old "deleted_at" field's value of the UsersCoffeeBean entity.
-// If the UsersCoffeeBean object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UsersCoffeeBeanMutation) OldDeletedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
-	}
-	return oldValue.DeletedAt, nil
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (m *UsersCoffeeBeanMutation) ClearDeletedAt() {
-	m.deleted_at = nil
-	m.clearedFields[userscoffeebean.FieldDeletedAt] = struct{}{}
-}
-
-// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
-func (m *UsersCoffeeBeanMutation) DeletedAtCleared() bool {
-	_, ok := m.clearedFields[userscoffeebean.FieldDeletedAt]
-	return ok
-}
-
-// ResetDeletedAt resets all changes to the "deleted_at" field.
-func (m *UsersCoffeeBeanMutation) ResetDeletedAt() {
-	m.deleted_at = nil
-	delete(m.clearedFields, userscoffeebean.FieldDeletedAt)
-}
-
-// ClearCoffeeBean clears the "coffee_bean" edge to the CoffeeBean entity.
-func (m *UsersCoffeeBeanMutation) ClearCoffeeBean() {
-	m.clearedcoffee_bean = true
-}
-
-// CoffeeBeanCleared reports if the "coffee_bean" edge to the CoffeeBean entity was cleared.
-func (m *UsersCoffeeBeanMutation) CoffeeBeanCleared() bool {
-	return m.CoffeeBeanIDCleared() || m.clearedcoffee_bean
-}
-
-// CoffeeBeanIDs returns the "coffee_bean" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// CoffeeBeanID instead. It exists only for internal usage by the builders.
-func (m *UsersCoffeeBeanMutation) CoffeeBeanIDs() (ids []int32) {
-	if id := m.coffee_bean; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetCoffeeBean resets all changes to the "coffee_bean" edge.
-func (m *UsersCoffeeBeanMutation) ResetCoffeeBean() {
-	m.coffee_bean = nil
-	m.clearedcoffee_bean = false
-}
-
 // ClearUser clears the "user" edge to the User entity.
-func (m *UsersCoffeeBeanMutation) ClearUser() {
+func (m *UserCoffeeBeanMutation) ClearUser() {
 	m.cleareduser = true
 }
 
 // UserCleared reports if the "user" edge to the User entity was cleared.
-func (m *UsersCoffeeBeanMutation) UserCleared() bool {
+func (m *UserCoffeeBeanMutation) UserCleared() bool {
 	return m.UserIDCleared() || m.cleareduser
 }
 
 // UserIDs returns the "user" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // UserID instead. It exists only for internal usage by the builders.
-func (m *UsersCoffeeBeanMutation) UserIDs() (ids []int32) {
+func (m *UserCoffeeBeanMutation) UserIDs() (ids []int32) {
 	if id := m.user; id != nil {
 		ids = append(ids, *id)
 	}
@@ -4386,48 +1850,57 @@ func (m *UsersCoffeeBeanMutation) UserIDs() (ids []int32) {
 }
 
 // ResetUser resets all changes to the "user" edge.
-func (m *UsersCoffeeBeanMutation) ResetUser() {
+func (m *UserCoffeeBeanMutation) ResetUser() {
 	m.user = nil
 	m.cleareduser = false
 }
 
-// Where appends a list predicates to the UsersCoffeeBeanMutation builder.
-func (m *UsersCoffeeBeanMutation) Where(ps ...predicate.UsersCoffeeBean) {
+// Where appends a list predicates to the UserCoffeeBeanMutation builder.
+func (m *UserCoffeeBeanMutation) Where(ps ...predicate.UserCoffeeBean) {
 	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
-func (m *UsersCoffeeBeanMutation) Op() Op {
+func (m *UserCoffeeBeanMutation) Op() Op {
 	return m.op
 }
 
-// Type returns the node type of this mutation (UsersCoffeeBean).
-func (m *UsersCoffeeBeanMutation) Type() string {
+// Type returns the node type of this mutation (UserCoffeeBean).
+func (m *UserCoffeeBeanMutation) Type() string {
 	return m.typ
 }
 
 // Fields returns all fields that were changed during this mutation. Note that in
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
-func (m *UsersCoffeeBeanMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+func (m *UserCoffeeBeanMutation) Fields() []string {
+	fields := make([]string, 0, 9)
 	if m.status != nil {
-		fields = append(fields, userscoffeebean.FieldStatus)
+		fields = append(fields, usercoffeebean.FieldStatus)
 	}
 	if m.user != nil {
-		fields = append(fields, userscoffeebean.FieldUserID)
+		fields = append(fields, usercoffeebean.FieldUserID)
 	}
-	if m.coffee_bean != nil {
-		fields = append(fields, userscoffeebean.FieldCoffeeBeanID)
+	if m.name != nil {
+		fields = append(fields, usercoffeebean.FieldName)
+	}
+	if m.farm_name != nil {
+		fields = append(fields, usercoffeebean.FieldFarmName)
+	}
+	if m.country != nil {
+		fields = append(fields, usercoffeebean.FieldCountry)
+	}
+	if m.roast_degree != nil {
+		fields = append(fields, usercoffeebean.FieldRoastDegree)
+	}
+	if m.roasted_at != nil {
+		fields = append(fields, usercoffeebean.FieldRoastedAt)
 	}
 	if m.created_at != nil {
-		fields = append(fields, userscoffeebean.FieldCreatedAt)
+		fields = append(fields, usercoffeebean.FieldCreatedAt)
 	}
 	if m.updated_at != nil {
-		fields = append(fields, userscoffeebean.FieldUpdatedAt)
-	}
-	if m.deleted_at != nil {
-		fields = append(fields, userscoffeebean.FieldDeletedAt)
+		fields = append(fields, usercoffeebean.FieldUpdatedAt)
 	}
 	return fields
 }
@@ -4435,20 +1908,26 @@ func (m *UsersCoffeeBeanMutation) Fields() []string {
 // Field returns the value of a field with the given name. The second boolean
 // return value indicates that this field was not set, or was not defined in the
 // schema.
-func (m *UsersCoffeeBeanMutation) Field(name string) (ent.Value, bool) {
+func (m *UserCoffeeBeanMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case userscoffeebean.FieldStatus:
+	case usercoffeebean.FieldStatus:
 		return m.Status()
-	case userscoffeebean.FieldUserID:
+	case usercoffeebean.FieldUserID:
 		return m.UserID()
-	case userscoffeebean.FieldCoffeeBeanID:
-		return m.CoffeeBeanID()
-	case userscoffeebean.FieldCreatedAt:
+	case usercoffeebean.FieldName:
+		return m.Name()
+	case usercoffeebean.FieldFarmName:
+		return m.FarmName()
+	case usercoffeebean.FieldCountry:
+		return m.Country()
+	case usercoffeebean.FieldRoastDegree:
+		return m.RoastDegree()
+	case usercoffeebean.FieldRoastedAt:
+		return m.RoastedAt()
+	case usercoffeebean.FieldCreatedAt:
 		return m.CreatedAt()
-	case userscoffeebean.FieldUpdatedAt:
+	case usercoffeebean.FieldUpdatedAt:
 		return m.UpdatedAt()
-	case userscoffeebean.FieldDeletedAt:
-		return m.DeletedAt()
 	}
 	return nil, false
 }
@@ -4456,81 +1935,108 @@ func (m *UsersCoffeeBeanMutation) Field(name string) (ent.Value, bool) {
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
-func (m *UsersCoffeeBeanMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+func (m *UserCoffeeBeanMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case userscoffeebean.FieldStatus:
+	case usercoffeebean.FieldStatus:
 		return m.OldStatus(ctx)
-	case userscoffeebean.FieldUserID:
+	case usercoffeebean.FieldUserID:
 		return m.OldUserID(ctx)
-	case userscoffeebean.FieldCoffeeBeanID:
-		return m.OldCoffeeBeanID(ctx)
-	case userscoffeebean.FieldCreatedAt:
+	case usercoffeebean.FieldName:
+		return m.OldName(ctx)
+	case usercoffeebean.FieldFarmName:
+		return m.OldFarmName(ctx)
+	case usercoffeebean.FieldCountry:
+		return m.OldCountry(ctx)
+	case usercoffeebean.FieldRoastDegree:
+		return m.OldRoastDegree(ctx)
+	case usercoffeebean.FieldRoastedAt:
+		return m.OldRoastedAt(ctx)
+	case usercoffeebean.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
-	case userscoffeebean.FieldUpdatedAt:
+	case usercoffeebean.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
-	case userscoffeebean.FieldDeletedAt:
-		return m.OldDeletedAt(ctx)
 	}
-	return nil, fmt.Errorf("unknown UsersCoffeeBean field %s", name)
+	return nil, fmt.Errorf("unknown UserCoffeeBean field %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *UsersCoffeeBeanMutation) SetField(name string, value ent.Value) error {
+func (m *UserCoffeeBeanMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case userscoffeebean.FieldStatus:
+	case usercoffeebean.FieldStatus:
 		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetStatus(v)
 		return nil
-	case userscoffeebean.FieldUserID:
+	case usercoffeebean.FieldUserID:
 		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUserID(v)
 		return nil
-	case userscoffeebean.FieldCoffeeBeanID:
-		v, ok := value.(int32)
+	case usercoffeebean.FieldName:
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetCoffeeBeanID(v)
+		m.SetName(v)
 		return nil
-	case userscoffeebean.FieldCreatedAt:
+	case usercoffeebean.FieldFarmName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFarmName(v)
+		return nil
+	case usercoffeebean.FieldCountry:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCountry(v)
+		return nil
+	case usercoffeebean.FieldRoastDegree:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRoastDegree(v)
+		return nil
+	case usercoffeebean.FieldRoastedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRoastedAt(v)
+		return nil
+	case usercoffeebean.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatedAt(v)
 		return nil
-	case userscoffeebean.FieldUpdatedAt:
+	case usercoffeebean.FieldUpdatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUpdatedAt(v)
 		return nil
-	case userscoffeebean.FieldDeletedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDeletedAt(v)
-		return nil
 	}
-	return fmt.Errorf("unknown UsersCoffeeBean field %s", name)
+	return fmt.Errorf("unknown UserCoffeeBean field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
-func (m *UsersCoffeeBeanMutation) AddedFields() []string {
+func (m *UserCoffeeBeanMutation) AddedFields() []string {
 	var fields []string
 	if m.addstatus != nil {
-		fields = append(fields, userscoffeebean.FieldStatus)
+		fields = append(fields, usercoffeebean.FieldStatus)
 	}
 	return fields
 }
@@ -4538,9 +2044,9 @@ func (m *UsersCoffeeBeanMutation) AddedFields() []string {
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
-func (m *UsersCoffeeBeanMutation) AddedField(name string) (ent.Value, bool) {
+func (m *UserCoffeeBeanMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case userscoffeebean.FieldStatus:
+	case usercoffeebean.FieldStatus:
 		return m.AddedStatus()
 	}
 	return nil, false
@@ -4549,9 +2055,9 @@ func (m *UsersCoffeeBeanMutation) AddedField(name string) (ent.Value, bool) {
 // AddField adds the value to the field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *UsersCoffeeBeanMutation) AddField(name string, value ent.Value) error {
+func (m *UserCoffeeBeanMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case userscoffeebean.FieldStatus:
+	case usercoffeebean.FieldStatus:
 		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
@@ -4559,96 +2065,104 @@ func (m *UsersCoffeeBeanMutation) AddField(name string, value ent.Value) error {
 		m.AddStatus(v)
 		return nil
 	}
-	return fmt.Errorf("unknown UsersCoffeeBean numeric field %s", name)
+	return fmt.Errorf("unknown UserCoffeeBean numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
-func (m *UsersCoffeeBeanMutation) ClearedFields() []string {
+func (m *UserCoffeeBeanMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(userscoffeebean.FieldUserID) {
-		fields = append(fields, userscoffeebean.FieldUserID)
+	if m.FieldCleared(usercoffeebean.FieldUserID) {
+		fields = append(fields, usercoffeebean.FieldUserID)
 	}
-	if m.FieldCleared(userscoffeebean.FieldCoffeeBeanID) {
-		fields = append(fields, userscoffeebean.FieldCoffeeBeanID)
+	if m.FieldCleared(usercoffeebean.FieldFarmName) {
+		fields = append(fields, usercoffeebean.FieldFarmName)
 	}
-	if m.FieldCleared(userscoffeebean.FieldDeletedAt) {
-		fields = append(fields, userscoffeebean.FieldDeletedAt)
+	if m.FieldCleared(usercoffeebean.FieldCountry) {
+		fields = append(fields, usercoffeebean.FieldCountry)
+	}
+	if m.FieldCleared(usercoffeebean.FieldRoastedAt) {
+		fields = append(fields, usercoffeebean.FieldRoastedAt)
 	}
 	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
-func (m *UsersCoffeeBeanMutation) FieldCleared(name string) bool {
+func (m *UserCoffeeBeanMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
-func (m *UsersCoffeeBeanMutation) ClearField(name string) error {
+func (m *UserCoffeeBeanMutation) ClearField(name string) error {
 	switch name {
-	case userscoffeebean.FieldUserID:
+	case usercoffeebean.FieldUserID:
 		m.ClearUserID()
 		return nil
-	case userscoffeebean.FieldCoffeeBeanID:
-		m.ClearCoffeeBeanID()
+	case usercoffeebean.FieldFarmName:
+		m.ClearFarmName()
 		return nil
-	case userscoffeebean.FieldDeletedAt:
-		m.ClearDeletedAt()
+	case usercoffeebean.FieldCountry:
+		m.ClearCountry()
+		return nil
+	case usercoffeebean.FieldRoastedAt:
+		m.ClearRoastedAt()
 		return nil
 	}
-	return fmt.Errorf("unknown UsersCoffeeBean nullable field %s", name)
+	return fmt.Errorf("unknown UserCoffeeBean nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
-func (m *UsersCoffeeBeanMutation) ResetField(name string) error {
+func (m *UserCoffeeBeanMutation) ResetField(name string) error {
 	switch name {
-	case userscoffeebean.FieldStatus:
+	case usercoffeebean.FieldStatus:
 		m.ResetStatus()
 		return nil
-	case userscoffeebean.FieldUserID:
+	case usercoffeebean.FieldUserID:
 		m.ResetUserID()
 		return nil
-	case userscoffeebean.FieldCoffeeBeanID:
-		m.ResetCoffeeBeanID()
+	case usercoffeebean.FieldName:
+		m.ResetName()
 		return nil
-	case userscoffeebean.FieldCreatedAt:
+	case usercoffeebean.FieldFarmName:
+		m.ResetFarmName()
+		return nil
+	case usercoffeebean.FieldCountry:
+		m.ResetCountry()
+		return nil
+	case usercoffeebean.FieldRoastDegree:
+		m.ResetRoastDegree()
+		return nil
+	case usercoffeebean.FieldRoastedAt:
+		m.ResetRoastedAt()
+		return nil
+	case usercoffeebean.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil
-	case userscoffeebean.FieldUpdatedAt:
+	case usercoffeebean.FieldUpdatedAt:
 		m.ResetUpdatedAt()
 		return nil
-	case userscoffeebean.FieldDeletedAt:
-		m.ResetDeletedAt()
-		return nil
 	}
-	return fmt.Errorf("unknown UsersCoffeeBean field %s", name)
+	return fmt.Errorf("unknown UserCoffeeBean field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
-func (m *UsersCoffeeBeanMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.coffee_bean != nil {
-		edges = append(edges, userscoffeebean.EdgeCoffeeBean)
-	}
+func (m *UserCoffeeBeanMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
 	if m.user != nil {
-		edges = append(edges, userscoffeebean.EdgeUser)
+		edges = append(edges, usercoffeebean.EdgeUser)
 	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
-func (m *UsersCoffeeBeanMutation) AddedIDs(name string) []ent.Value {
+func (m *UserCoffeeBeanMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case userscoffeebean.EdgeCoffeeBean:
-		if id := m.coffee_bean; id != nil {
-			return []ent.Value{*id}
-		}
-	case userscoffeebean.EdgeUser:
+	case usercoffeebean.EdgeUser:
 		if id := m.user; id != nil {
 			return []ent.Value{*id}
 		}
@@ -4657,38 +2171,33 @@ func (m *UsersCoffeeBeanMutation) AddedIDs(name string) []ent.Value {
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
-func (m *UsersCoffeeBeanMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+func (m *UserCoffeeBeanMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
-func (m *UsersCoffeeBeanMutation) RemovedIDs(name string) []ent.Value {
+func (m *UserCoffeeBeanMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *UsersCoffeeBeanMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearedcoffee_bean {
-		edges = append(edges, userscoffeebean.EdgeCoffeeBean)
-	}
+func (m *UserCoffeeBeanMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
 	if m.cleareduser {
-		edges = append(edges, userscoffeebean.EdgeUser)
+		edges = append(edges, usercoffeebean.EdgeUser)
 	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
-func (m *UsersCoffeeBeanMutation) EdgeCleared(name string) bool {
+func (m *UserCoffeeBeanMutation) EdgeCleared(name string) bool {
 	switch name {
-	case userscoffeebean.EdgeCoffeeBean:
-		return m.clearedcoffee_bean
-	case userscoffeebean.EdgeUser:
+	case usercoffeebean.EdgeUser:
 		return m.cleareduser
 	}
 	return false
@@ -4696,28 +2205,22 @@ func (m *UsersCoffeeBeanMutation) EdgeCleared(name string) bool {
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
-func (m *UsersCoffeeBeanMutation) ClearEdge(name string) error {
+func (m *UserCoffeeBeanMutation) ClearEdge(name string) error {
 	switch name {
-	case userscoffeebean.EdgeCoffeeBean:
-		m.ClearCoffeeBean()
-		return nil
-	case userscoffeebean.EdgeUser:
+	case usercoffeebean.EdgeUser:
 		m.ClearUser()
 		return nil
 	}
-	return fmt.Errorf("unknown UsersCoffeeBean unique edge %s", name)
+	return fmt.Errorf("unknown UserCoffeeBean unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
-func (m *UsersCoffeeBeanMutation) ResetEdge(name string) error {
+func (m *UserCoffeeBeanMutation) ResetEdge(name string) error {
 	switch name {
-	case userscoffeebean.EdgeCoffeeBean:
-		m.ResetCoffeeBean()
-		return nil
-	case userscoffeebean.EdgeUser:
+	case usercoffeebean.EdgeUser:
 		m.ResetUser()
 		return nil
 	}
-	return fmt.Errorf("unknown UsersCoffeeBean edge %s", name)
+	return fmt.Errorf("unknown UserCoffeeBean edge %s", name)
 }

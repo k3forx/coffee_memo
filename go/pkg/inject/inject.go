@@ -41,12 +41,12 @@ func New() (Injector, func(), error) {
 
 	injector := Injector{
 		Reader: Reader{
-			CoffeeBean: reader.NewCoffeeBeanReader(readerClient),
-			User:       reader.NewUserReader(readerClient),
+			UserCoffeeBean: reader.NewUserCoffeeBeanReader(readerClient),
+			User:           reader.NewUserReader(readerClient),
 		},
 		Writer: Writer{
-			CoffeeBean: writer.NewCoffeeBeanWriter(writerClient),
-			User:       writer.NewUserWriter(writerClient),
+			UserCoffeeBean: writer.NewUserCoffeeBeanWriter(writerClient),
+			User:           writer.NewUserWriter(writerClient),
 		},
 	}
 
@@ -59,11 +59,11 @@ type Injector struct {
 }
 
 type Reader struct {
-	CoffeeBean reader.CoffeeBean
-	User       reader.User
+	UserCoffeeBean reader.UserCoffeeBean
+	User           reader.User
 }
 
 type Writer struct {
-	CoffeeBean writer.CoffeeBean
-	User       writer.User
+	UserCoffeeBean writer.UserCoffeeBean
+	User           writer.User
 }

@@ -24,12 +24,9 @@ type config struct {
 
 // hooks per client, for fast access.
 type hooks struct {
-	CoffeeBean      []ent.Hook
-	CoffeeShop      []ent.Hook
-	DripRecipe      []ent.Hook
-	GooseDbVersion  []ent.Hook
-	User            []ent.Hook
-	UsersCoffeeBean []ent.Hook
+	GooseDbVersion []ent.Hook
+	User           []ent.Hook
+	UserCoffeeBean []ent.Hook
 }
 
 // Options applies the options on the config object.

@@ -9,12 +9,12 @@ import (
 func NewMockInjector(ctrl *gomock.Controller) Injector {
 	return Injector{
 		Reader: Reader{
-			CoffeeBean: readerMock.NewMockCoffeeBean(ctrl),
-			User:       readerMock.NewMockUser(ctrl),
+			UserCoffeeBean: readerMock.NewMockUserCoffeeBean(ctrl),
+			User:           readerMock.NewMockUser(ctrl),
 		},
 		Writer: Writer{
-			CoffeeBean: writerMock.NewMockCoffeeBean(ctrl),
-			User:       writerMock.NewMockUser(ctrl),
+			UserCoffeeBean: writerMock.NewMockUserCoffeeBean(ctrl),
+			User:           writerMock.NewMockUser(ctrl),
 		},
 	}
 }

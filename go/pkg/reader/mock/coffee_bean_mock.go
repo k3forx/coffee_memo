@@ -36,10 +36,10 @@ func (m *MockCoffeeBean) EXPECT() *MockCoffeeBeanMockRecorder {
 }
 
 // GetAllByUserID mocks base method.
-func (m *MockCoffeeBean) GetAllByUserID(ctx context.Context, userID int) ([]model.CoffeeBean, error) {
+func (m *MockCoffeeBean) GetAllByUserID(ctx context.Context, userID int) ([]model.UserCoffeeBean, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllByUserID", ctx, userID)
-	ret0, _ := ret[0].([]model.CoffeeBean)
+	ret0, _ := ret[0].([]model.UserCoffeeBean)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -51,10 +51,10 @@ func (mr *MockCoffeeBeanMockRecorder) GetAllByUserID(ctx, userID interface{}) *g
 }
 
 // GetByID mocks base method.
-func (m *MockCoffeeBean) GetByID(ctx context.Context, coffeeBeanID int) (model.CoffeeBean, error) {
+func (m *MockCoffeeBean) GetByID(ctx context.Context, coffeeBeanID int) (model.UserCoffeeBean, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetByID", ctx, coffeeBeanID)
-	ret0, _ := ret[0].(model.CoffeeBean)
+	ret0, _ := ret[0].(model.UserCoffeeBean)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -66,10 +66,10 @@ func (mr *MockCoffeeBeanMockRecorder) GetByID(ctx, coffeeBeanID interface{}) *go
 }
 
 // GetByIDWithUser mocks base method.
-func (m *MockCoffeeBean) GetByIDWithUser(ctx context.Context, coffeeBeanID int) (model.CoffeeBean, error) {
+func (m *MockCoffeeBean) GetByIDWithUser(ctx context.Context, coffeeBeanID int) (model.UserCoffeeBean, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetByIDWithUser", ctx, coffeeBeanID)
-	ret0, _ := ret[0].(model.CoffeeBean)
+	ret0, _ := ret[0].(model.UserCoffeeBean)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
