@@ -20,6 +20,7 @@ func NewCoffeeBeanWriter(db *ent.Client) *CoffeeBeanWriter {
 //go:generate mockgen -source=./coffee_bean.go -destination=./mock/coffee_bean_mock.go -package=writer
 type CoffeeBean interface {
 	Create(ctx context.Context, coffeeBean *model.CoffeeBean, user *model.User) error
+	DeleteByID(ctx context.Context, coffeeBean *model.CoffeeBean) error
 }
 
 type CoffeeBeanWriter struct {

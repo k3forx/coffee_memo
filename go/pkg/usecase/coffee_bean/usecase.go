@@ -19,6 +19,7 @@ func NewUsecase(injector inject.Injector) *CoffeeBeanUsecase {
 type Usecase interface {
 	GetAllByUserID(ctx context.Context, in GetAllByUserIDInput) (*GetAllByUserIDOutput, *result.Result)
 	Create(ctx context.Context, in CreateInput) *result.Result
+	DeleteByID(ctx context.Context, in DeleteByIDInput) *result.Result
 }
 
 type CoffeeBeanUsecase struct {
@@ -68,6 +69,37 @@ func (u *CoffeeBeanUsecase) Create(ctx context.Context, in CreateInput) *result.
 	if err := u.injector.Writer.CoffeeBean.Create(ctx, &coffeeBean, &user); err != nil {
 		logger.Error(ctx, err)
 		return result.New(result.CodeInternalError, "コービー豆の登録に失敗しました。")
+	}
+
+	return result.OK()
+}
+
+func (u *CoffeeBeanUsecase) DeleteByID(ctx context.Context, in DeleteByIDInput) *result.Result {
+	user, err := u.injector.Reader.User.GetByID(ctx, in.UserID)
+	if err != nil {
+		logger.Error(ctx, err)
+		return result.Error()
+	}
+	if !user.Exists() {
+		return result.New(result.CodeNotFound, "アカウントが見つかりません")
+	}
+
+	coffeeBean, err := u.injector.Reader.CoffeeBean.GetByIDWithUser(ctx, in.CoffeeBeanID)
+	if err != nil {
+		logger.Error(ctx, err)
+		return result.Error()
+	}
+	if !coffeeBean.Exists() {
+		return result.New(result.CodeNotFound, "コーヒー豆が存在しません")
+	}
+	if coffeeBean.User.ID != user.ID {
+		return result.New(result.CodeForbidden, "削除できません")
+	}
+
+	coffeeBean.Status = model.CoffeeBeanStatusDeleted
+	if err := u.injector.Writer.CoffeeBean.DeleteByID(ctx, &coffeeBean); err != nil {
+		logger.Error(ctx, err)
+		return result.New(result.CodeInternalError, "削除に失敗しました")
 	}
 
 	return result.OK()

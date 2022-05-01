@@ -18,6 +18,7 @@ func NewCoffeeBeanReader(db *ent.Client) *CoffeeBeanReader {
 //go:generate mockgen -source=./coffee_bean.go -destination=./mock/coffee_bean_mock.go -package=reader
 type CoffeeBean interface {
 	GetByID(ctx context.Context, coffeeBeanID int) (model.CoffeeBean, error)
+	GetByIDWithUser(ctx context.Context, coffeeBeanID int) (model.CoffeeBean, error)
 	GetAllByUserID(ctx context.Context, userID int) ([]model.CoffeeBean, error)
 }
 
@@ -33,6 +34,19 @@ func (impl *CoffeeBeanReader) GetByID(ctx context.Context, coffeeBeanID int) (mo
 		return model.CoffeeBean{}, ent.MaskNotFound(err)
 	}
 	return model.NewCoffeeBean(cb), nil
+}
+
+func (impl *CoffeeBeanReader) GetByIDWithUser(ctx context.Context, coffeeBeanID int) (model.CoffeeBean, error) {
+	usersCoffeeBean, err := impl.db.UsersCoffeeBean.
+		Query().
+		Where(userscoffeebean.CoffeeBeanIDEQ(int32(coffeeBeanID))).
+		WithCoffeeBean().
+		WithUser().
+		Only(ctx)
+	if err != nil {
+		return model.CoffeeBean{}, ent.MaskNotFound(err)
+	}
+	return model.NewCoffeeBeanWithUser(usersCoffeeBean), nil
 }
 
 func (impl *CoffeeBeanReader) GetAllByUserID(ctx context.Context, userID int) ([]model.CoffeeBean, error) {

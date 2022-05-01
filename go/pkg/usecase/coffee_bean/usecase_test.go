@@ -262,3 +262,190 @@ func TestUsecase_Create(t *testing.T) {
 		})
 	}
 }
+
+func TestUsecase_DeleteByID(t *testing.T) {
+	t.Parallel()
+
+	err := errors.New("server error")
+	const (
+		userID       = 1
+		coffeeBeanID = 123
+	)
+	returnedUser := model.User{
+		ID: userID,
+	}
+	returnedCoffeeBean := model.CoffeeBean{
+		ID:   coffeeBeanID,
+		User: returnedUser,
+	}
+
+	cases := map[string]struct {
+		setup func(ctrl *gomock.Controller) inject.Injector
+		in    coffee_bean.DeleteByIDInput
+		res   *result.Result
+	}{
+		"success": {
+			setup: func(ctrl *gomock.Controller) inject.Injector {
+				injector := inject.NewMockInjector(ctrl)
+
+				userReader := injector.Reader.User.(*readerMock.MockUser)
+				userReader.EXPECT().GetByID(gomock.Any(), userID).
+					Return(returnedUser, nil)
+
+				coffeeBeanReader := injector.Reader.CoffeeBean.(*readerMock.MockCoffeeBean)
+				coffeeBeanReader.EXPECT().GetByIDWithUser(gomock.Any(), coffeeBeanID).
+					Return(returnedCoffeeBean, nil)
+
+				coffeeBeanWriter := injector.Writer.CoffeeBean.(*writerMock.MockCoffeeBean)
+				coffeeBeanWriter.EXPECT().DeleteByID(gomock.Any(), gomock.AssignableToTypeOf(&model.CoffeeBean{})).
+					Return(nil)
+
+				return injector
+			},
+			in: coffee_bean.DeleteByIDInput{
+				UserID:       userID,
+				CoffeeBeanID: coffeeBeanID,
+			},
+			res: result.OK(),
+		},
+		"error_in_getting_user": {
+			setup: func(ctrl *gomock.Controller) inject.Injector {
+				injector := inject.NewMockInjector(ctrl)
+
+				userReader := injector.Reader.User.(*readerMock.MockUser)
+				userReader.EXPECT().GetByID(gomock.Any(), userID).
+					Return(model.User{}, err)
+
+				return injector
+			},
+			in: coffee_bean.DeleteByIDInput{
+				UserID:       userID,
+				CoffeeBeanID: coffeeBeanID,
+			},
+			res: result.Error(),
+		},
+		"user_does_not_exist": {
+			setup: func(ctrl *gomock.Controller) inject.Injector {
+				injector := inject.NewMockInjector(ctrl)
+
+				userReader := injector.Reader.User.(*readerMock.MockUser)
+				userReader.EXPECT().GetByID(gomock.Any(), userID).
+					Return(model.User{}, nil)
+
+				return injector
+			},
+			in: coffee_bean.DeleteByIDInput{
+				UserID:       userID,
+				CoffeeBeanID: coffeeBeanID,
+			},
+			res: result.New(result.CodeNotFound, "アカウントが見つかりません"),
+		},
+		"error_in_getting_coffee_bean": {
+			setup: func(ctrl *gomock.Controller) inject.Injector {
+				injector := inject.NewMockInjector(ctrl)
+
+				userReader := injector.Reader.User.(*readerMock.MockUser)
+				userReader.EXPECT().GetByID(gomock.Any(), userID).
+					Return(returnedUser, nil)
+
+				coffeeBeanReader := injector.Reader.CoffeeBean.(*readerMock.MockCoffeeBean)
+				coffeeBeanReader.EXPECT().GetByIDWithUser(gomock.Any(), coffeeBeanID).
+					Return(model.CoffeeBean{}, err)
+
+				return injector
+			},
+			in: coffee_bean.DeleteByIDInput{
+				UserID:       userID,
+				CoffeeBeanID: coffeeBeanID,
+			},
+			res: result.Error(),
+		},
+		"coffee_bean_does_not_exist": {
+			setup: func(ctrl *gomock.Controller) inject.Injector {
+				injector := inject.NewMockInjector(ctrl)
+
+				userReader := injector.Reader.User.(*readerMock.MockUser)
+				userReader.EXPECT().GetByID(gomock.Any(), userID).
+					Return(returnedUser, nil)
+
+				coffeeBeanReader := injector.Reader.CoffeeBean.(*readerMock.MockCoffeeBean)
+				coffeeBeanReader.EXPECT().GetByIDWithUser(gomock.Any(), coffeeBeanID).
+					Return(model.CoffeeBean{}, nil)
+
+				return injector
+			},
+			in: coffee_bean.DeleteByIDInput{
+				UserID:       userID,
+				CoffeeBeanID: coffeeBeanID,
+			},
+			res: result.New(result.CodeNotFound, "コーヒー豆が存在しません"),
+		},
+		"invald_user": {
+			setup: func(ctrl *gomock.Controller) inject.Injector {
+				injector := inject.NewMockInjector(ctrl)
+
+				userReader := injector.Reader.User.(*readerMock.MockUser)
+				userReader.EXPECT().GetByID(gomock.Any(), userID).
+					Return(returnedUser, nil)
+
+				coffeeBeanReader := injector.Reader.CoffeeBean.(*readerMock.MockCoffeeBean)
+				coffeeBeanReader.EXPECT().GetByIDWithUser(gomock.Any(), coffeeBeanID).
+					Return(
+						model.CoffeeBean{
+							ID: coffeeBeanID,
+							User: model.User{
+								ID: 111111,
+							},
+						},
+						nil,
+					)
+
+				return injector
+			},
+			in: coffee_bean.DeleteByIDInput{
+				UserID:       userID,
+				CoffeeBeanID: coffeeBeanID,
+			},
+			res: result.New(result.CodeForbidden, "削除できません"),
+		},
+		"error_in_deleting_coffee_bean": {
+			setup: func(ctrl *gomock.Controller) inject.Injector {
+				injector := inject.NewMockInjector(ctrl)
+
+				userReader := injector.Reader.User.(*readerMock.MockUser)
+				userReader.EXPECT().GetByID(gomock.Any(), userID).
+					Return(returnedUser, nil)
+
+				coffeeBeanReader := injector.Reader.CoffeeBean.(*readerMock.MockCoffeeBean)
+				coffeeBeanReader.EXPECT().GetByIDWithUser(gomock.Any(), coffeeBeanID).
+					Return(returnedCoffeeBean, nil)
+
+				coffeeBeanWriter := injector.Writer.CoffeeBean.(*writerMock.MockCoffeeBean)
+				coffeeBeanWriter.EXPECT().DeleteByID(gomock.Any(), gomock.AssignableToTypeOf(&model.CoffeeBean{})).
+					Return(err)
+
+				return injector
+			},
+			in: coffee_bean.DeleteByIDInput{
+				UserID:       userID,
+				CoffeeBeanID: coffeeBeanID,
+			},
+			res: result.New(result.CodeInternalError, "削除に失敗しました"),
+		},
+	}
+
+	for name, c := range cases {
+		c := c
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			u := coffee_bean.NewUsecase(c.setup(ctrl))
+
+			res := u.DeleteByID(context.Background(), c.in)
+			if diff := cmp.Diff(c.res, res); diff != "" {
+				t.Errorf("DeleteByID result mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}

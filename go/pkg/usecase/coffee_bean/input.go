@@ -18,3 +18,7 @@ type CreateInput struct {
 	RoastDegree model.RoastDegree
 	RoastedAt   time.Time
 }
+type DeleteByIDInput struct {
+	UserID       int
+	CoffeeBeanID int
+}
