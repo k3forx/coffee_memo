@@ -2,8 +2,10 @@ package writer
 
 import (
 	"context"
+	"time"
 
 	"github.com/k3forx/coffee_memo/pkg/ent"
+	"github.com/k3forx/coffee_memo/pkg/ent/usercoffeebean"
 	"github.com/k3forx/coffee_memo/pkg/model"
 )
 
@@ -25,50 +27,33 @@ type UserCoffeeBeanWriter struct {
 
 var _ UserCoffeeBean = (*UserCoffeeBeanWriter)(nil)
 
-func (impl *UserCoffeeBeanWriter) Create(ctx context.Context, coffeeBean *model.UserCoffeeBean, user *model.User) error {
-	// now := time.Now().UTC()
-
-	// tx, err := impl.db.Tx(ctx)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// b, err := tx.CoffeeBean.Create().
-	// 	SetName(coffeeBean.Name).
-	// 	SetFarmName(coffeeBean.FarmName).
-	// 	SetCountry(coffeeBean.Country).
-	// 	SetRoastDegree(coffeeBean.RoastDegree.String()).
-	// 	SetRoastedAt(coffeeBean.RoastedAt).
-	// 	SetCreatedAt(now).
-	// 	SetUpdatedAt(now).
-	// 	Save(ctx)
-	// if err != nil {
-	// 	return transaction.Rollback(tx, fmt.Errorf("failed to create coffee beans: %w", err))
-	// }
-	// *coffeeBean = model.NewCoffeeBean(b)
-
-	// _, err = tx.UsersCoffeeBean.Create().
-	// 	SetStatus(int32(model.CoffeeBeanStatusActive.Num())).
-	// 	SetUserID(int32(user.ID)).
-	// 	SetCoffeeBeanID(int32(coffeeBean.ID)).
-	// 	SetCreatedAt(now).
-	// 	SetUpdatedAt(now).
-	// 	Save(ctx)
-	// if err != nil {
-	// 	return transaction.Rollback(tx, fmt.Errorf("failed to create users coffee beans: %w", err))
-	// }
-
-	// return tx.Commit()
+func (impl *UserCoffeeBeanWriter) Create(ctx context.Context, userCoffeeBean *model.UserCoffeeBean, user *model.User) error {
+	now := time.Now().UTC()
+	ucb, err := impl.db.UserCoffeeBean.Create().
+		SetStatus(int32(userCoffeeBean.Status.Num())).
+		SetUserID(int32(userCoffeeBean.User.ID)).
+		SetName(userCoffeeBean.Name).
+		SetFarmName(userCoffeeBean.FarmName).
+		SetCountry(userCoffeeBean.Country).
+		SetRoastDegree(userCoffeeBean.RoastDegree.String()).
+		SetRoastedAt(userCoffeeBean.RoastedAt).
+		SetCreatedAt(now).
+		SetUpdatedAt(now).
+		Save(ctx)
+	if err != nil {
+		return err
+	}
+	*userCoffeeBean = model.NewUserCoffeeBean(ucb)
 	return nil
 }
 
-func (impl *UserCoffeeBeanWriter) DeleteByID(ctx context.Context, coffeeBean *model.UserCoffeeBean) error {
-	// if _, err := impl.db.UsersCoffeeBean.
-	// 	Update().
-	// 	SetStatus(int32(model.CoffeeBeanStatusDeleted.Num())).
-	// 	Where(userscoffeebean.CoffeeBeanIDEQ(int32(coffeeBean.ID))).
-	// 	Save(ctx); err != nil {
-	// 	return err
-	// }
+func (impl *UserCoffeeBeanWriter) DeleteByID(ctx context.Context, userCoffeeBean *model.UserCoffeeBean) error {
+	if _, err := impl.db.UserCoffeeBean.
+		Update().
+		SetStatus(int32(model.CoffeeBeanStatusDeleted.Num())).
+		Where(usercoffeebean.IDEQ(int32(userCoffeeBean.ID))).
+		Save(ctx); err != nil {
+		return err
+	}
 	return nil
 }

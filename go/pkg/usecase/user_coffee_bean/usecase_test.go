@@ -11,7 +11,7 @@ import (
 	"github.com/k3forx/coffee_memo/pkg/model"
 	readerMock "github.com/k3forx/coffee_memo/pkg/reader/mock"
 	"github.com/k3forx/coffee_memo/pkg/result"
-	coffee_bean "github.com/k3forx/coffee_memo/pkg/usecase/user_coffee_bean"
+	"github.com/k3forx/coffee_memo/pkg/usecase/user_coffee_bean"
 	writerMock "github.com/k3forx/coffee_memo/pkg/writer/mock"
 )
 
@@ -36,8 +36,8 @@ func TestUsecase_GetAllByUserID(t *testing.T) {
 
 	cases := map[string]struct {
 		setup func(ctrl *gomock.Controller) inject.Injector
-		in    coffee_bean.GetAllByUserIDInput
-		out   *coffee_bean.GetAllByUserIDOutput
+		in    user_coffee_bean.GetAllByUserIDInput
+		out   *user_coffee_bean.GetAllByUserIDOutput
 		res   *result.Result
 	}{
 		"success": {
@@ -48,16 +48,16 @@ func TestUsecase_GetAllByUserID(t *testing.T) {
 				userReader.EXPECT().GetByID(gomock.Any(), userId).
 					Return(returnedUser, nil)
 
-				coffeeBeanReader := injector.Reader.UserCoffeeBean.(*readerMock.MockCoffeeBean)
-				coffeeBeanReader.EXPECT().GetAllByUserID(gomock.Any(), userId).
+				userCoffeeBeanReader := injector.Reader.UserCoffeeBean.(*readerMock.MockUserCoffeeBean)
+				userCoffeeBeanReader.EXPECT().GetAllByUserID(gomock.Any(), userId).
 					Return(returnedCoffeeBeans, nil)
 
 				return injector
 			},
-			in: coffee_bean.GetAllByUserIDInput{
+			in: user_coffee_bean.GetAllByUserIDInput{
 				UserID: userId,
 			},
-			out: &coffee_bean.GetAllByUserIDOutput{
+			out: &user_coffee_bean.GetAllByUserIDOutput{
 				CoffeeBeans: returnedCoffeeBeans,
 			},
 			res: result.OK(),
@@ -72,7 +72,7 @@ func TestUsecase_GetAllByUserID(t *testing.T) {
 
 				return injector
 			},
-			in: coffee_bean.GetAllByUserIDInput{
+			in: user_coffee_bean.GetAllByUserIDInput{
 				UserID: userId,
 			},
 			out: nil,
@@ -88,7 +88,7 @@ func TestUsecase_GetAllByUserID(t *testing.T) {
 
 				return injector
 			},
-			in: coffee_bean.GetAllByUserIDInput{
+			in: user_coffee_bean.GetAllByUserIDInput{
 				UserID: userId,
 			},
 			out: nil,
@@ -102,13 +102,13 @@ func TestUsecase_GetAllByUserID(t *testing.T) {
 				userReader.EXPECT().GetByID(gomock.Any(), userId).
 					Return(returnedUser, nil)
 
-				coffeeBeanReader := injector.Reader.UserCoffeeBean.(*readerMock.MockCoffeeBean)
-				coffeeBeanReader.EXPECT().GetAllByUserID(gomock.Any(), userId).
+				userCoffeeBeanReader := injector.Reader.UserCoffeeBean.(*readerMock.MockUserCoffeeBean)
+				userCoffeeBeanReader.EXPECT().GetAllByUserID(gomock.Any(), userId).
 					Return(nil, err)
 
 				return injector
 			},
-			in: coffee_bean.GetAllByUserIDInput{
+			in: user_coffee_bean.GetAllByUserIDInput{
 				UserID: userId,
 			},
 			out: nil,
@@ -123,7 +123,7 @@ func TestUsecase_GetAllByUserID(t *testing.T) {
 
 			ctrl := gomock.NewController(t)
 			injector := c.setup(ctrl)
-			u := coffee_bean.NewUsecase(injector)
+			u := user_coffee_bean.NewUsecase(injector)
 
 			out, res := u.GetAllByUserID(context.Background(), c.in)
 			if diff := cmp.Diff(c.res, res); diff != "" {
@@ -147,7 +147,7 @@ func TestUsecase_Create(t *testing.T) {
 
 	cases := map[string]struct {
 		setup func(ctrl *gomock.Controller) inject.Injector
-		in    coffee_bean.CreateInput
+		in    user_coffee_bean.CreateInput
 		res   *result.Result
 	}{
 		"success": {
@@ -158,12 +158,12 @@ func TestUsecase_Create(t *testing.T) {
 				userReader.EXPECT().GetByID(gomock.Any(), userId).
 					Return(returnedUser, nil)
 
-				coffeeBeanWriter := injector.Writer.UserCoffeeBean.(*writerMock.MockCoffeeBean)
-				coffeeBeanWriter.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+				userCoffeeBeanWriter := injector.Writer.UserCoffeeBean.(*writerMock.MockUserCoffeeBean)
+				userCoffeeBeanWriter.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 
 				return injector
 			},
-			in: coffee_bean.CreateInput{
+			in: user_coffee_bean.CreateInput{
 				UserId:      userId,
 				Name:        "イルガチャフィ",
 				RoastDegree: model.RoastDegreeChinamon,
@@ -174,7 +174,7 @@ func TestUsecase_Create(t *testing.T) {
 			setup: func(ctrl *gomock.Controller) inject.Injector {
 				return inject.NewMockInjector(ctrl)
 			},
-			in: coffee_bean.CreateInput{
+			in: user_coffee_bean.CreateInput{
 				UserId: userId,
 				Name:   "イルガチャフィ",
 			},
@@ -184,7 +184,7 @@ func TestUsecase_Create(t *testing.T) {
 			setup: func(ctrl *gomock.Controller) inject.Injector {
 				return inject.NewMockInjector(ctrl)
 			},
-			in: coffee_bean.CreateInput{
+			in: user_coffee_bean.CreateInput{
 				UserId:      userId,
 				RoastDegree: model.RoastDegreeChinamon,
 			},
@@ -200,7 +200,7 @@ func TestUsecase_Create(t *testing.T) {
 
 				return injector
 			},
-			in: coffee_bean.CreateInput{
+			in: user_coffee_bean.CreateInput{
 				UserId:      userId,
 				Name:        "イルガチャフィ",
 				RoastDegree: model.RoastDegreeChinamon,
@@ -217,7 +217,7 @@ func TestUsecase_Create(t *testing.T) {
 
 				return injector
 			},
-			in: coffee_bean.CreateInput{
+			in: user_coffee_bean.CreateInput{
 				UserId:      userId,
 				Name:        "イルガチャフィ",
 				RoastDegree: model.RoastDegreeChinamon,
@@ -232,12 +232,12 @@ func TestUsecase_Create(t *testing.T) {
 				userReader.EXPECT().GetByID(gomock.Any(), userId).
 					Return(returnedUser, nil)
 
-				coffeeBeanWriter := injector.Writer.UserCoffeeBean.(*writerMock.MockCoffeeBean)
-				coffeeBeanWriter.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Return(err)
+				userCoffeeBeanWriter := injector.Writer.UserCoffeeBean.(*writerMock.MockUserCoffeeBean)
+				userCoffeeBeanWriter.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Return(err)
 
 				return injector
 			},
-			in: coffee_bean.CreateInput{
+			in: user_coffee_bean.CreateInput{
 				UserId:      userId,
 				Name:        "イルガチャフィ",
 				RoastDegree: model.RoastDegreeChinamon,
@@ -253,7 +253,7 @@ func TestUsecase_Create(t *testing.T) {
 
 			ctrl := gomock.NewController(t)
 			injector := c.setup(ctrl)
-			u := coffee_bean.NewUsecase(injector)
+			u := user_coffee_bean.NewUsecase(injector)
 
 			res := u.Create(context.Background(), c.in)
 			if diff := cmp.Diff(c.res, res); diff != "" {
@@ -281,7 +281,7 @@ func TestUsecase_DeleteByID(t *testing.T) {
 
 	cases := map[string]struct {
 		setup func(ctrl *gomock.Controller) inject.Injector
-		in    coffee_bean.DeleteByIDInput
+		in    user_coffee_bean.DeleteByIDInput
 		res   *result.Result
 	}{
 		"success": {
@@ -292,17 +292,17 @@ func TestUsecase_DeleteByID(t *testing.T) {
 				userReader.EXPECT().GetByID(gomock.Any(), userID).
 					Return(returnedUser, nil)
 
-				coffeeBeanReader := injector.Reader.UserCoffeeBean.(*readerMock.MockCoffeeBean)
-				coffeeBeanReader.EXPECT().GetByIDWithUser(gomock.Any(), coffeeBeanID).
+				userCoffeeBeanReader := injector.Reader.UserCoffeeBean.(*readerMock.MockUserCoffeeBean)
+				userCoffeeBeanReader.EXPECT().GetByIDWithUser(gomock.Any(), coffeeBeanID).
 					Return(returnedCoffeeBean, nil)
 
-				coffeeBeanWriter := injector.Writer.UserCoffeeBean.(*writerMock.MockCoffeeBean)
-				coffeeBeanWriter.EXPECT().DeleteByID(gomock.Any(), gomock.AssignableToTypeOf(&model.UserCoffeeBean{})).
+				userCoffeeBeanWriter := injector.Writer.UserCoffeeBean.(*writerMock.MockUserCoffeeBean)
+				userCoffeeBeanWriter.EXPECT().DeleteByID(gomock.Any(), gomock.AssignableToTypeOf(&model.UserCoffeeBean{})).
 					Return(nil)
 
 				return injector
 			},
-			in: coffee_bean.DeleteByIDInput{
+			in: user_coffee_bean.DeleteByIDInput{
 				UserID:       userID,
 				CoffeeBeanID: coffeeBeanID,
 			},
@@ -318,7 +318,7 @@ func TestUsecase_DeleteByID(t *testing.T) {
 
 				return injector
 			},
-			in: coffee_bean.DeleteByIDInput{
+			in: user_coffee_bean.DeleteByIDInput{
 				UserID:       userID,
 				CoffeeBeanID: coffeeBeanID,
 			},
@@ -334,7 +334,7 @@ func TestUsecase_DeleteByID(t *testing.T) {
 
 				return injector
 			},
-			in: coffee_bean.DeleteByIDInput{
+			in: user_coffee_bean.DeleteByIDInput{
 				UserID:       userID,
 				CoffeeBeanID: coffeeBeanID,
 			},
@@ -348,13 +348,13 @@ func TestUsecase_DeleteByID(t *testing.T) {
 				userReader.EXPECT().GetByID(gomock.Any(), userID).
 					Return(returnedUser, nil)
 
-				coffeeBeanReader := injector.Reader.UserCoffeeBean.(*readerMock.MockCoffeeBean)
-				coffeeBeanReader.EXPECT().GetByIDWithUser(gomock.Any(), coffeeBeanID).
+				userCoffeeBeanReader := injector.Reader.UserCoffeeBean.(*readerMock.MockUserCoffeeBean)
+				userCoffeeBeanReader.EXPECT().GetByIDWithUser(gomock.Any(), coffeeBeanID).
 					Return(model.UserCoffeeBean{}, err)
 
 				return injector
 			},
-			in: coffee_bean.DeleteByIDInput{
+			in: user_coffee_bean.DeleteByIDInput{
 				UserID:       userID,
 				CoffeeBeanID: coffeeBeanID,
 			},
@@ -368,13 +368,13 @@ func TestUsecase_DeleteByID(t *testing.T) {
 				userReader.EXPECT().GetByID(gomock.Any(), userID).
 					Return(returnedUser, nil)
 
-				coffeeBeanReader := injector.Reader.UserCoffeeBean.(*readerMock.MockCoffeeBean)
-				coffeeBeanReader.EXPECT().GetByIDWithUser(gomock.Any(), coffeeBeanID).
+				userCoffeeBeanReader := injector.Reader.UserCoffeeBean.(*readerMock.MockUserCoffeeBean)
+				userCoffeeBeanReader.EXPECT().GetByIDWithUser(gomock.Any(), coffeeBeanID).
 					Return(model.UserCoffeeBean{}, nil)
 
 				return injector
 			},
-			in: coffee_bean.DeleteByIDInput{
+			in: user_coffee_bean.DeleteByIDInput{
 				UserID:       userID,
 				CoffeeBeanID: coffeeBeanID,
 			},
@@ -388,8 +388,8 @@ func TestUsecase_DeleteByID(t *testing.T) {
 				userReader.EXPECT().GetByID(gomock.Any(), userID).
 					Return(returnedUser, nil)
 
-				coffeeBeanReader := injector.Reader.UserCoffeeBean.(*readerMock.MockCoffeeBean)
-				coffeeBeanReader.EXPECT().GetByIDWithUser(gomock.Any(), coffeeBeanID).
+				userCoffeeBeanReader := injector.Reader.UserCoffeeBean.(*readerMock.MockUserCoffeeBean)
+				userCoffeeBeanReader.EXPECT().GetByIDWithUser(gomock.Any(), coffeeBeanID).
 					Return(
 						model.UserCoffeeBean{
 							ID: coffeeBeanID,
@@ -402,7 +402,7 @@ func TestUsecase_DeleteByID(t *testing.T) {
 
 				return injector
 			},
-			in: coffee_bean.DeleteByIDInput{
+			in: user_coffee_bean.DeleteByIDInput{
 				UserID:       userID,
 				CoffeeBeanID: coffeeBeanID,
 			},
@@ -416,17 +416,17 @@ func TestUsecase_DeleteByID(t *testing.T) {
 				userReader.EXPECT().GetByID(gomock.Any(), userID).
 					Return(returnedUser, nil)
 
-				coffeeBeanReader := injector.Reader.UserCoffeeBean.(*readerMock.MockCoffeeBean)
-				coffeeBeanReader.EXPECT().GetByIDWithUser(gomock.Any(), coffeeBeanID).
+				userCoffeeBeanReader := injector.Reader.UserCoffeeBean.(*readerMock.MockUserCoffeeBean)
+				userCoffeeBeanReader.EXPECT().GetByIDWithUser(gomock.Any(), coffeeBeanID).
 					Return(returnedCoffeeBean, nil)
 
-				coffeeBeanWriter := injector.Writer.UserCoffeeBean.(*writerMock.MockCoffeeBean)
-				coffeeBeanWriter.EXPECT().DeleteByID(gomock.Any(), gomock.AssignableToTypeOf(&model.UserCoffeeBean{})).
+				userCoffeeBeanWriter := injector.Writer.UserCoffeeBean.(*writerMock.MockUserCoffeeBean)
+				userCoffeeBeanWriter.EXPECT().DeleteByID(gomock.Any(), gomock.AssignableToTypeOf(&model.UserCoffeeBean{})).
 					Return(err)
 
 				return injector
 			},
-			in: coffee_bean.DeleteByIDInput{
+			in: user_coffee_bean.DeleteByIDInput{
 				UserID:       userID,
 				CoffeeBeanID: coffeeBeanID,
 			},
@@ -440,7 +440,7 @@ func TestUsecase_DeleteByID(t *testing.T) {
 			t.Parallel()
 
 			ctrl := gomock.NewController(t)
-			u := coffee_bean.NewUsecase(c.setup(ctrl))
+			u := user_coffee_bean.NewUsecase(c.setup(ctrl))
 
 			res := u.DeleteByID(context.Background(), c.in)
 			if diff := cmp.Diff(c.res, res); diff != "" {
