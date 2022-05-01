@@ -70,8 +70,20 @@ func NewRoastDegree(str string) RoastDegree {
 	return RoastDegreeUnknown
 }
 
+type CoffeeBeanStatus int
+
+const (
+	CoffeeBeanStatusActive CoffeeBeanStatus = iota
+	CoffeeBeanStatusDeleted
+)
+
+func (cbs CoffeeBeanStatus) Num() int {
+	return int(cbs)
+}
+
 type CoffeeBean struct {
 	ID          int
+	Status      CoffeeBeanStatus
 	Name        string
 	FarmName    string
 	Country     string

@@ -3945,6 +3945,8 @@ type UsersCoffeeBeanMutation struct {
 	op                 Op
 	typ                string
 	id                 *int32
+	status             *int32
+	addstatus          *int32
 	created_at         *time.Time
 	updated_at         *time.Time
 	deleted_at         *time.Time
@@ -4060,6 +4062,62 @@ func (m *UsersCoffeeBeanMutation) IDs(ctx context.Context) ([]int32, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetStatus sets the "status" field.
+func (m *UsersCoffeeBeanMutation) SetStatus(i int32) {
+	m.status = &i
+	m.addstatus = nil
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *UsersCoffeeBeanMutation) Status() (r int32, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the UsersCoffeeBean entity.
+// If the UsersCoffeeBean object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UsersCoffeeBeanMutation) OldStatus(ctx context.Context) (v int32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// AddStatus adds i to the "status" field.
+func (m *UsersCoffeeBeanMutation) AddStatus(i int32) {
+	if m.addstatus != nil {
+		*m.addstatus += i
+	} else {
+		m.addstatus = &i
+	}
+}
+
+// AddedStatus returns the value that was added to the "status" field in this mutation.
+func (m *UsersCoffeeBeanMutation) AddedStatus() (r int32, exists bool) {
+	v := m.addstatus
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *UsersCoffeeBeanMutation) ResetStatus() {
+	m.status = nil
+	m.addstatus = nil
 }
 
 // SetUserID sets the "user_id" field.
@@ -4352,7 +4410,10 @@ func (m *UsersCoffeeBeanMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UsersCoffeeBeanMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
+	if m.status != nil {
+		fields = append(fields, userscoffeebean.FieldStatus)
+	}
 	if m.user != nil {
 		fields = append(fields, userscoffeebean.FieldUserID)
 	}
@@ -4376,6 +4437,8 @@ func (m *UsersCoffeeBeanMutation) Fields() []string {
 // schema.
 func (m *UsersCoffeeBeanMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case userscoffeebean.FieldStatus:
+		return m.Status()
 	case userscoffeebean.FieldUserID:
 		return m.UserID()
 	case userscoffeebean.FieldCoffeeBeanID:
@@ -4395,6 +4458,8 @@ func (m *UsersCoffeeBeanMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *UsersCoffeeBeanMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case userscoffeebean.FieldStatus:
+		return m.OldStatus(ctx)
 	case userscoffeebean.FieldUserID:
 		return m.OldUserID(ctx)
 	case userscoffeebean.FieldCoffeeBeanID:
@@ -4414,6 +4479,13 @@ func (m *UsersCoffeeBeanMutation) OldField(ctx context.Context, name string) (en
 // type.
 func (m *UsersCoffeeBeanMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case userscoffeebean.FieldStatus:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
 	case userscoffeebean.FieldUserID:
 		v, ok := value.(int32)
 		if !ok {
@@ -4457,6 +4529,9 @@ func (m *UsersCoffeeBeanMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *UsersCoffeeBeanMutation) AddedFields() []string {
 	var fields []string
+	if m.addstatus != nil {
+		fields = append(fields, userscoffeebean.FieldStatus)
+	}
 	return fields
 }
 
@@ -4465,6 +4540,8 @@ func (m *UsersCoffeeBeanMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *UsersCoffeeBeanMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
+	case userscoffeebean.FieldStatus:
+		return m.AddedStatus()
 	}
 	return nil, false
 }
@@ -4474,6 +4551,13 @@ func (m *UsersCoffeeBeanMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *UsersCoffeeBeanMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case userscoffeebean.FieldStatus:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddStatus(v)
+		return nil
 	}
 	return fmt.Errorf("unknown UsersCoffeeBean numeric field %s", name)
 }
@@ -4522,6 +4606,9 @@ func (m *UsersCoffeeBeanMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *UsersCoffeeBeanMutation) ResetField(name string) error {
 	switch name {
+	case userscoffeebean.FieldStatus:
+		m.ResetStatus()
+		return nil
 	case userscoffeebean.FieldUserID:
 		m.ResetUserID()
 		return nil

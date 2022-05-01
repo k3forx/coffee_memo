@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/k3forx/coffee_memo/pkg/ent"
+	"github.com/k3forx/coffee_memo/pkg/ent/userscoffeebean"
 	"github.com/k3forx/coffee_memo/pkg/model"
 	"github.com/k3forx/coffee_memo/pkg/transaction"
 )
@@ -50,12 +51,26 @@ func (impl *CoffeeBeanWriter) Create(ctx context.Context, coffeeBean *model.Coff
 	*coffeeBean = model.NewCoffeeBean(b)
 
 	_, err = tx.UsersCoffeeBean.Create().
+		SetStatus(int32(model.CoffeeBeanStatusActive.Num())).
 		SetUserID(int32(user.ID)).
 		SetCoffeeBeanID(int32(coffeeBean.ID)).
+		SetCreatedAt(now).
+		SetUpdatedAt(now).
 		Save(ctx)
 	if err != nil {
 		return transaction.Rollback(tx, fmt.Errorf("failed to create users coffee beans: %w", err))
 	}
 
 	return tx.Commit()
+}
+
+func (impl *CoffeeBeanWriter) DeleteByID(ctx context.Context, coffeeBean *model.CoffeeBean) error {
+	if _, err := impl.db.UsersCoffeeBean.
+		Update().
+		SetStatus(int32(model.CoffeeBeanStatusDeleted.Num())).
+		Where(userscoffeebean.CoffeeBeanIDEQ(int32(coffeeBean.ID))).
+		Save(ctx); err != nil {
+		return err
+	}
+	return nil
 }
