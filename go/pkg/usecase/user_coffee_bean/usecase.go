@@ -75,6 +75,37 @@ func (u *UserCoffeeBeanUsecase) Create(ctx context.Context, in CreateInput) *res
 }
 
 func (u *UserCoffeeBeanUsecase) EditByID(ctx context.Context, in EditByIDInput) *result.Result {
+	user, err := u.injector.Reader.User.GetByID(ctx, in.UserID)
+	if err != nil {
+		logger.Error(ctx, err)
+		return result.Error()
+	}
+	if !user.Exists() {
+		return result.New(result.CodeNotFound, "アカウントが見つかりません")
+	}
+
+	userCoffeeBean, err := u.injector.Reader.UserCoffeeBean.GetByID(ctx, in.UserCoffeeBeanID)
+	if err != nil {
+		logger.Error(ctx, err)
+		return result.Error()
+	}
+	if !userCoffeeBean.Exists() {
+		return result.New(result.CodeNotFound, "コーヒー豆が存在しません")
+	}
+	if userCoffeeBean.User.ID != user.ID {
+		return result.New(result.CodeForbidden, "編集できません")
+	}
+
+	if err := in.validate(); err != nil {
+		return result.New(result.CodeBadRequest, err.Error())
+	}
+
+	userCoffeeBean = in.Model()
+	if err := u.injector.Writer.UserCoffeeBean.UpdateByID(ctx, &userCoffeeBean); err != nil {
+		logger.Error(ctx, err)
+		return result.Error()
+	}
+
 	return result.OK()
 }
 
