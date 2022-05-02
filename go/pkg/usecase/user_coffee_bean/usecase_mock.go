@@ -63,6 +63,20 @@ func (mr *MockUsecaseMockRecorder) DeleteByID(ctx, in interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteByID", reflect.TypeOf((*MockUsecase)(nil).DeleteByID), ctx, in)
 }
 
+// EditByID mocks base method.
+func (m *MockUsecase) EditByID(ctx context.Context, in EditByIDInput) *result.Result {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EditByID", ctx, in)
+	ret0, _ := ret[0].(*result.Result)
+	return ret0
+}
+
+// EditByID indicates an expected call of EditByID.
+func (mr *MockUsecaseMockRecorder) EditByID(ctx, in interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EditByID", reflect.TypeOf((*MockUsecase)(nil).EditByID), ctx, in)
+}
+
 // GetAllByUserID mocks base method.
 func (m *MockUsecase) GetAllByUserID(ctx context.Context, in GetAllByUserIDInput) (*GetAllByUserIDOutput, *result.Result) {
 	m.ctrl.T.Helper()

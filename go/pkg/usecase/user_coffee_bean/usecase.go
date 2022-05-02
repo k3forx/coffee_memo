@@ -19,6 +19,7 @@ func NewUsecase(injector inject.Injector) *UserCoffeeBeanUsecase {
 type Usecase interface {
 	GetAllByUserID(ctx context.Context, in GetAllByUserIDInput) (*GetAllByUserIDOutput, *result.Result)
 	Create(ctx context.Context, in CreateInput) *result.Result
+	EditByID(ctx context.Context, in EditByIDInput) *result.Result
 	DeleteByID(ctx context.Context, in DeleteByIDInput) *result.Result
 }
 

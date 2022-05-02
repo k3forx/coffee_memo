@@ -2,6 +2,7 @@ package user_coffee_bean
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/k3forx/coffee_memo/pkg/inject"
 	"github.com/k3forx/coffee_memo/pkg/model"
@@ -26,6 +27,7 @@ func Route(r *echo.Group, injector inject.Injector) {
 	h := NewHandler(injector)
 	r.GET("", h.GetAllByUserID)
 	r.POST("", h.Create)
+	r.PUT("/:id", h.EditByID)
 	r.DELETE("/:id", h.DeleteByID)
 }
 
@@ -66,6 +68,43 @@ func (h Handler) Create(c echo.Context) error {
 	}
 
 	if res := h.usecase.Create(c.Request().Context(), in); !res.IsOK() {
+		return presenter.Error(c, res)
+	}
+
+	return presenter.Success(c)
+}
+
+func (h Handler) EditByID(c echo.Context) error {
+	var req EditByIDRequest
+	_ = c.Bind(&req)
+
+	userCoffeeBeanID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return presenter.BadRequest(c, result.CodeBadRequest.String())
+	}
+
+	s, err := session.GetSession(c)
+	if err != nil {
+		return presenter.Error(c, result.Error())
+	}
+	sessionUser := s.GetSessionUser()
+
+	layout := "2006-01-02T15:04:05.000Z"
+	roastedAt, err := time.Parse(layout, req.RoastedAt)
+	if err != nil {
+		return presenter.BadRequest(c, result.CodeBadRequest.String())
+	}
+
+	in := user_coffee_bean.EditByIDInput{
+		UserID:           sessionUser.ID,
+		UserCoffeeBeanID: userCoffeeBeanID,
+		Name:             req.Name,
+		FarmName:         req.FarmName,
+		Country:          req.Country,
+		RoastDegree:      model.NewRoastDegree(req.RoastDegree),
+		RoastedAt:        roastedAt,
+	}
+	if res := h.usecase.EditByID(c.Request().Context(), in); !res.IsOK() {
 		return presenter.Error(c, res)
 	}
 
