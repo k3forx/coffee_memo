@@ -26,6 +26,7 @@ type Handler struct {
 func Route(r *echo.Group, injector inject.Injector) {
 	h := NewHandler(injector)
 	r.GET("", h.GetAllByUserID)
+	r.GET("/:id", h.GetByID)
 	r.POST("", h.Create)
 	r.PUT("/:id", h.EditByID)
 	r.DELETE("/:id", h.DeleteByID)
@@ -47,6 +48,23 @@ func (h Handler) GetAllByUserID(c echo.Context) error {
 	}
 
 	return presenter.JSON(c, newGetAllView(out))
+}
+
+func (h Handler) GetByID(c echo.Context) error {
+	userCoffeeBeanID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return presenter.BadRequest(c, result.CodeBadRequest.String())
+	}
+
+	in := user_coffee_bean.GetByIDInput{
+		UserCoffeeBeanID: userCoffeeBeanID,
+	}
+	out, res := h.usecase.GetByID(c.Request().Context(), in)
+	if !res.IsOK() {
+		return presenter.Error(c, res)
+	}
+
+	return presenter.JSON(c, newGetByIDView(out))
 }
 
 func (h Handler) Create(c echo.Context) error {

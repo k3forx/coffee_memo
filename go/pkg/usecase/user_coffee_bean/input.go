@@ -11,6 +11,10 @@ type GetAllByUserIDInput struct {
 	UserID int
 }
 
+type GetByIDInput struct {
+	UserCoffeeBeanID int
+}
+
 type CreateInput struct {
 	UserId      int
 	Name        string

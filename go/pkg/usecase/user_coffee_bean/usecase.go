@@ -18,6 +18,7 @@ func NewUsecase(injector inject.Injector) *UserCoffeeBeanUsecase {
 //go:generate mockgen -source=./usecase.go -destination=./usecase_mock.go -package=user_coffee_bean
 type Usecase interface {
 	GetAllByUserID(ctx context.Context, in GetAllByUserIDInput) (*GetAllByUserIDOutput, *result.Result)
+	GetByID(ctx context.Context, in GetByIDInput) (*GetByIDOutput, *result.Result)
 	Create(ctx context.Context, in CreateInput) *result.Result
 	EditByID(ctx context.Context, in EditByIDInput) *result.Result
 	DeleteByID(ctx context.Context, in DeleteByIDInput) *result.Result
@@ -44,6 +45,18 @@ func (u *UserCoffeeBeanUsecase) GetAllByUserID(ctx context.Context, in GetAllByU
 	}
 
 	return &GetAllByUserIDOutput{CoffeeBeans: coffeeBeans}, result.OK()
+}
+
+func (u *UserCoffeeBeanUsecase) GetByID(ctx context.Context, in GetByIDInput) (*GetByIDOutput, *result.Result) {
+	userCofffeeBean, err := u.injector.Reader.UserCoffeeBean.GetByID(ctx, in.UserCoffeeBeanID)
+	if err != nil {
+		logger.Error(ctx, err)
+		return nil, result.Error()
+	}
+	if !userCofffeeBean.Exists() {
+		return nil, result.New(result.CodeNotFound, "コーヒー豆が見つかりません")
+	}
+	return &GetByIDOutput{UserCoffeeBean: userCofffeeBean}, result.OK()
 }
 
 func (u *UserCoffeeBeanUsecase) Create(ctx context.Context, in CreateInput) *result.Result {
