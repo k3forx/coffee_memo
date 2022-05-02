@@ -136,6 +136,94 @@ func TestUsecase_GetAllByUserID(t *testing.T) {
 	}
 }
 
+func TestUsecase_GetByID(t *testing.T) {
+	t.Parallel()
+
+	err := errors.New("server error")
+	const (
+		userCoffeeBeanID = 1
+	)
+	returnedUserCoffeeBean := model.UserCoffeeBean{
+		ID: userCoffeeBeanID,
+	}
+
+	cases := map[string]struct {
+		setup func(ctrl *gomock.Controller) inject.Injector
+		in    user_coffee_bean.GetByIDInput
+		out   *user_coffee_bean.GetByIDOutput
+		res   *result.Result
+	}{
+		"success": {
+			setup: func(ctrl *gomock.Controller) inject.Injector {
+				injector := inject.NewMockInjector(ctrl)
+
+				userCoffeeBeanReader := injector.Reader.UserCoffeeBean.(*readerMock.MockUserCoffeeBean)
+				userCoffeeBeanReader.EXPECT().GetByID(gomock.Any(), userCoffeeBeanID).
+					Return(returnedUserCoffeeBean, nil)
+
+				return injector
+			},
+			in: user_coffee_bean.GetByIDInput{
+				UserCoffeeBeanID: userCoffeeBeanID,
+			},
+			out: &user_coffee_bean.GetByIDOutput{
+				UserCoffeeBean: returnedUserCoffeeBean,
+			},
+			res: result.OK(),
+		},
+		"error_in_getting_user_coffee_bean": {
+			setup: func(ctrl *gomock.Controller) inject.Injector {
+				injector := inject.NewMockInjector(ctrl)
+
+				userCoffeeBeanReader := injector.Reader.UserCoffeeBean.(*readerMock.MockUserCoffeeBean)
+				userCoffeeBeanReader.EXPECT().GetByID(gomock.Any(), userCoffeeBeanID).
+					Return(model.UserCoffeeBean{}, err)
+
+				return injector
+			},
+			in: user_coffee_bean.GetByIDInput{
+				UserCoffeeBeanID: userCoffeeBeanID,
+			},
+			out: nil,
+			res: result.Error(),
+		},
+		"user_coffee_bean_does_not_exist": {
+			setup: func(ctrl *gomock.Controller) inject.Injector {
+				injector := inject.NewMockInjector(ctrl)
+
+				userCoffeeBeanReader := injector.Reader.UserCoffeeBean.(*readerMock.MockUserCoffeeBean)
+				userCoffeeBeanReader.EXPECT().GetByID(gomock.Any(), userCoffeeBeanID).
+					Return(model.UserCoffeeBean{}, nil)
+
+				return injector
+			},
+			in: user_coffee_bean.GetByIDInput{
+				UserCoffeeBeanID: userCoffeeBeanID,
+			},
+			out: nil,
+			res: result.New(result.CodeNotFound, "コーヒー豆が見つかりません"),
+		},
+	}
+
+	for name, c := range cases {
+		c := c
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			u := user_coffee_bean.NewUsecase(c.setup(ctrl))
+
+			out, res := u.GetByID(context.Background(), c.in)
+			if diff := cmp.Diff(c.res, res); diff != "" {
+				t.Errorf("GetByID result mismatch (-want +got):\n%s", res)
+			}
+			if diff := cmp.Diff(c.out, out); diff != "" {
+				t.Errorf("GetByID output mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
 func TestUsecase_Create(t *testing.T) {
 	t.Parallel()
 
