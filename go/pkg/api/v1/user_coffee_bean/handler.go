@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/k3forx/coffee_memo/pkg/inject"
+	"github.com/k3forx/coffee_memo/pkg/logger"
 	"github.com/k3forx/coffee_memo/pkg/model"
 	"github.com/k3forx/coffee_memo/pkg/presenter"
 	"github.com/k3forx/coffee_memo/pkg/result"
@@ -77,14 +78,21 @@ func (h Handler) Create(c echo.Context) error {
 	}
 	sessionUser := s.GetSessionUser()
 
+	layout := "2006-01-02"
+	roastedAt, err := time.Parse(layout, req.RoastedAt)
+	if err != nil {
+		logger.Error(c.Request().Context(), err)
+		return presenter.BadRequest(c, result.CodeBadRequest.String())
+	}
+
 	in := user_coffee_bean.CreateInput{
 		UserId:      sessionUser.ID,
 		Name:        req.Name,
 		FarmName:    req.FarmName,
 		Country:     req.Country,
 		RoastDegree: model.NewRoastDegree(req.RoastDegree),
+		RoastedAt:   roastedAt,
 	}
-
 	if res := h.usecase.Create(c.Request().Context(), in); !res.IsOK() {
 		return presenter.Error(c, res)
 	}
