@@ -74,6 +74,9 @@ func (u *UserCoffeeBeanUsecase) Create(ctx context.Context, in CreateInput) *res
 	}
 
 	userCoffeeBean := model.UserCoffeeBean{
+		User: model.User{
+			ID: user.ID,
+		},
 		Name:        in.Name,
 		FarmName:    in.FarmName,
 		Country:     in.Country,
