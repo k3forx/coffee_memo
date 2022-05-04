@@ -30,6 +30,7 @@ services:
       - 3306:3306
     volumes:
       - ./docker/mysql/initdb.d:/docker-entrypoint-initdb.d:ro
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
       - mysql:/var/lib/mysql
     environment:
       MYSQL_DATABASE: coffee_app
