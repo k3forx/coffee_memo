@@ -51,6 +51,7 @@ func (impl *UserCoffeeBeanReader) GetAllByUserID(ctx context.Context, userID int
 	es, err := impl.db.UserCoffeeBean.
 		Query().
 		Where(usercoffeebean.UserIDEQ(int32(userID))).
+		Where(usercoffeebean.StatusEQ(int32(model.CoffeeBeanStatusActive))).
 		All(ctx)
 	if err != nil {
 		return nil, ent.MaskNotFound(err)

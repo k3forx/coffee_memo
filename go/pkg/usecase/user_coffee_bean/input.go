@@ -44,6 +44,10 @@ func (in EditByIDInput) validate() error {
 
 func (in EditByIDInput) Model() model.UserCoffeeBean {
 	return model.UserCoffeeBean{
+		ID: in.UserCoffeeBeanID,
+		User: model.User{
+			ID: in.UserID,
+		},
 		Name:        in.Name,
 		FarmName:    in.FarmName,
 		Country:     in.Country,

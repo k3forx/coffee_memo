@@ -51,6 +51,7 @@ func (impl *UserCoffeeBeanWriter) Create(ctx context.Context, userCoffeeBean *mo
 func (impl *UserCoffeeBeanWriter) UpdateByID(ctx context.Context, userCoffeeBean *model.UserCoffeeBean) error {
 	if _, err := impl.db.UserCoffeeBean.
 		Update().
+		Where(usercoffeebean.IDEQ(int32(userCoffeeBean.ID))).
 		SetStatus(int32(userCoffeeBean.Status.Num())).
 		SetUserID(int32(userCoffeeBean.User.ID)).
 		SetName(userCoffeeBean.Name).
