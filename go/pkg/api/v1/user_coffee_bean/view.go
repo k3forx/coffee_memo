@@ -26,6 +26,7 @@ func newGetAllView(out *user_coffee_bean.GetAllByUserIDOutput) UserCoffeeBeans {
 			FarmName:    cb.FarmName,
 			Country:     cb.Country,
 			RoastDegree: cb.RoastDegree.LocalizedString(),
+			RoastedAt:   cb.RoastedAt.Format("2006-01-02"),
 		}
 	}
 	return UserCoffeeBeans{UserCoffeeBeans: userCoffeeBeans}
@@ -38,6 +39,7 @@ func newGetByIDView(out *user_coffee_bean.GetByIDOutput) UserCoffeeBean {
 		Name:        ucb.Name,
 		FarmName:    ucb.FarmName,
 		Country:     ucb.Country,
-		RoastDegree: ucb.RoastDegree.LocalizedString(),
+		RoastDegree: ucb.RoastDegree.String(),
+		RoastedAt:   ucb.RoastedAt.Format("2006-01-02"),
 	}
 }
