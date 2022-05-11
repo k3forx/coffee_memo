@@ -2,7 +2,6 @@ package user_coffee_bean_test
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -22,13 +21,13 @@ func TestHandler_GetByID(t *testing.T) {
 	t.Parallel()
 
 	cases := map[string]struct {
-		id           int
+		id           string
 		setup        func(ctrl *gomock.Controller) userCoffeeBeanUsecase.Usecase
 		expectedCode int
 		expectedBody map[string]interface{}
 	}{
 		"success": {
-			id: 1,
+			id: "1",
 			setup: func(ctrl *gomock.Controller) userCoffeeBeanUsecase.Usecase {
 				u := userCoffeeBeanUsecase.NewMockUsecase(ctrl)
 				in := userCoffeeBeanUsecase.GetByIDInput{
@@ -60,6 +59,33 @@ func TestHandler_GetByID(t *testing.T) {
 				"roastedAt":   "2022-03-01",
 			},
 		},
+		"invalid_id": {
+			id: "",
+			setup: func(ctrl *gomock.Controller) userCoffeeBeanUsecase.Usecase {
+				return userCoffeeBeanUsecase.NewMockUsecase(ctrl)
+			},
+			expectedCode: http.StatusBadRequest,
+			expectedBody: map[string]interface{}{
+				"message": "bad request",
+				"status":  "bad request",
+			},
+		},
+		"usecase_returns_error": {
+			id: "1",
+			setup: func(ctrl *gomock.Controller) userCoffeeBeanUsecase.Usecase {
+				u := userCoffeeBeanUsecase.NewMockUsecase(ctrl)
+				in := userCoffeeBeanUsecase.GetByIDInput{
+					UserCoffeeBeanID: 1,
+				}
+				u.EXPECT().GetByID(gomock.All(), in).Return(nil, result.New(result.CodeNotFound, "コーヒー豆が見つかりません"))
+				return u
+			},
+			expectedCode: http.StatusNotFound,
+			expectedBody: map[string]interface{}{
+				"message": "コーヒー豆が見つかりません",
+				"status":  "not found",
+			},
+		},
 	}
 
 	for name, c := range cases {
@@ -72,7 +98,7 @@ func TestHandler_GetByID(t *testing.T) {
 			w := httptest.NewRecorder()
 			echoContext := e.NewContext(r, w)
 			echoContext.SetParamNames("id")
-			echoContext.SetParamValues(fmt.Sprintf("%d", c.id))
+			echoContext.SetParamValues(c.id)
 
 			ctrl := gomock.NewController(t)
 			injector := inject.NewMockInjector(ctrl)
