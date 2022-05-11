@@ -44,9 +44,11 @@ type UserCoffeeBean struct {
 type UserCoffeeBeanEdges struct {
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
+	// UserDripRecipes holds the value of the user_drip_recipes edge.
+	UserDripRecipes []*UserDripRecipe `json:"user_drip_recipes,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -61,6 +63,15 @@ func (e UserCoffeeBeanEdges) UserOrErr() (*User, error) {
 		return e.User, nil
 	}
 	return nil, &NotLoadedError{edge: "user"}
+}
+
+// UserDripRecipesOrErr returns the UserDripRecipes value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserCoffeeBeanEdges) UserDripRecipesOrErr() ([]*UserDripRecipe, error) {
+	if e.loadedTypes[1] {
+		return e.UserDripRecipes, nil
+	}
+	return nil, &NotLoadedError{edge: "user_drip_recipes"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -157,6 +168,11 @@ func (ucb *UserCoffeeBean) assignValues(columns []string, values []interface{}) 
 // QueryUser queries the "user" edge of the UserCoffeeBean entity.
 func (ucb *UserCoffeeBean) QueryUser() *UserQuery {
 	return (&UserCoffeeBeanClient{config: ucb.config}).QueryUser(ucb)
+}
+
+// QueryUserDripRecipes queries the "user_drip_recipes" edge of the UserCoffeeBean entity.
+func (ucb *UserCoffeeBean) QueryUserDripRecipes() *UserDripRecipeQuery {
+	return (&UserCoffeeBeanClient{config: ucb.config}).QueryUserDripRecipes(ucb)
 }
 
 // Update returns a builder for updating this UserCoffeeBean.

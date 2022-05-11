@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/k3forx/coffee_memo/pkg/ent/predicate"
 	"github.com/k3forx/coffee_memo/pkg/ent/user"
 	"github.com/k3forx/coffee_memo/pkg/ent/usercoffeebean"
+	"github.com/k3forx/coffee_memo/pkg/ent/userdriprecipe"
 )
 
 // UserCoffeeBeanQuery is the builder for querying UserCoffeeBean entities.
@@ -25,7 +27,8 @@ type UserCoffeeBeanQuery struct {
 	fields     []string
 	predicates []predicate.UserCoffeeBean
 	// eager-loading edges.
-	withUser *UserQuery
+	withUser            *UserQuery
+	withUserDripRecipes *UserDripRecipeQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -77,6 +80,28 @@ func (ucbq *UserCoffeeBeanQuery) QueryUser() *UserQuery {
 			sqlgraph.From(usercoffeebean.Table, usercoffeebean.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, usercoffeebean.UserTable, usercoffeebean.UserColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(ucbq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryUserDripRecipes chains the current query on the "user_drip_recipes" edge.
+func (ucbq *UserCoffeeBeanQuery) QueryUserDripRecipes() *UserDripRecipeQuery {
+	query := &UserDripRecipeQuery{config: ucbq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := ucbq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := ucbq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(usercoffeebean.Table, usercoffeebean.FieldID, selector),
+			sqlgraph.To(userdriprecipe.Table, userdriprecipe.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, usercoffeebean.UserDripRecipesTable, usercoffeebean.UserDripRecipesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(ucbq.driver.Dialect(), step)
 		return fromU, nil
@@ -260,12 +285,13 @@ func (ucbq *UserCoffeeBeanQuery) Clone() *UserCoffeeBeanQuery {
 		return nil
 	}
 	return &UserCoffeeBeanQuery{
-		config:     ucbq.config,
-		limit:      ucbq.limit,
-		offset:     ucbq.offset,
-		order:      append([]OrderFunc{}, ucbq.order...),
-		predicates: append([]predicate.UserCoffeeBean{}, ucbq.predicates...),
-		withUser:   ucbq.withUser.Clone(),
+		config:              ucbq.config,
+		limit:               ucbq.limit,
+		offset:              ucbq.offset,
+		order:               append([]OrderFunc{}, ucbq.order...),
+		predicates:          append([]predicate.UserCoffeeBean{}, ucbq.predicates...),
+		withUser:            ucbq.withUser.Clone(),
+		withUserDripRecipes: ucbq.withUserDripRecipes.Clone(),
 		// clone intermediate query.
 		sql:    ucbq.sql.Clone(),
 		path:   ucbq.path,
@@ -281,6 +307,17 @@ func (ucbq *UserCoffeeBeanQuery) WithUser(opts ...func(*UserQuery)) *UserCoffeeB
 		opt(query)
 	}
 	ucbq.withUser = query
+	return ucbq
+}
+
+// WithUserDripRecipes tells the query-builder to eager-load the nodes that are connected to
+// the "user_drip_recipes" edge. The optional arguments are used to configure the query builder of the edge.
+func (ucbq *UserCoffeeBeanQuery) WithUserDripRecipes(opts ...func(*UserDripRecipeQuery)) *UserCoffeeBeanQuery {
+	query := &UserDripRecipeQuery{config: ucbq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	ucbq.withUserDripRecipes = query
 	return ucbq
 }
 
@@ -354,8 +391,9 @@ func (ucbq *UserCoffeeBeanQuery) sqlAll(ctx context.Context, hooks ...queryHook)
 	var (
 		nodes       = []*UserCoffeeBean{}
 		_spec       = ucbq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			ucbq.withUser != nil,
+			ucbq.withUserDripRecipes != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -400,6 +438,31 @@ func (ucbq *UserCoffeeBeanQuery) sqlAll(ctx context.Context, hooks ...queryHook)
 			for i := range nodes {
 				nodes[i].Edges.User = n
 			}
+		}
+	}
+
+	if query := ucbq.withUserDripRecipes; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int32]*UserCoffeeBean)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.UserDripRecipes = []*UserDripRecipe{}
+		}
+		query.Where(predicate.UserDripRecipe(func(s *sql.Selector) {
+			s.Where(sql.InValues(usercoffeebean.UserDripRecipesColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.CoffeeBeanID
+			node, ok := nodeids[fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "coffee_bean_id" returned %v for node %v`, fk, n.ID)
+			}
+			node.Edges.UserDripRecipes = append(node.Edges.UserDripRecipes, n)
 		}
 	}
 

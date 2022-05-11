@@ -14,6 +14,7 @@ import (
 	"github.com/k3forx/coffee_memo/pkg/ent/predicate"
 	"github.com/k3forx/coffee_memo/pkg/ent/user"
 	"github.com/k3forx/coffee_memo/pkg/ent/usercoffeebean"
+	"github.com/k3forx/coffee_memo/pkg/ent/userdriprecipe"
 )
 
 // UserCoffeeBeanUpdate is the builder for updating UserCoffeeBean entities.
@@ -151,6 +152,21 @@ func (ucbu *UserCoffeeBeanUpdate) SetUser(u *User) *UserCoffeeBeanUpdate {
 	return ucbu.SetUserID(u.ID)
 }
 
+// AddUserDripRecipeIDs adds the "user_drip_recipes" edge to the UserDripRecipe entity by IDs.
+func (ucbu *UserCoffeeBeanUpdate) AddUserDripRecipeIDs(ids ...int32) *UserCoffeeBeanUpdate {
+	ucbu.mutation.AddUserDripRecipeIDs(ids...)
+	return ucbu
+}
+
+// AddUserDripRecipes adds the "user_drip_recipes" edges to the UserDripRecipe entity.
+func (ucbu *UserCoffeeBeanUpdate) AddUserDripRecipes(u ...*UserDripRecipe) *UserCoffeeBeanUpdate {
+	ids := make([]int32, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return ucbu.AddUserDripRecipeIDs(ids...)
+}
+
 // Mutation returns the UserCoffeeBeanMutation object of the builder.
 func (ucbu *UserCoffeeBeanUpdate) Mutation() *UserCoffeeBeanMutation {
 	return ucbu.mutation
@@ -160,6 +176,27 @@ func (ucbu *UserCoffeeBeanUpdate) Mutation() *UserCoffeeBeanMutation {
 func (ucbu *UserCoffeeBeanUpdate) ClearUser() *UserCoffeeBeanUpdate {
 	ucbu.mutation.ClearUser()
 	return ucbu
+}
+
+// ClearUserDripRecipes clears all "user_drip_recipes" edges to the UserDripRecipe entity.
+func (ucbu *UserCoffeeBeanUpdate) ClearUserDripRecipes() *UserCoffeeBeanUpdate {
+	ucbu.mutation.ClearUserDripRecipes()
+	return ucbu
+}
+
+// RemoveUserDripRecipeIDs removes the "user_drip_recipes" edge to UserDripRecipe entities by IDs.
+func (ucbu *UserCoffeeBeanUpdate) RemoveUserDripRecipeIDs(ids ...int32) *UserCoffeeBeanUpdate {
+	ucbu.mutation.RemoveUserDripRecipeIDs(ids...)
+	return ucbu
+}
+
+// RemoveUserDripRecipes removes "user_drip_recipes" edges to UserDripRecipe entities.
+func (ucbu *UserCoffeeBeanUpdate) RemoveUserDripRecipes(u ...*UserDripRecipe) *UserCoffeeBeanUpdate {
+	ids := make([]int32, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return ucbu.RemoveUserDripRecipeIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -350,6 +387,60 @@ func (ucbu *UserCoffeeBeanUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if ucbu.mutation.UserDripRecipesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   usercoffeebean.UserDripRecipesTable,
+			Columns: []string{usercoffeebean.UserDripRecipesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: userdriprecipe.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ucbu.mutation.RemovedUserDripRecipesIDs(); len(nodes) > 0 && !ucbu.mutation.UserDripRecipesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   usercoffeebean.UserDripRecipesTable,
+			Columns: []string{usercoffeebean.UserDripRecipesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: userdriprecipe.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ucbu.mutation.UserDripRecipesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   usercoffeebean.UserDripRecipesTable,
+			Columns: []string{usercoffeebean.UserDripRecipesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: userdriprecipe.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ucbu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{usercoffeebean.Label}
@@ -491,6 +582,21 @@ func (ucbuo *UserCoffeeBeanUpdateOne) SetUser(u *User) *UserCoffeeBeanUpdateOne 
 	return ucbuo.SetUserID(u.ID)
 }
 
+// AddUserDripRecipeIDs adds the "user_drip_recipes" edge to the UserDripRecipe entity by IDs.
+func (ucbuo *UserCoffeeBeanUpdateOne) AddUserDripRecipeIDs(ids ...int32) *UserCoffeeBeanUpdateOne {
+	ucbuo.mutation.AddUserDripRecipeIDs(ids...)
+	return ucbuo
+}
+
+// AddUserDripRecipes adds the "user_drip_recipes" edges to the UserDripRecipe entity.
+func (ucbuo *UserCoffeeBeanUpdateOne) AddUserDripRecipes(u ...*UserDripRecipe) *UserCoffeeBeanUpdateOne {
+	ids := make([]int32, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return ucbuo.AddUserDripRecipeIDs(ids...)
+}
+
 // Mutation returns the UserCoffeeBeanMutation object of the builder.
 func (ucbuo *UserCoffeeBeanUpdateOne) Mutation() *UserCoffeeBeanMutation {
 	return ucbuo.mutation
@@ -500,6 +606,27 @@ func (ucbuo *UserCoffeeBeanUpdateOne) Mutation() *UserCoffeeBeanMutation {
 func (ucbuo *UserCoffeeBeanUpdateOne) ClearUser() *UserCoffeeBeanUpdateOne {
 	ucbuo.mutation.ClearUser()
 	return ucbuo
+}
+
+// ClearUserDripRecipes clears all "user_drip_recipes" edges to the UserDripRecipe entity.
+func (ucbuo *UserCoffeeBeanUpdateOne) ClearUserDripRecipes() *UserCoffeeBeanUpdateOne {
+	ucbuo.mutation.ClearUserDripRecipes()
+	return ucbuo
+}
+
+// RemoveUserDripRecipeIDs removes the "user_drip_recipes" edge to UserDripRecipe entities by IDs.
+func (ucbuo *UserCoffeeBeanUpdateOne) RemoveUserDripRecipeIDs(ids ...int32) *UserCoffeeBeanUpdateOne {
+	ucbuo.mutation.RemoveUserDripRecipeIDs(ids...)
+	return ucbuo
+}
+
+// RemoveUserDripRecipes removes "user_drip_recipes" edges to UserDripRecipe entities.
+func (ucbuo *UserCoffeeBeanUpdateOne) RemoveUserDripRecipes(u ...*UserDripRecipe) *UserCoffeeBeanUpdateOne {
+	ids := make([]int32, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return ucbuo.RemoveUserDripRecipeIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -706,6 +833,60 @@ func (ucbuo *UserCoffeeBeanUpdateOne) sqlSave(ctx context.Context) (_node *UserC
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt32,
 					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ucbuo.mutation.UserDripRecipesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   usercoffeebean.UserDripRecipesTable,
+			Columns: []string{usercoffeebean.UserDripRecipesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: userdriprecipe.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ucbuo.mutation.RemovedUserDripRecipesIDs(); len(nodes) > 0 && !ucbuo.mutation.UserDripRecipesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   usercoffeebean.UserDripRecipesTable,
+			Columns: []string{usercoffeebean.UserDripRecipesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: userdriprecipe.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ucbuo.mutation.UserDripRecipesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   usercoffeebean.UserDripRecipesTable,
+			Columns: []string{usercoffeebean.UserDripRecipesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: userdriprecipe.FieldID,
 				},
 			},
 		}
