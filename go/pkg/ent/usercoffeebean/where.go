@@ -1036,6 +1036,34 @@ func HasUserWith(preds ...predicate.User) predicate.UserCoffeeBean {
 	})
 }
 
+// HasUserDripRecipes applies the HasEdge predicate on the "user_drip_recipes" edge.
+func HasUserDripRecipes() predicate.UserCoffeeBean {
+	return predicate.UserCoffeeBean(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(UserDripRecipesTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, UserDripRecipesTable, UserDripRecipesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasUserDripRecipesWith applies the HasEdge predicate on the "user_drip_recipes" edge with a given conditions (other predicates).
+func HasUserDripRecipesWith(preds ...predicate.UserDripRecipe) predicate.UserCoffeeBean {
+	return predicate.UserCoffeeBean(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(UserDripRecipesInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, UserDripRecipesTable, UserDripRecipesColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.UserCoffeeBean) predicate.UserCoffeeBean {
 	return predicate.UserCoffeeBean(func(s *sql.Selector) {

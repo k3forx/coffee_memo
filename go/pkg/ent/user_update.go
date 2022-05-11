@@ -14,6 +14,7 @@ import (
 	"github.com/k3forx/coffee_memo/pkg/ent/predicate"
 	"github.com/k3forx/coffee_memo/pkg/ent/user"
 	"github.com/k3forx/coffee_memo/pkg/ent/usercoffeebean"
+	"github.com/k3forx/coffee_memo/pkg/ent/userdriprecipe"
 )
 
 // UserUpdate is the builder for updating User entities.
@@ -107,6 +108,21 @@ func (uu *UserUpdate) AddUserCoffeeBeans(u ...*UserCoffeeBean) *UserUpdate {
 	return uu.AddUserCoffeeBeanIDs(ids...)
 }
 
+// AddUserDripRecipeIDs adds the "user_drip_recipes" edge to the UserDripRecipe entity by IDs.
+func (uu *UserUpdate) AddUserDripRecipeIDs(ids ...int32) *UserUpdate {
+	uu.mutation.AddUserDripRecipeIDs(ids...)
+	return uu
+}
+
+// AddUserDripRecipes adds the "user_drip_recipes" edges to the UserDripRecipe entity.
+func (uu *UserUpdate) AddUserDripRecipes(u ...*UserDripRecipe) *UserUpdate {
+	ids := make([]int32, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uu.AddUserDripRecipeIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -131,6 +147,27 @@ func (uu *UserUpdate) RemoveUserCoffeeBeans(u ...*UserCoffeeBean) *UserUpdate {
 		ids[i] = u[i].ID
 	}
 	return uu.RemoveUserCoffeeBeanIDs(ids...)
+}
+
+// ClearUserDripRecipes clears all "user_drip_recipes" edges to the UserDripRecipe entity.
+func (uu *UserUpdate) ClearUserDripRecipes() *UserUpdate {
+	uu.mutation.ClearUserDripRecipes()
+	return uu
+}
+
+// RemoveUserDripRecipeIDs removes the "user_drip_recipes" edge to UserDripRecipe entities by IDs.
+func (uu *UserUpdate) RemoveUserDripRecipeIDs(ids ...int32) *UserUpdate {
+	uu.mutation.RemoveUserDripRecipeIDs(ids...)
+	return uu
+}
+
+// RemoveUserDripRecipes removes "user_drip_recipes" edges to UserDripRecipe entities.
+func (uu *UserUpdate) RemoveUserDripRecipes(u ...*UserDripRecipe) *UserUpdate {
+	ids := make([]int32, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uu.RemoveUserDripRecipeIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -321,6 +358,60 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.UserDripRecipesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.UserDripRecipesTable,
+			Columns: []string{user.UserDripRecipesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: userdriprecipe.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedUserDripRecipesIDs(); len(nodes) > 0 && !uu.mutation.UserDripRecipesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.UserDripRecipesTable,
+			Columns: []string{user.UserDripRecipesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: userdriprecipe.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.UserDripRecipesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.UserDripRecipesTable,
+			Columns: []string{user.UserDripRecipesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: userdriprecipe.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -418,6 +509,21 @@ func (uuo *UserUpdateOne) AddUserCoffeeBeans(u ...*UserCoffeeBean) *UserUpdateOn
 	return uuo.AddUserCoffeeBeanIDs(ids...)
 }
 
+// AddUserDripRecipeIDs adds the "user_drip_recipes" edge to the UserDripRecipe entity by IDs.
+func (uuo *UserUpdateOne) AddUserDripRecipeIDs(ids ...int32) *UserUpdateOne {
+	uuo.mutation.AddUserDripRecipeIDs(ids...)
+	return uuo
+}
+
+// AddUserDripRecipes adds the "user_drip_recipes" edges to the UserDripRecipe entity.
+func (uuo *UserUpdateOne) AddUserDripRecipes(u ...*UserDripRecipe) *UserUpdateOne {
+	ids := make([]int32, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uuo.AddUserDripRecipeIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -442,6 +548,27 @@ func (uuo *UserUpdateOne) RemoveUserCoffeeBeans(u ...*UserCoffeeBean) *UserUpdat
 		ids[i] = u[i].ID
 	}
 	return uuo.RemoveUserCoffeeBeanIDs(ids...)
+}
+
+// ClearUserDripRecipes clears all "user_drip_recipes" edges to the UserDripRecipe entity.
+func (uuo *UserUpdateOne) ClearUserDripRecipes() *UserUpdateOne {
+	uuo.mutation.ClearUserDripRecipes()
+	return uuo
+}
+
+// RemoveUserDripRecipeIDs removes the "user_drip_recipes" edge to UserDripRecipe entities by IDs.
+func (uuo *UserUpdateOne) RemoveUserDripRecipeIDs(ids ...int32) *UserUpdateOne {
+	uuo.mutation.RemoveUserDripRecipeIDs(ids...)
+	return uuo
+}
+
+// RemoveUserDripRecipes removes "user_drip_recipes" edges to UserDripRecipe entities.
+func (uuo *UserUpdateOne) RemoveUserDripRecipes(u ...*UserDripRecipe) *UserUpdateOne {
+	ids := make([]int32, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uuo.RemoveUserDripRecipeIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -648,6 +775,60 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt32,
 					Column: usercoffeebean.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.UserDripRecipesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.UserDripRecipesTable,
+			Columns: []string{user.UserDripRecipesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: userdriprecipe.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedUserDripRecipesIDs(); len(nodes) > 0 && !uuo.mutation.UserDripRecipesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.UserDripRecipesTable,
+			Columns: []string{user.UserDripRecipesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: userdriprecipe.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.UserDripRecipesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.UserDripRecipesTable,
+			Columns: []string{user.UserDripRecipesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: userdriprecipe.FieldID,
 				},
 			},
 		}

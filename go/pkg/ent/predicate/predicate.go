@@ -14,3 +14,6 @@ type User func(*sql.Selector)
 
 // UserCoffeeBean is the predicate function for usercoffeebean builders.
 type UserCoffeeBean func(*sql.Selector)
+
+// UserDripRecipe is the predicate function for userdriprecipe builders.
+type UserDripRecipe func(*sql.Selector)

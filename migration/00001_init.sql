@@ -131,11 +131,12 @@ CREATE TABLE `user_drip_recipes` (
 	`step_one` VARCHAR(255) NOT NULL,
 	`step_two` VARCHAR(255) NOT NULL,
 	`memo` VARCHAR(255) NOT NULL,
-	`attrs` JSON,
 	`created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	`deleted_at` DATETIME DEFAULT NULL,
-	PRIMARY KEY (`id`)
+	PRIMARY KEY (`id`),
+	CONSTRAINT fkey_user_drip_recipes_user_id FOREIGN KEY (user_id) REFERENCES users (id),
+	CONSTRAINT fkey_user_drip_recipes_coffee_bean_id FOREIGN KEY (coffee_bean_id) REFERENCES user_coffee_beans (id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 -- +goose StatementEnd
@@ -145,6 +146,12 @@ CREATE TABLE `user_drip_recipes` (
 -- +goose StatementBegin
 
 -- DROP TABLE `coffee_shops`;
+
+-- +goose StatementEnd
+
+-- +goose StatementBegin
+
+DROP TABLE `user_drip_recipes`;
 
 -- +goose StatementEnd
 
@@ -163,12 +170,6 @@ DROP TABLE `user_coffee_beans`;
 -- +goose StatementBegin
 
 -- DROP TABLE `coffee_beans`;
-
--- +goose StatementEnd
-
--- +goose StatementBegin
-
--- DROP TABLE `drip_recipes`;
 
 -- +goose StatementEnd
 

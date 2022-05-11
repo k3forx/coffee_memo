@@ -66,11 +66,48 @@ var (
 			},
 		},
 	}
+	// UserDripRecipesColumns holds the columns for the "user_drip_recipes" table.
+	UserDripRecipesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt32, Increment: true},
+		{Name: "coffee_bean_weight", Type: field.TypeFloat64},
+		{Name: "coffee_bean_grind", Type: field.TypeString},
+		{Name: "liquid_weight", Type: field.TypeFloat64},
+		{Name: "temperature", Type: field.TypeFloat64},
+		{Name: "step_one", Type: field.TypeString},
+		{Name: "step_two", Type: field.TypeString},
+		{Name: "memo", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "user_id", Type: field.TypeInt32, Nullable: true},
+		{Name: "coffee_bean_id", Type: field.TypeInt32, Nullable: true},
+	}
+	// UserDripRecipesTable holds the schema information for the "user_drip_recipes" table.
+	UserDripRecipesTable = &schema.Table{
+		Name:       "user_drip_recipes",
+		Columns:    UserDripRecipesColumns,
+		PrimaryKey: []*schema.Column{UserDripRecipesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "user_drip_recipes_users_user_drip_recipes",
+				Columns:    []*schema.Column{UserDripRecipesColumns[11]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "user_drip_recipes_user_coffee_beans_user_drip_recipes",
+				Columns:    []*schema.Column{UserDripRecipesColumns[12]},
+				RefColumns: []*schema.Column{UserCoffeeBeansColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		GooseDbVersionTable,
 		UsersTable,
 		UserCoffeeBeansTable,
+		UserDripRecipesTable,
 	}
 )
 
@@ -79,4 +116,6 @@ func init() {
 		Table: "goose_db_version",
 	}
 	UserCoffeeBeansTable.ForeignKeys[0].RefTable = UsersTable
+	UserDripRecipesTable.ForeignKeys[0].RefTable = UsersTable
+	UserDripRecipesTable.ForeignKeys[1].RefTable = UserCoffeeBeansTable
 }
