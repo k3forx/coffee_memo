@@ -17,7 +17,7 @@ func (UserCoffeeBean) Fields() []ent.Field {
 	return []ent.Field{field.Int32("id"), field.Int32("status"), field.Int32("user_id").Optional(), field.String("name"), field.String("farm_name").Optional(), field.String("country").Optional(), field.String("roast_degree"), field.Time("roasted_at").Optional(), field.Time("created_at"), field.Time("updated_at")}
 }
 func (UserCoffeeBean) Edges() []ent.Edge {
-	return []ent.Edge{edge.From("user", User.Type).Ref("user_coffee_beans").Unique().Field("user_id"), edge.To("user_drip_recipes", UserDripRecipe.Type)}
+	return []ent.Edge{edge.To("user_brew_recipes", UserBrewRecipe.Type), edge.From("user", User.Type).Ref("user_coffee_beans").Unique().Field("user_id")}
 }
 func (UserCoffeeBean) Annotations() []schema.Annotation {
 	return nil

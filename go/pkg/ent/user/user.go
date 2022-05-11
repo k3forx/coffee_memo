@@ -21,12 +21,19 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
+	// EdgeUserBrewRecipes holds the string denoting the user_brew_recipes edge name in mutations.
+	EdgeUserBrewRecipes = "user_brew_recipes"
 	// EdgeUserCoffeeBeans holds the string denoting the user_coffee_beans edge name in mutations.
 	EdgeUserCoffeeBeans = "user_coffee_beans"
-	// EdgeUserDripRecipes holds the string denoting the user_drip_recipes edge name in mutations.
-	EdgeUserDripRecipes = "user_drip_recipes"
 	// Table holds the table name of the user in the database.
 	Table = "users"
+	// UserBrewRecipesTable is the table that holds the user_brew_recipes relation/edge.
+	UserBrewRecipesTable = "user_brew_recipes"
+	// UserBrewRecipesInverseTable is the table name for the UserBrewRecipe entity.
+	// It exists in this package in order to avoid circular dependency with the "userbrewrecipe" package.
+	UserBrewRecipesInverseTable = "user_brew_recipes"
+	// UserBrewRecipesColumn is the table column denoting the user_brew_recipes relation/edge.
+	UserBrewRecipesColumn = "user_id"
 	// UserCoffeeBeansTable is the table that holds the user_coffee_beans relation/edge.
 	UserCoffeeBeansTable = "user_coffee_beans"
 	// UserCoffeeBeansInverseTable is the table name for the UserCoffeeBean entity.
@@ -34,13 +41,6 @@ const (
 	UserCoffeeBeansInverseTable = "user_coffee_beans"
 	// UserCoffeeBeansColumn is the table column denoting the user_coffee_beans relation/edge.
 	UserCoffeeBeansColumn = "user_id"
-	// UserDripRecipesTable is the table that holds the user_drip_recipes relation/edge.
-	UserDripRecipesTable = "user_drip_recipes"
-	// UserDripRecipesInverseTable is the table name for the UserDripRecipe entity.
-	// It exists in this package in order to avoid circular dependency with the "userdriprecipe" package.
-	UserDripRecipesInverseTable = "user_drip_recipes"
-	// UserDripRecipesColumn is the table column denoting the user_drip_recipes relation/edge.
-	UserDripRecipesColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
