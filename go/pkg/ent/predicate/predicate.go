@@ -12,8 +12,8 @@ type GooseDbVersion func(*sql.Selector)
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
 
+// UserBrewRecipe is the predicate function for userbrewrecipe builders.
+type UserBrewRecipe func(*sql.Selector)
+
 // UserCoffeeBean is the predicate function for usercoffeebean builders.
 type UserCoffeeBean func(*sql.Selector)
-
-// UserDripRecipe is the predicate function for userdriprecipe builders.
-type UserDripRecipe func(*sql.Selector)

@@ -13,8 +13,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/k3forx/coffee_memo/pkg/ent/predicate"
 	"github.com/k3forx/coffee_memo/pkg/ent/user"
+	"github.com/k3forx/coffee_memo/pkg/ent/userbrewrecipe"
 	"github.com/k3forx/coffee_memo/pkg/ent/usercoffeebean"
-	"github.com/k3forx/coffee_memo/pkg/ent/userdriprecipe"
 )
 
 // UserCoffeeBeanUpdate is the builder for updating UserCoffeeBean entities.
@@ -147,24 +147,24 @@ func (ucbu *UserCoffeeBeanUpdate) SetUpdatedAt(t time.Time) *UserCoffeeBeanUpdat
 	return ucbu
 }
 
-// SetUser sets the "user" edge to the User entity.
-func (ucbu *UserCoffeeBeanUpdate) SetUser(u *User) *UserCoffeeBeanUpdate {
-	return ucbu.SetUserID(u.ID)
-}
-
-// AddUserDripRecipeIDs adds the "user_drip_recipes" edge to the UserDripRecipe entity by IDs.
-func (ucbu *UserCoffeeBeanUpdate) AddUserDripRecipeIDs(ids ...int32) *UserCoffeeBeanUpdate {
-	ucbu.mutation.AddUserDripRecipeIDs(ids...)
+// AddUserBrewRecipeIDs adds the "user_brew_recipes" edge to the UserBrewRecipe entity by IDs.
+func (ucbu *UserCoffeeBeanUpdate) AddUserBrewRecipeIDs(ids ...int32) *UserCoffeeBeanUpdate {
+	ucbu.mutation.AddUserBrewRecipeIDs(ids...)
 	return ucbu
 }
 
-// AddUserDripRecipes adds the "user_drip_recipes" edges to the UserDripRecipe entity.
-func (ucbu *UserCoffeeBeanUpdate) AddUserDripRecipes(u ...*UserDripRecipe) *UserCoffeeBeanUpdate {
+// AddUserBrewRecipes adds the "user_brew_recipes" edges to the UserBrewRecipe entity.
+func (ucbu *UserCoffeeBeanUpdate) AddUserBrewRecipes(u ...*UserBrewRecipe) *UserCoffeeBeanUpdate {
 	ids := make([]int32, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return ucbu.AddUserDripRecipeIDs(ids...)
+	return ucbu.AddUserBrewRecipeIDs(ids...)
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (ucbu *UserCoffeeBeanUpdate) SetUser(u *User) *UserCoffeeBeanUpdate {
+	return ucbu.SetUserID(u.ID)
 }
 
 // Mutation returns the UserCoffeeBeanMutation object of the builder.
@@ -172,31 +172,31 @@ func (ucbu *UserCoffeeBeanUpdate) Mutation() *UserCoffeeBeanMutation {
 	return ucbu.mutation
 }
 
-// ClearUser clears the "user" edge to the User entity.
-func (ucbu *UserCoffeeBeanUpdate) ClearUser() *UserCoffeeBeanUpdate {
-	ucbu.mutation.ClearUser()
+// ClearUserBrewRecipes clears all "user_brew_recipes" edges to the UserBrewRecipe entity.
+func (ucbu *UserCoffeeBeanUpdate) ClearUserBrewRecipes() *UserCoffeeBeanUpdate {
+	ucbu.mutation.ClearUserBrewRecipes()
 	return ucbu
 }
 
-// ClearUserDripRecipes clears all "user_drip_recipes" edges to the UserDripRecipe entity.
-func (ucbu *UserCoffeeBeanUpdate) ClearUserDripRecipes() *UserCoffeeBeanUpdate {
-	ucbu.mutation.ClearUserDripRecipes()
+// RemoveUserBrewRecipeIDs removes the "user_brew_recipes" edge to UserBrewRecipe entities by IDs.
+func (ucbu *UserCoffeeBeanUpdate) RemoveUserBrewRecipeIDs(ids ...int32) *UserCoffeeBeanUpdate {
+	ucbu.mutation.RemoveUserBrewRecipeIDs(ids...)
 	return ucbu
 }
 
-// RemoveUserDripRecipeIDs removes the "user_drip_recipes" edge to UserDripRecipe entities by IDs.
-func (ucbu *UserCoffeeBeanUpdate) RemoveUserDripRecipeIDs(ids ...int32) *UserCoffeeBeanUpdate {
-	ucbu.mutation.RemoveUserDripRecipeIDs(ids...)
-	return ucbu
-}
-
-// RemoveUserDripRecipes removes "user_drip_recipes" edges to UserDripRecipe entities.
-func (ucbu *UserCoffeeBeanUpdate) RemoveUserDripRecipes(u ...*UserDripRecipe) *UserCoffeeBeanUpdate {
+// RemoveUserBrewRecipes removes "user_brew_recipes" edges to UserBrewRecipe entities.
+func (ucbu *UserCoffeeBeanUpdate) RemoveUserBrewRecipes(u ...*UserBrewRecipe) *UserCoffeeBeanUpdate {
 	ids := make([]int32, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return ucbu.RemoveUserDripRecipeIDs(ids...)
+	return ucbu.RemoveUserBrewRecipeIDs(ids...)
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (ucbu *UserCoffeeBeanUpdate) ClearUser() *UserCoffeeBeanUpdate {
+	ucbu.mutation.ClearUser()
+	return ucbu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -352,6 +352,60 @@ func (ucbu *UserCoffeeBeanUpdate) sqlSave(ctx context.Context) (n int, err error
 			Column: usercoffeebean.FieldUpdatedAt,
 		})
 	}
+	if ucbu.mutation.UserBrewRecipesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   usercoffeebean.UserBrewRecipesTable,
+			Columns: []string{usercoffeebean.UserBrewRecipesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: userbrewrecipe.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ucbu.mutation.RemovedUserBrewRecipesIDs(); len(nodes) > 0 && !ucbu.mutation.UserBrewRecipesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   usercoffeebean.UserBrewRecipesTable,
+			Columns: []string{usercoffeebean.UserBrewRecipesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: userbrewrecipe.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ucbu.mutation.UserBrewRecipesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   usercoffeebean.UserBrewRecipesTable,
+			Columns: []string{usercoffeebean.UserBrewRecipesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: userbrewrecipe.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if ucbu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -379,60 +433,6 @@ func (ucbu *UserCoffeeBeanUpdate) sqlSave(ctx context.Context) (n int, err error
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt32,
 					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if ucbu.mutation.UserDripRecipesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   usercoffeebean.UserDripRecipesTable,
-			Columns: []string{usercoffeebean.UserDripRecipesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt32,
-					Column: userdriprecipe.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := ucbu.mutation.RemovedUserDripRecipesIDs(); len(nodes) > 0 && !ucbu.mutation.UserDripRecipesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   usercoffeebean.UserDripRecipesTable,
-			Columns: []string{usercoffeebean.UserDripRecipesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt32,
-					Column: userdriprecipe.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := ucbu.mutation.UserDripRecipesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   usercoffeebean.UserDripRecipesTable,
-			Columns: []string{usercoffeebean.UserDripRecipesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt32,
-					Column: userdriprecipe.FieldID,
 				},
 			},
 		}
@@ -577,24 +577,24 @@ func (ucbuo *UserCoffeeBeanUpdateOne) SetUpdatedAt(t time.Time) *UserCoffeeBeanU
 	return ucbuo
 }
 
-// SetUser sets the "user" edge to the User entity.
-func (ucbuo *UserCoffeeBeanUpdateOne) SetUser(u *User) *UserCoffeeBeanUpdateOne {
-	return ucbuo.SetUserID(u.ID)
-}
-
-// AddUserDripRecipeIDs adds the "user_drip_recipes" edge to the UserDripRecipe entity by IDs.
-func (ucbuo *UserCoffeeBeanUpdateOne) AddUserDripRecipeIDs(ids ...int32) *UserCoffeeBeanUpdateOne {
-	ucbuo.mutation.AddUserDripRecipeIDs(ids...)
+// AddUserBrewRecipeIDs adds the "user_brew_recipes" edge to the UserBrewRecipe entity by IDs.
+func (ucbuo *UserCoffeeBeanUpdateOne) AddUserBrewRecipeIDs(ids ...int32) *UserCoffeeBeanUpdateOne {
+	ucbuo.mutation.AddUserBrewRecipeIDs(ids...)
 	return ucbuo
 }
 
-// AddUserDripRecipes adds the "user_drip_recipes" edges to the UserDripRecipe entity.
-func (ucbuo *UserCoffeeBeanUpdateOne) AddUserDripRecipes(u ...*UserDripRecipe) *UserCoffeeBeanUpdateOne {
+// AddUserBrewRecipes adds the "user_brew_recipes" edges to the UserBrewRecipe entity.
+func (ucbuo *UserCoffeeBeanUpdateOne) AddUserBrewRecipes(u ...*UserBrewRecipe) *UserCoffeeBeanUpdateOne {
 	ids := make([]int32, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return ucbuo.AddUserDripRecipeIDs(ids...)
+	return ucbuo.AddUserBrewRecipeIDs(ids...)
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (ucbuo *UserCoffeeBeanUpdateOne) SetUser(u *User) *UserCoffeeBeanUpdateOne {
+	return ucbuo.SetUserID(u.ID)
 }
 
 // Mutation returns the UserCoffeeBeanMutation object of the builder.
@@ -602,31 +602,31 @@ func (ucbuo *UserCoffeeBeanUpdateOne) Mutation() *UserCoffeeBeanMutation {
 	return ucbuo.mutation
 }
 
-// ClearUser clears the "user" edge to the User entity.
-func (ucbuo *UserCoffeeBeanUpdateOne) ClearUser() *UserCoffeeBeanUpdateOne {
-	ucbuo.mutation.ClearUser()
+// ClearUserBrewRecipes clears all "user_brew_recipes" edges to the UserBrewRecipe entity.
+func (ucbuo *UserCoffeeBeanUpdateOne) ClearUserBrewRecipes() *UserCoffeeBeanUpdateOne {
+	ucbuo.mutation.ClearUserBrewRecipes()
 	return ucbuo
 }
 
-// ClearUserDripRecipes clears all "user_drip_recipes" edges to the UserDripRecipe entity.
-func (ucbuo *UserCoffeeBeanUpdateOne) ClearUserDripRecipes() *UserCoffeeBeanUpdateOne {
-	ucbuo.mutation.ClearUserDripRecipes()
+// RemoveUserBrewRecipeIDs removes the "user_brew_recipes" edge to UserBrewRecipe entities by IDs.
+func (ucbuo *UserCoffeeBeanUpdateOne) RemoveUserBrewRecipeIDs(ids ...int32) *UserCoffeeBeanUpdateOne {
+	ucbuo.mutation.RemoveUserBrewRecipeIDs(ids...)
 	return ucbuo
 }
 
-// RemoveUserDripRecipeIDs removes the "user_drip_recipes" edge to UserDripRecipe entities by IDs.
-func (ucbuo *UserCoffeeBeanUpdateOne) RemoveUserDripRecipeIDs(ids ...int32) *UserCoffeeBeanUpdateOne {
-	ucbuo.mutation.RemoveUserDripRecipeIDs(ids...)
-	return ucbuo
-}
-
-// RemoveUserDripRecipes removes "user_drip_recipes" edges to UserDripRecipe entities.
-func (ucbuo *UserCoffeeBeanUpdateOne) RemoveUserDripRecipes(u ...*UserDripRecipe) *UserCoffeeBeanUpdateOne {
+// RemoveUserBrewRecipes removes "user_brew_recipes" edges to UserBrewRecipe entities.
+func (ucbuo *UserCoffeeBeanUpdateOne) RemoveUserBrewRecipes(u ...*UserBrewRecipe) *UserCoffeeBeanUpdateOne {
 	ids := make([]int32, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return ucbuo.RemoveUserDripRecipeIDs(ids...)
+	return ucbuo.RemoveUserBrewRecipeIDs(ids...)
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (ucbuo *UserCoffeeBeanUpdateOne) ClearUser() *UserCoffeeBeanUpdateOne {
+	ucbuo.mutation.ClearUser()
+	return ucbuo
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -806,6 +806,60 @@ func (ucbuo *UserCoffeeBeanUpdateOne) sqlSave(ctx context.Context) (_node *UserC
 			Column: usercoffeebean.FieldUpdatedAt,
 		})
 	}
+	if ucbuo.mutation.UserBrewRecipesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   usercoffeebean.UserBrewRecipesTable,
+			Columns: []string{usercoffeebean.UserBrewRecipesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: userbrewrecipe.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ucbuo.mutation.RemovedUserBrewRecipesIDs(); len(nodes) > 0 && !ucbuo.mutation.UserBrewRecipesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   usercoffeebean.UserBrewRecipesTable,
+			Columns: []string{usercoffeebean.UserBrewRecipesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: userbrewrecipe.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ucbuo.mutation.UserBrewRecipesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   usercoffeebean.UserBrewRecipesTable,
+			Columns: []string{usercoffeebean.UserBrewRecipesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: userbrewrecipe.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if ucbuo.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -833,60 +887,6 @@ func (ucbuo *UserCoffeeBeanUpdateOne) sqlSave(ctx context.Context) (_node *UserC
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt32,
 					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if ucbuo.mutation.UserDripRecipesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   usercoffeebean.UserDripRecipesTable,
-			Columns: []string{usercoffeebean.UserDripRecipesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt32,
-					Column: userdriprecipe.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := ucbuo.mutation.RemovedUserDripRecipesIDs(); len(nodes) > 0 && !ucbuo.mutation.UserDripRecipesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   usercoffeebean.UserDripRecipesTable,
-			Columns: []string{usercoffeebean.UserDripRecipesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt32,
-					Column: userdriprecipe.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := ucbuo.mutation.UserDripRecipesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   usercoffeebean.UserDripRecipesTable,
-			Columns: []string{usercoffeebean.UserDripRecipesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt32,
-					Column: userdriprecipe.FieldID,
 				},
 			},
 		}

@@ -16,10 +16,10 @@ type Tx struct {
 	GooseDbVersion *GooseDbVersionClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// UserBrewRecipe is the client for interacting with the UserBrewRecipe builders.
+	UserBrewRecipe *UserBrewRecipeClient
 	// UserCoffeeBean is the client for interacting with the UserCoffeeBean builders.
 	UserCoffeeBean *UserCoffeeBeanClient
-	// UserDripRecipe is the client for interacting with the UserDripRecipe builders.
-	UserDripRecipe *UserDripRecipeClient
 
 	// lazily loaded.
 	client     *Client
@@ -157,8 +157,8 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.GooseDbVersion = NewGooseDbVersionClient(tx.config)
 	tx.User = NewUserClient(tx.config)
+	tx.UserBrewRecipe = NewUserBrewRecipeClient(tx.config)
 	tx.UserCoffeeBean = NewUserCoffeeBeanClient(tx.config)
-	tx.UserDripRecipe = NewUserDripRecipeClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

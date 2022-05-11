@@ -26,8 +26,8 @@ type config struct {
 type hooks struct {
 	GooseDbVersion []ent.Hook
 	User           []ent.Hook
+	UserBrewRecipe []ent.Hook
 	UserCoffeeBean []ent.Hook
-	UserDripRecipe []ent.Hook
 }
 
 // Options applies the options on the config object.

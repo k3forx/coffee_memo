@@ -120,23 +120,27 @@ CREATE TABLE `user_coffee_beans` (
 
 -- +goose StatementBegin
 
-CREATE TABLE `user_drip_recipes` (
+CREATE TABLE `user_brew_recipes` (
 	`id` INT NOT NULL AUTO_INCREMENT,
+	`status` INT NOT NULL,
 	`user_id` INT NOT NULL,
-	`coffee_bean_id` INT NOT NULL,
+	`user_coffee_bean_id` INT NOT NULL,
 	`coffee_bean_weight` DOUBLE NOT NULL,
 	`coffee_bean_grind` VARCHAR(255) NOT NULL,
 	`liquid_weight` DOUBLE NOT NULL,
 	`temperature` DOUBLE NOT NULL,
-	`step_one` VARCHAR(255) NOT NULL,
-	`step_two` VARCHAR(255) NOT NULL,
-	`memo` VARCHAR(255) NOT NULL,
+	`step_one` VARCHAR(255) NOT NULL DEFAULT "",
+	`step_two` VARCHAR(255) NOT NULL DEFAULT "",
+	`step_three` VARCHAR(255) NOT NULL DEFAULT "",
+	`step_four` VARCHAR(255) NOT NULL DEFAULT "",
+	`step_five` VARCHAR(255) NOT NULL DEFAULT "",
+	`memo` TEXT,
 	`created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	`deleted_at` DATETIME DEFAULT NULL,
 	PRIMARY KEY (`id`),
 	CONSTRAINT fkey_user_drip_recipes_user_id FOREIGN KEY (user_id) REFERENCES users (id),
-	CONSTRAINT fkey_user_drip_recipes_coffee_bean_id FOREIGN KEY (coffee_bean_id) REFERENCES user_coffee_beans (id)
+	CONSTRAINT fkey_user_drip_recipes_user_coffee_bean_id FOREIGN KEY (user_coffee_bean_id) REFERENCES user_coffee_beans (id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 -- +goose StatementEnd

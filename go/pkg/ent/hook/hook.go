@@ -35,6 +35,19 @@ func (f UserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 	return f(ctx, mv)
 }
 
+// The UserBrewRecipeFunc type is an adapter to allow the use of ordinary
+// function as UserBrewRecipe mutator.
+type UserBrewRecipeFunc func(context.Context, *ent.UserBrewRecipeMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UserBrewRecipeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.UserBrewRecipeMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserBrewRecipeMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The UserCoffeeBeanFunc type is an adapter to allow the use of ordinary
 // function as UserCoffeeBean mutator.
 type UserCoffeeBeanFunc func(context.Context, *ent.UserCoffeeBeanMutation) (ent.Value, error)
@@ -44,19 +57,6 @@ func (f UserCoffeeBeanFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Val
 	mv, ok := m.(*ent.UserCoffeeBeanMutation)
 	if !ok {
 		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserCoffeeBeanMutation", m)
-	}
-	return f(ctx, mv)
-}
-
-// The UserDripRecipeFunc type is an adapter to allow the use of ordinary
-// function as UserDripRecipe mutator.
-type UserDripRecipeFunc func(context.Context, *ent.UserDripRecipeMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f UserDripRecipeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.UserDripRecipeMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserDripRecipeMutation", m)
 	}
 	return f(ctx, mv)
 }

@@ -793,6 +793,34 @@ func DeletedAtNotNil() predicate.User {
 	})
 }
 
+// HasUserBrewRecipes applies the HasEdge predicate on the "user_brew_recipes" edge.
+func HasUserBrewRecipes() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(UserBrewRecipesTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, UserBrewRecipesTable, UserBrewRecipesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasUserBrewRecipesWith applies the HasEdge predicate on the "user_brew_recipes" edge with a given conditions (other predicates).
+func HasUserBrewRecipesWith(preds ...predicate.UserBrewRecipe) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(UserBrewRecipesInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, UserBrewRecipesTable, UserBrewRecipesColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasUserCoffeeBeans applies the HasEdge predicate on the "user_coffee_beans" edge.
 func HasUserCoffeeBeans() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -812,34 +840,6 @@ func HasUserCoffeeBeansWith(preds ...predicate.UserCoffeeBean) predicate.User {
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(UserCoffeeBeansInverseTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, UserCoffeeBeansTable, UserCoffeeBeansColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasUserDripRecipes applies the HasEdge predicate on the "user_drip_recipes" edge.
-func HasUserDripRecipes() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UserDripRecipesTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, UserDripRecipesTable, UserDripRecipesColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasUserDripRecipesWith applies the HasEdge predicate on the "user_drip_recipes" edge with a given conditions (other predicates).
-func HasUserDripRecipesWith(preds ...predicate.UserDripRecipe) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UserDripRecipesInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, UserDripRecipesTable, UserDripRecipesColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

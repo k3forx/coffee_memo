@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/k3forx/coffee_memo/pkg/ent/goosedbversion"
 	"github.com/k3forx/coffee_memo/pkg/ent/user"
+	"github.com/k3forx/coffee_memo/pkg/ent/userbrewrecipe"
 	"github.com/k3forx/coffee_memo/pkg/ent/usercoffeebean"
-	"github.com/k3forx/coffee_memo/pkg/ent/userdriprecipe"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -36,8 +36,8 @@ func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
 		goosedbversion.Table: goosedbversion.ValidColumn,
 		user.Table:           user.ValidColumn,
+		userbrewrecipe.Table: userbrewrecipe.ValidColumn,
 		usercoffeebean.Table: usercoffeebean.ValidColumn,
-		userdriprecipe.Table: userdriprecipe.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

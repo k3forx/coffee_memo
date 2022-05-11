@@ -11,8 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/k3forx/coffee_memo/pkg/ent/user"
+	"github.com/k3forx/coffee_memo/pkg/ent/userbrewrecipe"
 	"github.com/k3forx/coffee_memo/pkg/ent/usercoffeebean"
-	"github.com/k3forx/coffee_memo/pkg/ent/userdriprecipe"
 )
 
 // UserCoffeeBeanCreate is the builder for creating a UserCoffeeBean entity.
@@ -114,24 +114,24 @@ func (ucbc *UserCoffeeBeanCreate) SetID(i int32) *UserCoffeeBeanCreate {
 	return ucbc
 }
 
-// SetUser sets the "user" edge to the User entity.
-func (ucbc *UserCoffeeBeanCreate) SetUser(u *User) *UserCoffeeBeanCreate {
-	return ucbc.SetUserID(u.ID)
-}
-
-// AddUserDripRecipeIDs adds the "user_drip_recipes" edge to the UserDripRecipe entity by IDs.
-func (ucbc *UserCoffeeBeanCreate) AddUserDripRecipeIDs(ids ...int32) *UserCoffeeBeanCreate {
-	ucbc.mutation.AddUserDripRecipeIDs(ids...)
+// AddUserBrewRecipeIDs adds the "user_brew_recipes" edge to the UserBrewRecipe entity by IDs.
+func (ucbc *UserCoffeeBeanCreate) AddUserBrewRecipeIDs(ids ...int32) *UserCoffeeBeanCreate {
+	ucbc.mutation.AddUserBrewRecipeIDs(ids...)
 	return ucbc
 }
 
-// AddUserDripRecipes adds the "user_drip_recipes" edges to the UserDripRecipe entity.
-func (ucbc *UserCoffeeBeanCreate) AddUserDripRecipes(u ...*UserDripRecipe) *UserCoffeeBeanCreate {
+// AddUserBrewRecipes adds the "user_brew_recipes" edges to the UserBrewRecipe entity.
+func (ucbc *UserCoffeeBeanCreate) AddUserBrewRecipes(u ...*UserBrewRecipe) *UserCoffeeBeanCreate {
 	ids := make([]int32, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return ucbc.AddUserDripRecipeIDs(ids...)
+	return ucbc.AddUserBrewRecipeIDs(ids...)
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (ucbc *UserCoffeeBeanCreate) SetUser(u *User) *UserCoffeeBeanCreate {
+	return ucbc.SetUserID(u.ID)
 }
 
 // Mutation returns the UserCoffeeBeanMutation object of the builder.
@@ -316,6 +316,25 @@ func (ucbc *UserCoffeeBeanCreate) createSpec() (*UserCoffeeBean, *sqlgraph.Creat
 		})
 		_node.UpdatedAt = value
 	}
+	if nodes := ucbc.mutation.UserBrewRecipesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   usercoffeebean.UserBrewRecipesTable,
+			Columns: []string{usercoffeebean.UserBrewRecipesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt32,
+					Column: userbrewrecipe.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if nodes := ucbc.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -334,25 +353,6 @@ func (ucbc *UserCoffeeBeanCreate) createSpec() (*UserCoffeeBean, *sqlgraph.Creat
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.UserID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := ucbc.mutation.UserDripRecipesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   usercoffeebean.UserDripRecipesTable,
-			Columns: []string{usercoffeebean.UserDripRecipesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt32,
-					Column: userdriprecipe.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

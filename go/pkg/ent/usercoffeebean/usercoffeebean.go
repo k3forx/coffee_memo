@@ -25,12 +25,19 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
+	// EdgeUserBrewRecipes holds the string denoting the user_brew_recipes edge name in mutations.
+	EdgeUserBrewRecipes = "user_brew_recipes"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
-	// EdgeUserDripRecipes holds the string denoting the user_drip_recipes edge name in mutations.
-	EdgeUserDripRecipes = "user_drip_recipes"
 	// Table holds the table name of the usercoffeebean in the database.
 	Table = "user_coffee_beans"
+	// UserBrewRecipesTable is the table that holds the user_brew_recipes relation/edge.
+	UserBrewRecipesTable = "user_brew_recipes"
+	// UserBrewRecipesInverseTable is the table name for the UserBrewRecipe entity.
+	// It exists in this package in order to avoid circular dependency with the "userbrewrecipe" package.
+	UserBrewRecipesInverseTable = "user_brew_recipes"
+	// UserBrewRecipesColumn is the table column denoting the user_brew_recipes relation/edge.
+	UserBrewRecipesColumn = "user_coffee_bean_id"
 	// UserTable is the table that holds the user relation/edge.
 	UserTable = "user_coffee_beans"
 	// UserInverseTable is the table name for the User entity.
@@ -38,13 +45,6 @@ const (
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "user_id"
-	// UserDripRecipesTable is the table that holds the user_drip_recipes relation/edge.
-	UserDripRecipesTable = "user_drip_recipes"
-	// UserDripRecipesInverseTable is the table name for the UserDripRecipe entity.
-	// It exists in this package in order to avoid circular dependency with the "userdriprecipe" package.
-	UserDripRecipesInverseTable = "user_drip_recipes"
-	// UserDripRecipesColumn is the table column denoting the user_drip_recipes relation/edge.
-	UserDripRecipesColumn = "coffee_bean_id"
 )
 
 // Columns holds all SQL columns for usercoffeebean fields.
