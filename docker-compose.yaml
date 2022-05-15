@@ -17,9 +17,8 @@ services:
       - mysql
     volumes:
       - ./go:/go/src/app
-    environment:
-      - MAIN_APP_PORT_NUMBER=8000
-      - User=test
+    env_file:
+      - ./go/.env
     networks:
       - coffee_app_default
 
