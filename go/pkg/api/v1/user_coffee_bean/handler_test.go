@@ -2,7 +2,6 @@ package user_coffee_bean_test
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -14,10 +13,10 @@ import (
 	"github.com/k3forx/coffee_memo/pkg/inject"
 	"github.com/k3forx/coffee_memo/pkg/model"
 	"github.com/k3forx/coffee_memo/pkg/result"
-	"github.com/k3forx/coffee_memo/pkg/session"
 	userCoffeeBeanUsecase "github.com/k3forx/coffee_memo/pkg/usecase/user_coffee_bean"
 	auth_helper "github.com/k3forx/coffee_memo/test/auth"
 	"github.com/labstack/echo/v4"
+	"github.com/steinfletcher/apitest"
 )
 
 func TestHandler_GetAllByUserID(t *testing.T) {
@@ -30,21 +29,49 @@ func TestHandler_GetAllByUserID(t *testing.T) {
 		"success": {
 			setup: func(ctrl *gomock.Controller) userCoffeeBeanUsecase.Usecase {
 				u := userCoffeeBeanUsecase.NewMockUsecase(ctrl)
-				in := userCoffeeBeanUsecase.GetAllByUserIDInput{
-					UserID: 1,
+				out := &userCoffeeBeanUsecase.GetAllByUserIDOutput{
+					CoffeeBeans: []model.UserCoffeeBean{
+						{
+							ID:          1,
+							Name:        "name 1",
+							FarmName:    "farm 1",
+							Country:     "country 1",
+							RoastDegree: model.RoastDegreeChinamon,
+							RoastedAt:   time.Date(2022, time.January, 10, 1, 0, 0, 0, time.UTC),
+						},
+						{
+							ID:          2,
+							Name:        "name 2",
+							FarmName:    "farm 2",
+							Country:     "country 2",
+							RoastDegree: model.RoastDegreeLight,
+							RoastedAt:   time.Date(2022, time.January, 20, 2, 0, 0, 0, time.UTC),
+						},
+					},
 				}
-				out := &userCoffeeBeanUsecase.GetAllByUserIDOutput{}
-				u.EXPECT().GetAllByUserID(gomock.All(), in).Return(out, result.OK())
+				u.EXPECT().GetAllByUserID(gomock.Any(), gomock.Any()).Return(out, result.OK())
 				return u
 			},
 			expectedCode: http.StatusOK,
 			expectedBody: map[string]interface{}{
-				"id":          float64(1),
-				"name":        "test name",
-				"farmName":    "test farm",
-				"country":     "Japan",
-				"roastDegree": "chinamon",
-				"roastedAt":   "2022-03-01",
+				"coffeeBeans": []interface{}{
+					map[string]interface{}{
+						"id":          float64(1),
+						"name":        "name 1",
+						"farmName":    "farm 1",
+						"country":     "country 1",
+						"roastDegree": "シナモンロースト",
+						"roastedAt":   "2022-01-10",
+					},
+					map[string]interface{}{
+						"id":          float64(2),
+						"name":        "name 2",
+						"farmName":    "farm 2",
+						"country":     "country 2",
+						"roastDegree": "ライトロースト",
+						"roastedAt":   "2022-01-20",
+					},
+				},
 			},
 		},
 		// "usecase_returns_error": {
@@ -69,42 +96,25 @@ func TestHandler_GetAllByUserID(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
+			ctrl := gomock.NewController(t)
+			injector := inject.NewMockInjector(ctrl)
+			h := user_coffee_bean.NewHandler(injector)
+			u := c.setup(ctrl)
+			h.SetUsecase(u)
+
 			e, err := auth_helper.InitSessionStore(echo.New())
-			fmt.Printf("e: %+v\n", e)
-			fmt.Printf("session err: %+v\n", err)
+			if err != nil {
+				t.Errorf("err should be nil, but got %q", err)
+			}
+			r := e.Router()
+			r.Add(http.MethodGet, "/v1/coffee-beans", h.GetAllByUserID)
 
-			r := httptest.NewRequest(http.MethodGet, "/v1/coffee-beans", nil)
-			w := httptest.NewRecorder()
-			echoContext := e.NewContext(r, w)
-
-			s, _ := session.NewSession(echoContext)
-			s.SetSessionUser(&model.User{ID: 1, Email: "test@test.com"})
-			fmt.Printf("email: %+v\n", s.GetSessionUser().Email)
-			fmt.Println(c)
-
-			// ctrl := gomock.NewController(t)
-			// injector := inject.NewMockInjector(ctrl)
-
-			// h := user_coffee_bean.NewHandler(injector)
-			// u := c.setup(ctrl)
-			// h.SetUsecase(u)
-
-			// err = h.GetAllByUserID(echoContext)
-			// if err != nil {
-			// 	t.Errorf("err should be nil, but got %q", err)
-			// }
-			// if diff := cmp.Diff(c.expectedCode, w.Code); diff != "" {
-			// 	t.Errorf("GetAllByUserID() code mismatch (-want +got):\n%s", diff)
-			// }
-
-			// var actualBody map[string]interface{}
-			// err = json.Unmarshal(w.Body.Bytes(), &actualBody)
-			// if err != nil {
-			// 	t.Errorf("err should be nil, but got %q", err)
-			// }
-			// if diff := cmp.Diff(c.expectedBody, actualBody); diff != "" {
-			// 	t.Errorf("GetAllByUserID() body mismatch (-want +got):\n%s", diff)
-			// }
+			expectedBody, err := json.Marshal(c.expectedBody)
+			if err != nil {
+				t.Errorf("err should be nil, but got %q", err)
+			}
+			apitest.New().Handler(e).Get("/v1/coffee-beans").
+				Expect(t).Status(c.expectedCode).Body(string(expectedBody)).End()
 		})
 	}
 }
