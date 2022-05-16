@@ -226,3 +226,91 @@ func TestHandler_GetByID(t *testing.T) {
 		})
 	}
 }
+
+func TestHandler_Create(t *testing.T) {
+	t.Parallel()
+
+	const endpoint = "/v1/coffee-beans"
+
+	cases := map[string]struct {
+		setup        func(ctrl *gomock.Controller) userCoffeeBeanUsecase.Usecase
+		body         map[string]interface{}
+		expectedCode int
+		expectedBody map[string]interface{}
+	}{
+		"success": {
+			setup: func(ctrl *gomock.Controller) userCoffeeBeanUsecase.Usecase {
+				u := userCoffeeBeanUsecase.NewMockUsecase(ctrl)
+				u.EXPECT().Create(gomock.Any(), gomock.Any()).Return(result.OK())
+				return u
+			},
+			body: map[string]interface{}{
+				"roastedAt": "2022-01-09",
+			},
+			expectedCode: http.StatusOK,
+			expectedBody: map[string]interface{}{
+				"message": "success",
+				"status":  "success",
+			},
+		},
+		"invalid_time_format": {
+			setup: func(ctrl *gomock.Controller) userCoffeeBeanUsecase.Usecase {
+				return userCoffeeBeanUsecase.NewMockUsecase(ctrl)
+			},
+			body: map[string]interface{}{
+				"roastedAt": "invalid",
+			},
+			expectedCode: http.StatusBadRequest,
+			expectedBody: map[string]interface{}{
+				"message": "bad request",
+				"status":  "bad request",
+			},
+		},
+		"usecase_returns_error": {
+			setup: func(ctrl *gomock.Controller) userCoffeeBeanUsecase.Usecase {
+				u := userCoffeeBeanUsecase.NewMockUsecase(ctrl)
+				u.EXPECT().Create(gomock.Any(), gomock.Any()).Return(result.Error())
+				return u
+			},
+			body: map[string]interface{}{
+				"roastedAt": "2022-01-09",
+			},
+			expectedCode: http.StatusInternalServerError,
+			expectedBody: map[string]interface{}{
+				"message": "Error!",
+				"status":  "error",
+			},
+		},
+	}
+
+	for name, c := range cases {
+		c := c
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			injector := inject.NewMockInjector(ctrl)
+			h := user_coffee_bean.NewHandler(injector)
+			u := c.setup(ctrl)
+			h.SetUsecase(u)
+
+			e, err := auth_helper.InitSessionStore(echo.New())
+			if err != nil {
+				t.Errorf("err should be nil, but got %q", err)
+			}
+			r := e.Router()
+			r.Add(http.MethodPost, endpoint, h.Create)
+
+			body, err := json.Marshal(c.body)
+			if err != nil {
+				t.Errorf("err should be nil, but got %q", err)
+			}
+			expectedBody, err := json.Marshal(c.expectedBody)
+			if err != nil {
+				t.Errorf("err should be nil, but got %q", err)
+			}
+			apitest.New().Handler(e).Post(endpoint).JSON(body).
+				Expect(t).Status(c.expectedCode).Body(string(expectedBody)).End()
+		})
+	}
+}
