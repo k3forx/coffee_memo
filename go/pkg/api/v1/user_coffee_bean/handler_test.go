@@ -74,21 +74,19 @@ func TestHandler_GetAllByUserID(t *testing.T) {
 				},
 			},
 		},
-		// "usecase_returns_error": {
-		// 	setup: func(ctrl *gomock.Controller) userCoffeeBeanUsecase.Usecase {
-		// 		u := userCoffeeBeanUsecase.NewMockUsecase(ctrl)
-		// 		in := userCoffeeBeanUsecase.GetByIDInput{
-		// 			UserCoffeeBeanID: 1,
-		// 		}
-		// 		u.EXPECT().GetByID(gomock.All(), in).Return(nil, result.New(result.CodeNotFound, "コーヒー豆が見つかりません"))
-		// 		return u
-		// 	},
-		// 	expectedCode: http.StatusNotFound,
-		// 	expectedBody: map[string]interface{}{
-		// 		"message": "コーヒー豆が見つかりません",
-		// 		"status":  "not found",
-		// 	},
-		// },
+		"usecase_returns_error": {
+			setup: func(ctrl *gomock.Controller) userCoffeeBeanUsecase.Usecase {
+				u := userCoffeeBeanUsecase.NewMockUsecase(ctrl)
+				u.EXPECT().GetAllByUserID(gomock.Any(), gomock.Any()).
+					Return(nil, result.New(result.CodeNotFound, "コーヒー豆が見つかりません"))
+				return u
+			},
+			expectedCode: http.StatusNotFound,
+			expectedBody: map[string]interface{}{
+				"message": "コーヒー豆が見つかりません",
+				"status":  "not found",
+			},
+		},
 	}
 
 	for name, c := range cases {
