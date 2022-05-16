@@ -56,7 +56,6 @@ func (h Handler) LogIn(c echo.Context) error {
 		Email:    req.Email,
 		Password: req.Password,
 	}
-
 	out, res := h.usecase.LogIn(c.Request().Context(), in)
 	if !res.IsOK() {
 		return presenter.Error(c, res)

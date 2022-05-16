@@ -14,8 +14,108 @@ import (
 	"github.com/k3forx/coffee_memo/pkg/model"
 	"github.com/k3forx/coffee_memo/pkg/result"
 	userCoffeeBeanUsecase "github.com/k3forx/coffee_memo/pkg/usecase/user_coffee_bean"
+	auth_helper "github.com/k3forx/coffee_memo/test/auth"
 	"github.com/labstack/echo/v4"
+	"github.com/steinfletcher/apitest"
 )
+
+func TestHandler_GetAllByUserID(t *testing.T) {
+	t.Parallel()
+	cases := map[string]struct {
+		setup        func(ctrl *gomock.Controller) userCoffeeBeanUsecase.Usecase
+		expectedCode int
+		expectedBody map[string]interface{}
+	}{
+		"success": {
+			setup: func(ctrl *gomock.Controller) userCoffeeBeanUsecase.Usecase {
+				u := userCoffeeBeanUsecase.NewMockUsecase(ctrl)
+				out := &userCoffeeBeanUsecase.GetAllByUserIDOutput{
+					CoffeeBeans: []model.UserCoffeeBean{
+						{
+							ID:          1,
+							Name:        "name 1",
+							FarmName:    "farm 1",
+							Country:     "country 1",
+							RoastDegree: model.RoastDegreeChinamon,
+							RoastedAt:   time.Date(2022, time.January, 10, 1, 0, 0, 0, time.UTC),
+						},
+						{
+							ID:          2,
+							Name:        "name 2",
+							FarmName:    "farm 2",
+							Country:     "country 2",
+							RoastDegree: model.RoastDegreeLight,
+							RoastedAt:   time.Date(2022, time.January, 20, 2, 0, 0, 0, time.UTC),
+						},
+					},
+				}
+				u.EXPECT().GetAllByUserID(gomock.Any(), gomock.Any()).Return(out, result.OK())
+				return u
+			},
+			expectedCode: http.StatusOK,
+			expectedBody: map[string]interface{}{
+				"coffeeBeans": []interface{}{
+					map[string]interface{}{
+						"id":          float64(1),
+						"name":        "name 1",
+						"farmName":    "farm 1",
+						"country":     "country 1",
+						"roastDegree": "シナモンロースト",
+						"roastedAt":   "2022-01-10",
+					},
+					map[string]interface{}{
+						"id":          float64(2),
+						"name":        "name 2",
+						"farmName":    "farm 2",
+						"country":     "country 2",
+						"roastDegree": "ライトロースト",
+						"roastedAt":   "2022-01-20",
+					},
+				},
+			},
+		},
+		"usecase_returns_error": {
+			setup: func(ctrl *gomock.Controller) userCoffeeBeanUsecase.Usecase {
+				u := userCoffeeBeanUsecase.NewMockUsecase(ctrl)
+				u.EXPECT().GetAllByUserID(gomock.Any(), gomock.Any()).
+					Return(nil, result.New(result.CodeNotFound, "コーヒー豆が見つかりません"))
+				return u
+			},
+			expectedCode: http.StatusNotFound,
+			expectedBody: map[string]interface{}{
+				"message": "コーヒー豆が見つかりません",
+				"status":  "not found",
+			},
+		},
+	}
+
+	for name, c := range cases {
+		c := c
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			injector := inject.NewMockInjector(ctrl)
+			h := user_coffee_bean.NewHandler(injector)
+			u := c.setup(ctrl)
+			h.SetUsecase(u)
+
+			e, err := auth_helper.InitSessionStore(echo.New())
+			if err != nil {
+				t.Errorf("err should be nil, but got %q", err)
+			}
+			r := e.Router()
+			r.Add(http.MethodGet, "/v1/coffee-beans", h.GetAllByUserID)
+
+			expectedBody, err := json.Marshal(c.expectedBody)
+			if err != nil {
+				t.Errorf("err should be nil, but got %q", err)
+			}
+			apitest.New().Handler(e).Get("/v1/coffee-beans").
+				Expect(t).Status(c.expectedCode).Body(string(expectedBody)).End()
+		})
+	}
+}
 
 func TestHandler_GetByID(t *testing.T) {
 	t.Parallel()
