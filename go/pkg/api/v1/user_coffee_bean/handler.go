@@ -115,7 +115,7 @@ func (h Handler) EditByID(c echo.Context) error {
 	}
 	sessionUser := s.GetSessionUser()
 
-	layout := "2006-01-02 15:04:05.000"
+	layout := "2006-01-02"
 	roastedAt, err := time.Parse(layout, req.RoastedAt)
 	if err != nil {
 		return presenter.BadRequest(c, result.CodeBadRequest.String())
