@@ -74,7 +74,7 @@ func TestUsecase_GetByID(t *testing.T) {
 				UserID: userID,
 			},
 			out: nil,
-			res: result.New(result.CodeNotFound, "user is not found"),
+			res: result.New(result.CodeNotFound, "アカウントが見つかりません"),
 		},
 	}
 
