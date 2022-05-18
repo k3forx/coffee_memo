@@ -2,6 +2,7 @@ package user_coffee_bean_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -310,6 +311,112 @@ func TestHandler_Create(t *testing.T) {
 				t.Errorf("err should be nil, but got %q", err)
 			}
 			apitest.New().Handler(e).Post(endpoint).JSON(body).
+				Expect(t).Status(c.expectedCode).Body(string(expectedBody)).End()
+		})
+	}
+}
+
+func TestHandler_EditByID(t *testing.T) {
+	t.Parallel()
+
+	const baseEndpoint = "/v1/coffee-beans"
+
+	cases := map[string]struct {
+		setup        func(ctrl *gomock.Controller) userCoffeeBeanUsecase.Usecase
+		id           string
+		body         map[string]interface{}
+		expectedCode int
+		expectedBody map[string]interface{}
+	}{
+		"success": {
+			setup: func(ctrl *gomock.Controller) userCoffeeBeanUsecase.Usecase {
+				u := userCoffeeBeanUsecase.NewMockUsecase(ctrl)
+				u.EXPECT().EditByID(gomock.Any(), gomock.Any()).Return(result.OK())
+				return u
+			},
+			id: "1",
+			body: map[string]interface{}{
+				"roastedAt": "2022-01-09",
+			},
+			expectedCode: http.StatusOK,
+			expectedBody: map[string]interface{}{
+				"message": "success",
+				"status":  "success",
+			},
+		},
+		"invalid_id": {
+			setup: func(ctrl *gomock.Controller) userCoffeeBeanUsecase.Usecase {
+				return userCoffeeBeanUsecase.NewMockUsecase(ctrl)
+			},
+			id: "invalid-id",
+			body: map[string]interface{}{
+				"roastedAt": "2022-01-09",
+			},
+			expectedCode: http.StatusBadRequest,
+			expectedBody: map[string]interface{}{
+				"message": "bad request",
+				"status":  "bad request",
+			},
+		},
+		"invalid_time_format": {
+			setup: func(ctrl *gomock.Controller) userCoffeeBeanUsecase.Usecase {
+				return userCoffeeBeanUsecase.NewMockUsecase(ctrl)
+			},
+			id: "1",
+			body: map[string]interface{}{
+				"roastedAt": "invalid",
+			},
+			expectedCode: http.StatusBadRequest,
+			expectedBody: map[string]interface{}{
+				"message": "bad request",
+				"status":  "bad request",
+			},
+		},
+		"usecase_returns_error": {
+			setup: func(ctrl *gomock.Controller) userCoffeeBeanUsecase.Usecase {
+				u := userCoffeeBeanUsecase.NewMockUsecase(ctrl)
+				u.EXPECT().EditByID(gomock.Any(), gomock.Any()).Return(result.Error())
+				return u
+			},
+			id: "1",
+			body: map[string]interface{}{
+				"roastedAt": "2022-01-09",
+			},
+			expectedCode: http.StatusInternalServerError,
+			expectedBody: map[string]interface{}{
+				"message": "Error!",
+				"status":  "error",
+			},
+		},
+	}
+
+	for name, c := range cases {
+		c := c
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			injector := inject.NewMockInjector(ctrl)
+			h := user_coffee_bean.NewHandler(injector)
+			u := c.setup(ctrl)
+			h.SetUsecase(u)
+
+			e, err := auth_helper.InitSessionStore(echo.New())
+			if err != nil {
+				t.Errorf("err should be nil, but got %q", err)
+			}
+			r := e.Router()
+			r.Add(http.MethodPut, fmt.Sprintf("%s/:id", baseEndpoint), h.EditByID)
+
+			body, err := json.Marshal(c.body)
+			if err != nil {
+				t.Errorf("err should be nil, but got %q", err)
+			}
+			expectedBody, err := json.Marshal(c.expectedBody)
+			if err != nil {
+				t.Errorf("err should be nil, but got %q", err)
+			}
+			apitest.New().Handler(e).Put(fmt.Sprintf("%s/%s", baseEndpoint, c.id)).JSON(body).
 				Expect(t).Status(c.expectedCode).Body(string(expectedBody)).End()
 		})
 	}
