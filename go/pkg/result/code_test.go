@@ -48,6 +48,10 @@ func TestCode_ToStatusCode(t *testing.T) {
 			code:     result.CodeOK,
 			expected: http.StatusOK,
 		},
+		"unspecified": {
+			code:     result.CodeUnspecified,
+			expected: http.StatusInternalServerError,
+		},
 	}
 
 	for name, c := range cases {
