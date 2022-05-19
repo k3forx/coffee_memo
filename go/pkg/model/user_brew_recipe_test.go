@@ -124,7 +124,8 @@ func TestNewUserBrewRecipe(t *testing.T) {
 				ID:     1,
 				Status: model.BrewRecipeStatusCreated,
 				User: model.User{
-					ID: 2,
+					ID:    2,
+					Flags: model.UserFlags{0},
 				},
 				UserCoffeeBean: model.UserCoffeeBean{
 					ID: 3,
