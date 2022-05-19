@@ -71,6 +71,8 @@ func TestNewUserBrewRecipe(t *testing.T) {
 				},
 				CoffeeBeanWeight: 16,
 				CoffeeBeanGrind:  "coarse",
+				CreatedAt:        time.Date(2022, time.March, 2, 0, 0, 0, 0, time.UTC),
+				UpdatedAt:        time.Date(2022, time.March, 2, 0, 0, 0, 0, time.UTC),
 			},
 		},
 	}
