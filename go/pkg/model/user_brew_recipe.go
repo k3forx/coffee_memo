@@ -1,7 +1,6 @@
 package model
 
 import (
-	"database/sql"
 	"time"
 
 	"github.com/k3forx/coffee_memo/pkg/ent"
@@ -56,7 +55,7 @@ type UserBrewRecipe struct {
 	Memo             string
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
-	DeletedAt        sql.NullTime
+	DeletedAt        time.Time
 }
 
 func (m *UserBrewRecipe) Exists() bool {
@@ -93,14 +92,7 @@ func NewUserBrewRecipe(e *ent.UserBrewRecipe) UserBrewRecipe {
 		Memo:             e.Memo,
 		CreatedAt:        e.CreatedAt,
 		UpdatedAt:        e.UpdatedAt,
-		DeletedAt:        sql.NullTime{},
-	}
-
-	if !e.DeletedAt.IsZero() {
-		userBrewRecipe.DeletedAt = sql.NullTime{
-			Time:  e.DeletedAt,
-			Valid: true,
-		}
+		DeletedAt:        e.DeletedAt,
 	}
 
 	return userBrewRecipe
