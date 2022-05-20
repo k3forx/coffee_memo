@@ -47,13 +47,9 @@ func (u *UserBrewRecipeUsecase) Create(ctx context.Context, in CreateInput) *res
 	}
 
 	userBrewRecipe := model.UserBrewRecipe{
-		Status: model.BrewRecipeStatusCreated,
-		User: model.User{
-			ID: in.UserID,
-		},
-		UserCoffeeBean: model.UserCoffeeBean{
-			ID: in.UserCoffeeBeanID,
-		},
+		Status:           model.BrewRecipeStatusCreated,
+		User:             user,
+		UserCoffeeBean:   userCoffeeBean,
 		CoffeeBeanWeight: in.CoffeeBeanWeight,
 		CoffeeBeanGrind:  in.CoffeeBeanGrind,
 		LiquidWeight:     in.LiquidWeight,
