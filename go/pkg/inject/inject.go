@@ -45,6 +45,7 @@ func New() (Injector, func(), error) {
 			User:           reader.NewUserReader(readerClient),
 		},
 		Writer: Writer{
+			UserBrewRecipe: writer.NewUserBrewRecipeWriter(writerClient),
 			UserCoffeeBean: writer.NewUserCoffeeBeanWriter(writerClient),
 			User:           writer.NewUserWriter(writerClient),
 		},
@@ -64,6 +65,7 @@ type Reader struct {
 }
 
 type Writer struct {
+	UserBrewRecipe writer.UserBrewRecipe
 	UserCoffeeBean writer.UserCoffeeBean
 	User           writer.User
 }

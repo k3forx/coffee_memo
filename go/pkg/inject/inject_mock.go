@@ -13,6 +13,7 @@ func NewMockInjector(ctrl *gomock.Controller) Injector {
 			User:           readerMock.NewMockUser(ctrl),
 		},
 		Writer: Writer{
+			UserBrewRecipe: writerMock.NewMockUserBrewRecipe(ctrl),
 			UserCoffeeBean: writerMock.NewMockUserCoffeeBean(ctrl),
 			User:           writerMock.NewMockUser(ctrl),
 		},

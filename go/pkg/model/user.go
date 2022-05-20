@@ -69,3 +69,7 @@ type User struct {
 func (u *User) Exists() bool {
 	return u.ID > 0
 }
+
+func (u *User) HasCoffeeBean(cb UserCoffeeBean) bool {
+	return u.ID == cb.User.ID
+}
