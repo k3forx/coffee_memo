@@ -128,3 +128,47 @@ func TestUser_Exists(t *testing.T) {
 		})
 	}
 }
+
+func TestUser_HasCoffeeBean(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		user           model.User
+		userCoffeeBean model.UserCoffeeBean
+		expected       bool
+	}{
+		"false": {
+			user: model.User{
+				ID: 1,
+			},
+			userCoffeeBean: model.UserCoffeeBean{
+				User: model.User{
+					ID: 2,
+				},
+			},
+			expected: false,
+		},
+		"true": {
+			user: model.User{
+				ID: 1,
+			},
+			userCoffeeBean: model.UserCoffeeBean{
+				User: model.User{
+					ID: 1,
+				},
+			},
+			expected: true,
+		},
+	}
+
+	for name, c := range cases {
+		c := c
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			if diff := cmp.Diff(c.expected, c.user.HasCoffeeBean(c.userCoffeeBean)); diff != "" {
+				t.Errorf("User.HasCoffeeBean() mismatch (-wan +got):\n%s", diff)
+			}
+		})
+	}
+}
