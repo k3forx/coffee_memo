@@ -9,6 +9,7 @@ import (
 func NewMockInjector(ctrl *gomock.Controller) Injector {
 	return Injector{
 		Reader: Reader{
+			UserBrewRecipe: readerMock.NewMockUserBrewRecipe(ctrl),
 			UserCoffeeBean: readerMock.NewMockUserCoffeeBean(ctrl),
 			User:           readerMock.NewMockUser(ctrl),
 		},
