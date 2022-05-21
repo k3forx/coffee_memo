@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/k3forx/coffee_memo/pkg/ent"
+	"github.com/k3forx/coffee_memo/pkg/ent/userbrewrecipe"
 	"github.com/k3forx/coffee_memo/pkg/model"
 )
 
@@ -25,5 +26,9 @@ type UserBrewRecipeReader struct {
 var _ UserBrewRecipe = (*UserBrewRecipeReader)(nil)
 
 func (impl *UserBrewRecipeReader) GetByID(ctx context.Context, userBrewRecipeID int) (model.UserBrewRecipe, error) {
-	return model.UserBrewRecipe{}, nil
+	e, err := impl.db.UserBrewRecipe.Query().Where(userbrewrecipe.IDEQ(int32(userBrewRecipeID))).Only(ctx)
+	if err != nil {
+		return model.UserBrewRecipe{}, ent.MaskNotFound(err)
+	}
+	return model.NewUserBrewRecipe(e), nil
 }
