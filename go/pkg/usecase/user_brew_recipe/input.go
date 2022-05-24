@@ -22,3 +22,8 @@ type CreateInput struct {
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
 }
+
+type GetByIDInput struct {
+	UserID           int
+	UserBrewRecipeID int
+}

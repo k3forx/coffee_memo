@@ -68,3 +68,28 @@ func (u *UserBrewRecipeUsecase) Create(ctx context.Context, in CreateInput) *res
 
 	return result.OK()
 }
+
+func (u *UserBrewRecipeUsecase) GetByID(ctx context.Context, in GetByIDInput) (*GetByIDOutput, *result.Result) {
+	user, err := u.injector.Reader.User.GetByID(ctx, in.UserID)
+	if err != nil {
+		logger.Error(ctx, err)
+		return nil, result.Error()
+	}
+	if !user.Exists() {
+		return nil, result.New(result.CodeNotFound, "アカウントが存在しません")
+	}
+
+	userBrewRecipe, err := u.injector.Reader.UserBrewRecipe.GetByID(ctx, in.UserBrewRecipeID)
+	if err != nil {
+		logger.Error(ctx, err)
+		return nil, result.Error()
+	}
+	if !userBrewRecipe.Exists() {
+		return nil, result.New(result.CodeNotFound, "ドリップレシピが見つかりません")
+	}
+	if userBrewRecipe.User.ID != user.ID {
+		return nil, result.New(result.CodeForbidden, result.CodeForbidden.String())
+	}
+
+	return &GetByIDOutput{UserBrewRecipe: userBrewRecipe}, result.OK()
+}

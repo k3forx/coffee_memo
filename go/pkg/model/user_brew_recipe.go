@@ -68,12 +68,14 @@ func NewUserBrewRecipe(e *ent.UserBrewRecipe) UserBrewRecipe {
 	if u != nil {
 		user = NewUser(u)
 	}
+	user.ID = int(e.UserID)
 
 	ucb := e.Edges.UserCoffeeBean
 	var userCoffeeBean UserCoffeeBean
 	if ucb != nil {
 		userCoffeeBean = NewUserCoffeeBean(ucb)
 	}
+	userCoffeeBean.ID = int(e.UserCoffeeBeanID)
 
 	userBrewRecipe := UserBrewRecipe{
 		ID:               int(e.ID),
