@@ -106,6 +106,8 @@ func TestNewUserBrewRecipe(t *testing.T) {
 		"success": {
 			e: &ent.UserBrewRecipe{
 				ID:               1,
+				UserID:           2,
+				UserCoffeeBeanID: 3,
 				Status:           1,
 				CoffeeBeanWeight: 16,
 				CoffeeBeanGrind:  string(model.CoffeeBeanGrindCoarse),
