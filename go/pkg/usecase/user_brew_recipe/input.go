@@ -27,3 +27,8 @@ type GetByIDInput struct {
 	UserID           int
 	UserBrewRecipeID int
 }
+
+type DeleteByIDInput struct {
+	UserID           int
+	UserBrewRecipeID int
+}

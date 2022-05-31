@@ -93,3 +93,71 @@ func TestUserBrewRecipeWriter_Create(t *testing.T) {
 		})
 	}
 }
+
+func TestUserBrewRecipeWriter_Delete(t *testing.T) {
+	impl := writer.NewUserBrewRecipeWriter(testClient)
+
+	user := dbHelper.InsertAndDeleteUsers(t, testClient, func(u *ent.User) {
+		u.Email = "test-user-brew-recipe-writer-delete"
+	})
+	userCoffeeBean := dbHelper.InsertAndDeleteUserCoffeeBean(t, testClient, user, func(cb *ent.UserCoffeeBean) {
+		cb.UserID = user.ID
+	})
+	now := time.Now().In(time.UTC)
+	userBrewRecipe := dbHelper.InsertAndDeleteUserBrewRecipe(t, testClient, user, userCoffeeBean, func(ubr *ent.UserBrewRecipe) {
+		ubr.CreatedAt = now
+		ubr.UpdatedAt = now
+	})
+
+	cases := map[string]struct {
+		m        model.UserBrewRecipe
+		expected model.UserBrewRecipe
+	}{
+		"success": {
+			m: model.NewUserBrewRecipe(userBrewRecipe),
+			expected: model.UserBrewRecipe{
+				ID:     int(userBrewRecipe.ID),
+				Status: model.BrewRecipeStatusDeletedByUser,
+				User: model.User{
+					ID: int(user.ID),
+				},
+				UserCoffeeBean: model.UserCoffeeBean{
+					ID: int(userCoffeeBean.ID),
+				},
+				CoffeeBeanWeight: 16,
+				CoffeeBeanGrind:  model.CoffeeBeanGrindCoarse,
+				LiquidWeight:     240,
+				Temperature:      92,
+				StepOne:          "step 1",
+				StepTwo:          "step 2",
+				Memo:             "good taste!",
+				DeletedAt:        now,
+				CreatedAt:        now,
+				UpdatedAt:        now,
+			},
+		},
+	}
+
+	for name, c := range cases {
+		t.Run(name, func(t *testing.T) {
+			ctx := context.Background()
+
+			if err := impl.Delete(ctx, &c.m); err != nil {
+				t.Errorf("err should be nil but, got %q", err)
+			}
+
+			userBrewRecipeEntity, err := testClient.UserBrewRecipe.Get(ctx, int32(c.m.ID))
+			if err != nil {
+				t.Errorf("err should be nil, but got %v", err)
+			}
+
+			actualUserBrewRecipe := model.NewUserBrewRecipe(userBrewRecipeEntity)
+			opts := cmp.Options{
+				cmpopts.EquateApproxTime(time.Minute),
+			}
+			if diff := cmp.Diff(c.expected, actualUserBrewRecipe, opts); diff != "" {
+				t.Errorf("user brew recipe mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}

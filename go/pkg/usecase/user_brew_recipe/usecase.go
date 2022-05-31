@@ -18,6 +18,8 @@ func NewUsecase(injector inject.Injector) *UserBrewRecipeUsecase {
 //go:generate mockgen -source=./usecase.go -destination=./usecase_mock.go -package=user_brew_recipe
 type Usecase interface {
 	Create(ctx context.Context, in CreateInput) *result.Result
+	GetByID(ctx context.Context, in GetByIDInput) (*GetByIDOutput, *result.Result)
+	DeleteByID(ctx context.Context, in DeleteByIDInput) *result.Result
 }
 
 type UserBrewRecipeUsecase struct {
@@ -92,4 +94,34 @@ func (u *UserBrewRecipeUsecase) GetByID(ctx context.Context, in GetByIDInput) (*
 	}
 
 	return &GetByIDOutput{UserBrewRecipe: userBrewRecipe}, result.OK()
+}
+
+func (u *UserBrewRecipeUsecase) DeleteByID(ctx context.Context, in DeleteByIDInput) *result.Result {
+	user, err := u.injector.Reader.User.GetByID(ctx, in.UserID)
+	if err != nil {
+		logger.Error(ctx, err)
+		return result.Error()
+	}
+	if !user.Exists() {
+		return result.New(result.CodeNotFound, "アカウントが存在しません")
+	}
+
+	userBrewRecipe, err := u.injector.Reader.UserBrewRecipe.GetByID(ctx, in.UserBrewRecipeID)
+	if err != nil {
+		logger.Error(ctx, err)
+		return result.Error()
+	}
+	if !userBrewRecipe.Exists() {
+		return result.New(result.CodeNotFound, "ドリップレシピが見つかりません")
+	}
+	if userBrewRecipe.User.ID != user.ID {
+		return result.New(result.CodeForbidden, result.CodeForbidden.String())
+	}
+
+	if err := u.injector.Writer.UserBrewRecipe.Delete(ctx, &userBrewRecipe); err != nil {
+		logger.Error(ctx, err)
+		return result.Error()
+	}
+
+	return result.OK()
 }
