@@ -48,3 +48,32 @@ func (mr *MockUsecaseMockRecorder) Create(ctx, in interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockUsecase)(nil).Create), ctx, in)
 }
+
+// DeleteByID mocks base method.
+func (m *MockUsecase) DeleteByID(ctx context.Context, in DeleteByIDInput) *result.Result {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteByID", ctx, in)
+	ret0, _ := ret[0].(*result.Result)
+	return ret0
+}
+
+// DeleteByID indicates an expected call of DeleteByID.
+func (mr *MockUsecaseMockRecorder) DeleteByID(ctx, in interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteByID", reflect.TypeOf((*MockUsecase)(nil).DeleteByID), ctx, in)
+}
+
+// GetByID mocks base method.
+func (m *MockUsecase) GetByID(ctx context.Context, in GetByIDInput) (*GetByIDOutput, *result.Result) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByID", ctx, in)
+	ret0, _ := ret[0].(*GetByIDOutput)
+	ret1, _ := ret[1].(*result.Result)
+	return ret0, ret1
+}
+
+// GetByID indicates an expected call of GetByID.
+func (mr *MockUsecaseMockRecorder) GetByID(ctx, in interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockUsecase)(nil).GetByID), ctx, in)
+}

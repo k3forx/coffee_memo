@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/k3forx/coffee_memo/pkg/ent"
+	"github.com/k3forx/coffee_memo/pkg/ent/userbrewrecipe"
 	"github.com/k3forx/coffee_memo/pkg/model"
 	"golang.org/x/net/context"
 )
@@ -17,6 +18,7 @@ func NewUserBrewRecipeWriter(db *ent.Client) *UserBrewRecipeWriter {
 //go:generate mockgen -source=./user_brew_recipe.go -destination=./mock/user_brew_recipe_mock.go -package=writer
 type UserBrewRecipe interface {
 	Create(ctx context.Context, userBrewRecipe *model.UserBrewRecipe) error
+	Delete(ctx context.Context, userBrewRecipe *model.UserBrewRecipe) error
 }
 
 type UserBrewRecipeWriter struct {
@@ -48,5 +50,17 @@ func (impl *UserBrewRecipeWriter) Create(ctx context.Context, userBrewRecipe *mo
 		return err
 	}
 	*userBrewRecipe = model.NewUserBrewRecipe(e)
+	return nil
+}
+
+func (impl *UserBrewRecipeWriter) Delete(ctx context.Context, userBrewRecipe *model.UserBrewRecipe) error {
+	now := time.Now().In(time.UTC)
+	if _, err := impl.db.UserBrewRecipe.Update().
+		Where(userbrewrecipe.IDEQ(int32(userBrewRecipe.ID))).
+		SetStatus(int32(model.BrewRecipeStatusDeletedByUser)).
+		SetDeletedAt(now).
+		Save(ctx); err != nil {
+		return err
+	}
 	return nil
 }

@@ -11,6 +11,7 @@ type BrewRecipeStatus int
 const (
 	BrewRecipeStatusUnknown BrewRecipeStatus = iota
 	BrewRecipeStatusCreated
+	BrewRecipeStatusDeletedByUser
 )
 
 type CoffeeBeanGrind string

@@ -382,3 +382,191 @@ func TestUserBrewRecipeUsecase_GetByID(t *testing.T) {
 		})
 	}
 }
+
+func TestUserBrewRecipeUsecase_DeleteByID(t *testing.T) {
+	t.Parallel()
+
+	const (
+		userID           = 123
+		userBrewRecipeID = 345
+	)
+	returnedUser := model.User{
+		ID: userID,
+	}
+	returnedUserBrewRecipe := model.UserBrewRecipe{
+		ID: userBrewRecipeID,
+		User: model.User{
+			ID: userID,
+		},
+	}
+	err := errors.New("server error")
+
+	cases := map[string]struct {
+		setup func(ctrl *gomock.Controller) inject.Injector
+		in    user_brew_recipe.DeleteByIDInput
+		res   *result.Result
+	}{
+		"success": {
+			setup: func(ctrl *gomock.Controller) inject.Injector {
+				injector := inject.NewMockInjector(ctrl)
+
+				userReader := injector.Reader.User.(*readerMock.MockUser)
+				userReader.EXPECT().GetByID(gomock.Any(), userID).
+					Return(returnedUser, nil)
+
+				userBrewRecipeReader := injector.Reader.UserBrewRecipe.(*readerMock.MockUserBrewRecipe)
+				userBrewRecipeReader.EXPECT().GetByID(gomock.Any(), userBrewRecipeID).
+					Return(returnedUserBrewRecipe, nil)
+
+				userBrewRecipeWriter := injector.Writer.UserBrewRecipe.(*writerMock.MockUserBrewRecipe)
+				userBrewRecipeWriter.EXPECT().Delete(gomock.Any(), &returnedUserBrewRecipe).Return(nil)
+
+				return injector
+			},
+			in: user_brew_recipe.DeleteByIDInput{
+				UserID:           userID,
+				UserBrewRecipeID: userBrewRecipeID,
+			},
+			res: result.OK(),
+		},
+		"error_in_getting_user": {
+			setup: func(ctrl *gomock.Controller) inject.Injector {
+				injector := inject.NewMockInjector(ctrl)
+
+				userReader := injector.Reader.User.(*readerMock.MockUser)
+				userReader.EXPECT().GetByID(gomock.Any(), userID).
+					Return(model.User{}, err)
+
+				return injector
+			},
+			in: user_brew_recipe.DeleteByIDInput{
+				UserID:           userID,
+				UserBrewRecipeID: userBrewRecipeID,
+			},
+			res: result.Error(),
+		},
+		"user_does_not_exist": {
+			setup: func(ctrl *gomock.Controller) inject.Injector {
+				injector := inject.NewMockInjector(ctrl)
+
+				userReader := injector.Reader.User.(*readerMock.MockUser)
+				userReader.EXPECT().GetByID(gomock.Any(), userID).
+					Return(model.User{}, nil)
+
+				return injector
+			},
+			in: user_brew_recipe.DeleteByIDInput{
+				UserID:           userID,
+				UserBrewRecipeID: userBrewRecipeID,
+			},
+			res: result.New(result.CodeNotFound, "アカウントが存在しません"),
+		},
+		"error_in_getting_user_brew_recipe": {
+			setup: func(ctrl *gomock.Controller) inject.Injector {
+				injector := inject.NewMockInjector(ctrl)
+
+				userReader := injector.Reader.User.(*readerMock.MockUser)
+				userReader.EXPECT().GetByID(gomock.Any(), userID).
+					Return(returnedUser, nil)
+
+				userBrewRecipeReader := injector.Reader.UserBrewRecipe.(*readerMock.MockUserBrewRecipe)
+				userBrewRecipeReader.EXPECT().GetByID(gomock.Any(), userBrewRecipeID).
+					Return(model.UserBrewRecipe{}, err)
+
+				return injector
+			},
+			in: user_brew_recipe.DeleteByIDInput{
+				UserID:           userID,
+				UserBrewRecipeID: userBrewRecipeID,
+			},
+			res: result.Error(),
+		},
+		"user_brew_recipe_does_not_exist": {
+			setup: func(ctrl *gomock.Controller) inject.Injector {
+				injector := inject.NewMockInjector(ctrl)
+
+				userReader := injector.Reader.User.(*readerMock.MockUser)
+				userReader.EXPECT().GetByID(gomock.Any(), userID).
+					Return(returnedUser, nil)
+
+				userBrewRecipeReader := injector.Reader.UserBrewRecipe.(*readerMock.MockUserBrewRecipe)
+				userBrewRecipeReader.EXPECT().GetByID(gomock.Any(), userBrewRecipeID).
+					Return(model.UserBrewRecipe{}, nil)
+
+				return injector
+			},
+			in: user_brew_recipe.DeleteByIDInput{
+				UserID:           userID,
+				UserBrewRecipeID: userBrewRecipeID,
+			},
+			res: result.New(result.CodeNotFound, "ドリップレシピが見つかりません"),
+		},
+		"user_brew_recipe_user_id_is_different": {
+			setup: func(ctrl *gomock.Controller) inject.Injector {
+				injector := inject.NewMockInjector(ctrl)
+
+				userReader := injector.Reader.User.(*readerMock.MockUser)
+				userReader.EXPECT().GetByID(gomock.Any(), userID).
+					Return(returnedUser, nil)
+
+				userBrewRecipeReader := injector.Reader.UserBrewRecipe.(*readerMock.MockUserBrewRecipe)
+				userBrewRecipeReader.EXPECT().GetByID(gomock.Any(), userBrewRecipeID).
+					Return(
+						model.UserBrewRecipe{
+							ID: userBrewRecipeID,
+							User: model.User{
+								ID: 9,
+							},
+						},
+						nil,
+					)
+
+				return injector
+			},
+			in: user_brew_recipe.DeleteByIDInput{
+				UserID:           userID,
+				UserBrewRecipeID: userBrewRecipeID,
+			},
+			res: result.New(result.CodeForbidden, result.CodeForbidden.String()),
+		},
+		"error_in_deleting_user_brew_recipe": {
+			setup: func(ctrl *gomock.Controller) inject.Injector {
+				injector := inject.NewMockInjector(ctrl)
+
+				userReader := injector.Reader.User.(*readerMock.MockUser)
+				userReader.EXPECT().GetByID(gomock.Any(), userID).
+					Return(returnedUser, nil)
+
+				userBrewRecipeReader := injector.Reader.UserBrewRecipe.(*readerMock.MockUserBrewRecipe)
+				userBrewRecipeReader.EXPECT().GetByID(gomock.Any(), userBrewRecipeID).
+					Return(returnedUserBrewRecipe, nil)
+
+				userBrewRecipeWriter := injector.Writer.UserBrewRecipe.(*writerMock.MockUserBrewRecipe)
+				userBrewRecipeWriter.EXPECT().Delete(gomock.Any(), &returnedUserBrewRecipe).Return(err)
+
+				return injector
+			},
+			in: user_brew_recipe.DeleteByIDInput{
+				UserID:           userID,
+				UserBrewRecipeID: userBrewRecipeID,
+			},
+			res: result.Error(),
+		},
+	}
+
+	for name, c := range cases {
+		c := c
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			injector := c.setup(ctrl)
+			u := user_brew_recipe.NewUsecase(injector)
+
+			res := u.DeleteByID(context.Background(), c.in)
+			if diff := cmp.Diff(c.res, res); diff != "" {
+				t.Errorf("GetByID result mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
