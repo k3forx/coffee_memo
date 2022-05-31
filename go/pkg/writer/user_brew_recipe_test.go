@@ -98,7 +98,7 @@ func TestUserBrewRecipeWriter_Delete(t *testing.T) {
 	impl := writer.NewUserBrewRecipeWriter(testClient)
 
 	user := dbHelper.InsertAndDeleteUsers(t, testClient, func(u *ent.User) {
-		u.Email = "test-user-brew-recipe-writer-create"
+		u.Email = "test-user-brew-recipe-writer-delete"
 	})
 	userCoffeeBean := dbHelper.InsertAndDeleteUserCoffeeBean(t, testClient, user, func(cb *ent.UserCoffeeBean) {
 		cb.UserID = user.ID
