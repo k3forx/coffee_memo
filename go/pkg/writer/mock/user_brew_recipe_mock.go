@@ -62,3 +62,17 @@ func (mr *MockUserBrewRecipeMockRecorder) Delete(ctx, userBrewRecipe interface{}
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockUserBrewRecipe)(nil).Delete), ctx, userBrewRecipe)
 }
+
+// Update mocks base method.
+func (m *MockUserBrewRecipe) Update(ctx context.Context, userBrewRecipe *model.UserBrewRecipe) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Update", ctx, userBrewRecipe)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Update indicates an expected call of Update.
+func (mr *MockUserBrewRecipeMockRecorder) Update(ctx, userBrewRecipe interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockUserBrewRecipe)(nil).Update), ctx, userBrewRecipe)
+}
