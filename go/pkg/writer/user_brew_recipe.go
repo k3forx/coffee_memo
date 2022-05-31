@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/k3forx/coffee_memo/pkg/ent"
-	"github.com/k3forx/coffee_memo/pkg/ent/userbrewrecipe"
 	"github.com/k3forx/coffee_memo/pkg/model"
 	"golang.org/x/net/context"
 )
@@ -55,8 +54,7 @@ func (impl *UserBrewRecipeWriter) Create(ctx context.Context, userBrewRecipe *mo
 
 func (impl *UserBrewRecipeWriter) Delete(ctx context.Context, userBrewRecipe *model.UserBrewRecipe) error {
 	now := time.Now().In(time.UTC)
-	if _, err := impl.db.UserBrewRecipe.Update().
-		Where(userbrewrecipe.IDEQ(int32(userBrewRecipe.ID))).
+	if _, err := impl.db.UserBrewRecipe.UpdateOneID(int32(userBrewRecipe.ID)).
 		SetStatus(int32(model.BrewRecipeStatusDeletedByUser)).
 		SetDeletedAt(now).
 		Save(ctx); err != nil {
