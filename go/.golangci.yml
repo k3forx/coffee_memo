@@ -1,6 +1,6 @@
 linters-settings:
   custom:
-    example:
+    jsonCameler:
       path: ../plugins/jsonCameler.so
       description: Check whether JSON tags are written in lowerCamelCase
       original-url: github.com/k3forx/jsonCameler
