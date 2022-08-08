@@ -33,5 +33,5 @@ jobs:
           pwd
           go version
           go install github.com/k3forx/jsonCameler/cmd/jsonCameler@latest
-          which jsonCameler
+          echo 'intall done'
           go vet -vettool=`which jsonCameler` ./...
