@@ -1,5 +1,10 @@
 linter-settings:
+  custom:
+    example:
+      path: ./example.so
+
   linters:
     disable-all: true
     enable:
       - deadcode
+      - example
