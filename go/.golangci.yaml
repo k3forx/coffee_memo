@@ -1,0 +1,5 @@
+linter-settings:
+  linters:
+    disable-all: true
+    enable:
+      - deadcode
