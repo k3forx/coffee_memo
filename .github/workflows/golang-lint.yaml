@@ -21,3 +21,14 @@ jobs:
 
           # Optional: working directory, useful for monorepos
           working-directory: ./go
+
+  custom:
+    name: custom
+    runs-on: ubuntu-lates
+    steps:
+      - uses: actions/checkout@v2
+      - name: run
+        run: |
+          go version
+          go install github.com/k3forx/jsonCameler/cmd/jsonCameler@latest
+          go vet -vettool=`which jsonCameler` ./...
