@@ -30,5 +30,6 @@ jobs:
       - name: run
         run: |
           go version
+          go mod init
           go install github.com/k3forx/jsonCameler/cmd/jsonCameler@latest
           go vet -vettool=`which jsonCameler` ./...
