@@ -1,10 +1,10 @@
-linter-settings:
+linters-settings:
   custom:
     example:
       path: ./example.so
+      description: Check TODO without author
+      original-url: github.com/k3forx/linter-plugin-example
 
-  linters:
-    disable-all: true
-    enable:
-      - deadcode
-      - example
+linters:
+  enable:
+    - example
