@@ -1,7 +1,7 @@
 linters-settings:
   custom:
     example:
-      path: /example.so
+      path: ./example.so
       description: Check TODO without author
       original-url: github.com/k3forx/linter-plugin-example
 
