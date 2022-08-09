@@ -37,7 +37,6 @@ jobs:
           REPO_ACCESS_TOKEN: ${{ secrets.REPO_ACCESS_TOKEN  }}
         run: |
           export GOPROXY=direct
-          export GOSUMDB=off
           sed -e "s/your_github_username/k3forx/" -e "s/your_github_access_token/${REPO_ACCESS_TOKEN}/" ./.netrc.example > ~/.netrc
           go install github.com/k3forx/todoAuthor/cmd/todoAuthor@latest
           cd ./go
