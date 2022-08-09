@@ -71,3 +71,8 @@ type Writer struct {
 	UserCoffeeBean writer.UserCoffeeBean
 	User           writer.User
 }
+
+// TODO: fix
+func SomeFunc4() {
+	_ = 1 + 4
+}
