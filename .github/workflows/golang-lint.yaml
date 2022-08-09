@@ -41,8 +41,6 @@ jobs:
           pwd
           go version
           go env
-          export GOPRIVATE=github.com/k3forx/todoAuthor
           echo '-----------------------------------------------------'
-          go env
           go install github.com/k3forx/todoAuthor/cmd/todoAuthor@latest
           go vet -vettool=`which todoAuthor` ./...
