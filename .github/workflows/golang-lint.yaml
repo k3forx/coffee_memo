@@ -7,34 +7,39 @@ on:
   pull_request:
 
 jobs:
-  # golangci-lint:
-  #   name: golangci-lint
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - name: golangci-lint
-  #       uses: golangci/golangci-lint-action@v2
-  #       with:
-  #         # Optional: version of golangci-lint to use in form of v1.2 or v1.2.3 or `latest` to use the latest version
-  #         version: v1.45
-  #         args: --timeout=10m
-
-  #         # Optional: working directory, useful for monorepos
-  #         working-directory: ./go
-
-  custom:
-    name: custom
+  golangci-lint:
+    name: golangci-lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          # Optional: version of golangci-lint to use in form of v1.2 or v1.2.3 or `latest` to use the latest version
+          version: v1.45
+          args: --timeout=10m
+
+          # Optional: working directory, useful for monorepos
+          working-directory: ./go
+
+  custom-linters:
+    name: custom-linters
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
       - uses: actions/setup-go@v3
         with:
           go-version: '>=1.17.0'
+
       - name: run
         run: |
           cd ./go
           pwd
           go version
-          go install github.com/k3forx/jsonCameler/cmd/jsonCameler@latest
-          echo 'intall done'
-          go vet -vettool=`which jsonCameler` ./...
+          go env
+          export GOPRIVATE=github.com/k3forx/todoAuthor
+          echo '-----------------------------------------------------'
+          go env
+          go install github.com/k3forx/todoAuthor/cmd/todoAuthor@latest
+          go vet -vettool=`which todoAuthor` ./...
