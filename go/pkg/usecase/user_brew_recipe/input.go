@@ -28,6 +28,25 @@ type GetByIDInput struct {
 	UserBrewRecipeID int
 }
 
+type EditByIDInput struct {
+	UserID           int
+	UserBrewRecipeID int
+	UserCoffeeBeanID int
+	Status           model.BrewRecipeStatus
+	CoffeeBeanWeight float64
+	CoffeeBeanGrind  model.CoffeeBeanGrind
+	LiquidWeight     float64
+	Temperature      float64
+	StepOne          string
+	StepTwo          string
+	StepThree        string
+	StepFour         string
+	StepFive         string
+	Memo             string
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
+}
+
 type DeleteByIDInput struct {
 	UserID           int
 	UserBrewRecipeID int

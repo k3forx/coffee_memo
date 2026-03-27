@@ -17,6 +17,7 @@ func NewUserBrewRecipeWriter(db *ent.Client) *UserBrewRecipeWriter {
 //go:generate mockgen -source=./user_brew_recipe.go -destination=./mock/user_brew_recipe_mock.go -package=writer
 type UserBrewRecipe interface {
 	Create(ctx context.Context, userBrewRecipe *model.UserBrewRecipe) error
+	Update(ctx context.Context, userBrewRecipe *model.UserBrewRecipe) error
 	Delete(ctx context.Context, userBrewRecipe *model.UserBrewRecipe) error
 }
 
@@ -49,6 +50,10 @@ func (impl *UserBrewRecipeWriter) Create(ctx context.Context, userBrewRecipe *mo
 		return err
 	}
 	*userBrewRecipe = model.NewUserBrewRecipe(e)
+	return nil
+}
+
+func (impl *UserBrewRecipeWriter) Update(ctx context.Context, userBrewRecipe *model.UserBrewRecipe) error {
 	return nil
 }
 

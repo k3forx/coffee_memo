@@ -63,6 +63,26 @@ func (m *UserBrewRecipe) Exists() bool {
 	return m.ID > 0
 }
 
+func (m *UserBrewRecipe) Update(ubr UserBrewRecipe) {
+	m.Status = ubr.Status
+	m.User = User{
+		ID: ubr.User.ID,
+	}
+	m.UserCoffeeBean = UserCoffeeBean{
+		ID: ubr.UserCoffeeBean.ID,
+	}
+	m.CoffeeBeanWeight = ubr.CoffeeBeanWeight
+	m.CoffeeBeanGrind = ubr.CoffeeBeanGrind
+	m.LiquidWeight = ubr.LiquidWeight
+	m.Temperature = ubr.Temperature
+	m.StepOne = ubr.StepOne
+	m.StepTwo = ubr.StepTwo
+	m.StepThree = ubr.StepThree
+	m.StepFour = ubr.StepFour
+	m.StepFive = ubr.StepFive
+	m.Memo = ubr.Memo
+}
+
 func NewUserBrewRecipe(e *ent.UserBrewRecipe) UserBrewRecipe {
 	u := e.Edges.User
 	var user User
